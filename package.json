@@ -1,0 +1,30 @@
+{
+  "name": "api-bbaby_next",
+  "version": "1.0.0",
+  "description": "API of bbabystyle.com url: api.bbabystyle.com",
+  "main": "server.js",
+  "repository": "https://github.com/Pnlvfx/api-bbaby_next.git",
+  "author": "PnlVFX <simone97_19@hotmail.it>",
+  "license": "MIT",
+  "engines": {
+    "node": "16.x|| 17.9.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.json",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/node": "^18.0.0",
+    "node-ts": "^5.1.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.7.4"
+  }
+}
