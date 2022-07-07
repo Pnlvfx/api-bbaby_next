@@ -1,5 +1,5 @@
 import {google} from 'googleapis'
-import config from '../../config/config'
+import config from '../../../config/config'
 import fs from 'fs'
 import express from 'express'
 import { OAuth2Client } from 'google-auth-library'

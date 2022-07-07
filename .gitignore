@@ -5,5 +5,5 @@ node_modules
 public
 bbabystyle_googleCredentials.json
 youtubeCredentials
-config
+config/config.env
 yarn.lock

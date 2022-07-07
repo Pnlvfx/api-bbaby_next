@@ -2,11 +2,12 @@ import express from 'express'
 import config from '../../config/config'
 import Comment from '../../models/Comment'
 import Post from '../../models/Post'
-import {concatenateAudio, createAudio, makeDir,saveImageToDisk,_createImage} from './createImage'
+import {concatenateAudio, createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage'
 import cloudinary from '../../lib/cloudinary'
 import videoshow from 'videoshow'
 import fs from 'fs'
-import { authorize, uploadVideo } from './uploadYoutube'
+import { authorize, uploadVideo } from './gov-functions/uploadYoutube'
+import {TranslationServiceClient} from '@google-cloud/translate'
 
 const {PUBLIC_PATH,YOUTUBE_CREDENTIALS} = config
 
@@ -98,8 +99,15 @@ const governanceCtrl = {
                 if (err) return res.status(500).json({msg: `Error during processClientSecrets : ${err.message}`})
                 authorize(JSON.parse(content.toString()), (auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
             })
-        } catch {
-
+        } catch(err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    translateTweet: async (req:express.Request, res: express.Response) => {
+        try {
+            const translationClient = new TranslationServiceClient()
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
         }
     }
 }

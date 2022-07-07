@@ -8,6 +8,7 @@ import mongoose from 'mongoose'
 import postRouter from './components/post/postRouter'
 import userRouter from './components/user/userRouter'
 import governanceRouter from './components/governance/governanceRouter'
+import communityRouter from './components/community/communityRouter'
 
 const {CLIENT_URL,CORS_ORIGIN1,CORS_ORIGIN2,MONGO_URI} = config
 const app = express()
@@ -25,6 +26,8 @@ mongoose.connect(MONGO_URI).catch(error => console.log(`Cannot connect to bbabys
 app.use('/', postRouter)
 
 app.use('/', userRouter)
+
+app.use('/', communityRouter)
 
 app.use('/', governanceRouter)
 

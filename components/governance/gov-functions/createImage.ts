@@ -1,9 +1,9 @@
 import fs from "fs"
 import express from 'express'
 import puppeteer from "puppeteer"
-import config from "../../config/config"
+import config from "../../../config/config"
 import * as TextToImage from 'text-to-image'
-import cloudinary from "../../lib/cloudinary"
+import cloudinary from "../../../lib/cloudinary"
 import textToSpeech from '@google-cloud/text-to-speech'
 import util from 'util'
 import {getAudioDurationInSeconds} from 'get-audio-duration'
