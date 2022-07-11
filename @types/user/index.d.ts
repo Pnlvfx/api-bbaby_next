@@ -12,7 +12,7 @@ interface IUser {
     lon: string
     upVotes: [Types.ObjectId]
     downVotes: [Types.ObjectId]
-    tokens: {}
+    tokens: any
     hasExternalAccount: boolean
     externalAccounts: {}
     subscribed: [string]

@@ -4,6 +4,9 @@ import User from '../../models/User'
 import { createActivationToken, getUserFromToken, login, validateEmail } from './user-functions/userFunctions'
 import bcrypt from 'bcrypt'
 import sendEMail from './user-functions/sendMail'
+import jwt from 'jsonwebtoken'
+import cloudinary from '../../lib/cloudinary'
+import { _googleLogin } from './user-functions/google'
 
 const userCtrl = {
     register: async (req:express.Request,res:express.Response) => {
@@ -38,7 +41,16 @@ const userCtrl = {
         }
     },
     activateEmail: async (req:express.Request,res:express.Response) => {
-
+        try {
+            const {activation_token} = req.body
+            const user:any = jwt.verify(activation_token, config.ACTIVATION_TOKEN_SECRET)
+            const {email} = user
+            const check = await User.findOne({email})
+            if (check) return res.status(400).json({msg: "This email already exists"})
+            res.json({msg: "Success"})
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
     },
     login: async (req:express.Request,res:express.Response) => {
         try {
@@ -49,10 +61,10 @@ const userCtrl = {
                 if (passOk) {
                     login(user,res)
                 } else {
-                    res.status(422).json({msg:'Invalid username or password'});
+                    return res.status(422).json({msg:'Invalid username or password'});
                 }
             } else {
-                res.status(422).json({msg:'Invalid username or password'});
+                return res.status(422).json({msg:'Invalid username or password'});
             }
         } catch (err:any) {
             res.status(500).json({msg: err.message})
@@ -66,11 +78,72 @@ const userCtrl = {
                 const {token} = req.cookies
                 const user = await getUserFromToken(token)
                 if (!user) {
-                    res.status(500).json({msg: 'Token expired'})
+                    return res.status(500).json({msg: 'Token expired'})
                 } else {
                     res.json({user: {username:user.username, avatar: user.avatar, role: user.role}})
                 }
             }
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    userInfo: async (req:express.Request,res:express.Response) => {
+        try {
+            const token = req.cookies?.token ? req.cookies.token : null
+            if (!token) return res.status(400).json({msg: 'You need to login first'})
+            const user = await getUserFromToken(token)
+            res.json({
+                avatar: user?.avatar,
+                country: user?.country, 
+                email:user?.email,
+                externalAccounts:user?.externalAccounts,
+                hasExternalAccount: user?.hasExternalAccount,
+                role: user?.role,
+                username: user?.username
+            })
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    changeAvatar: async (req:express.Request,res:express.Response) => {
+        try {
+            const {image,username} = req.body
+            const uploadedImage = await cloudinary.v2.uploader.upload(image, {
+                upload_preset: 'bbaby_avatar'
+            })
+            if (!uploadedImage) return res.status(500).json({msg: 'Something went wrong with this image, please try again or change type of image'})
+            const _changeAvatar = await User.findOneAndUpdate({username: username}, {avatar: uploadedImage.secure_url})
+            if (!_changeAvatar) return res.status(500).json({msg: 'Something went wrong with this image, please try again or change type of image'})
+            res.json({success: "Avatar updated successfully"})
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    forgotPassword: async (req:express.Request,res:express.Response) => {
+        try {
+            const {email} = req.body
+            const user = await User.findOne({email})
+            if (!user) return res.status(400).json({msg:"This email does not exist."})
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    logout: async (req:express.Request,res:express.Response) => {
+        try {
+            const {COOKIE_DOMAIN} = config
+            res.clearCookie('token',{
+                httpOnly: true,
+                domain: COOKIE_DOMAIN,
+                secure: true
+            }).send()
+        } catch (err:any) {
+            res.status(500).json({msg: "Cannot proceed to logout, please retry"})
+        }
+    },
+    googleLogin: async (req:express.Request,res:express.Response) => {
+        try {
+            const {tokenId} = req.body
+             _googleLogin(tokenId,req,res)
         } catch (err:any) {
             res.status(500).json({msg: err.message})
         }

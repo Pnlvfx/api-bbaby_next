@@ -76,13 +76,13 @@ const governanceCtrl = {
             .audio(`${PUBLIC_PATH}/final.mp3`)
             .save(`${PUBLIC_PATH}/video1.mp4`)
             .on('error', function(err:string,stdout:string,stderr:string) {
-                res.status(500).json({msg: `Some error occured ${err ? err : stdout ? stdout : stderr}`})
+                return res.status(500).json({msg: `Some error occured ${err ? err : stdout ? stdout : stderr}`})
             })
             .on('end', (output:string) => {
                 //console.log(output)
                 cloudinary.v2.uploader.upload(output, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}, (err,response) => {
                     if (err) return res.status(500).json({msg: err.message})
-                    res.status(201).json({
+                    return res.status(201).json({
                         success: "Video created successfully",
                         video: response?.secure_url
                     })
@@ -106,6 +106,26 @@ const governanceCtrl = {
     translateTweet: async (req:express.Request, res: express.Response) => {
         try {
             const translationClient = new TranslationServiceClient()
+            const {text} = req.body
+            const {lang} = req.query
+            const projectId = 'bbabystyle'
+            const location = 'us-central1'
+            async function translateText() {
+                const request = {
+                    parent: `projects/${projectId}/locations/${location}`,
+                    contents: [text],
+                    mimeType: 'text/plain',
+                    sourceLanguageCode: lang === 'en' ? lang : 'it',
+                    targetLanguageCode: lang === 'en' ? 'it' : 'en'
+                }
+                const [response]:any = await translationClient.translateText(request)
+
+                for (const translation of response.translations) {
+                    res.json(translation.translatedText)
+                }
+            }
+            
+            translateText()   
         } catch (err:any) {
             res.status(500).json({msg: err.message})
         }

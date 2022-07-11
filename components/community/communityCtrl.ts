@@ -1,5 +1,8 @@
 import express from 'express'
+import cloudinary from '../../lib/cloudinary'
 import Community from '../../models/Community'
+import Post from '../../models/Post'
+import User from '../../models/User'
 import { getUserFromToken } from '../user/user-functions/userFunctions'
 const communityCtrl = {
     createCommunity: async(req:express.Request,res:express.Response) => {
@@ -7,6 +10,49 @@ const communityCtrl = {
             const {name,communityAvatar,cover} = req.body   
         } catch (err) {
             
+        }
+    },
+    getCommunity: async(req:express.Request,res:express.Response) => {
+        try {
+            const token = req.cookies?.token ? req.cookies.token : null
+            const {name} = req.params
+            if (token) {
+                const user = await getUserFromToken(token)
+                const _community = await Community.findOne({name})
+                const moderator = user?.username === _community?.communityAuthor ? true : user?.role === 1 ? true : false
+                const edit = await Community.findOneAndUpdate({name}, {user_is_moderator: moderator})
+            } else {
+                const edit = await Community.findOneAndUpdate({name}, {user_is_moderator: false})
+            }
+                const community = await Community.findOne({name})
+                if (!community) return res.status(500).json({msg: "Something went wrong"})
+                res.json(community);
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    changeAvatar: async(req:express.Request,res:express.Response) => {
+        try {
+            const {image} = req.body
+            const {name} = req.params
+            const response = await cloudinary.v2.uploader.upload(image, {height: 256, width: 256, crop: 'scale'})
+            if (!response) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+            const community = await Community.findOneAndUpdate({name}, {communityAvatar: response.secure_url})
+            if(!community) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+            const postThumb = await Post.updateMany({community: name}, {$set: {communityIcon: response.secure_url}})
+            if(!postThumb) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
+    updateDescription: async(req:express.Request,res:express.Response) => {
+        try {
+            const {name,descr:description} = req.body
+            const c = await Community.findOneAndUpdate({name}, {description})
+            if (!c) return res.status(500).json({msg: 'Something went wrong, please try again'})
+            res.status(200).json('Description update successfully');
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
         }
     },
     getCommunities: async(req:express.Request,res:express.Response) => {
@@ -38,18 +84,21 @@ const communityCtrl = {
                 res.status(500).json({msg: err.message})
             }
     },
-    getCommunity: async(req:express.Request,res:express.Response) => {
+    subscribe: async(req:express.Request,res:express.Response) => {
         try {
-            const token = req.cookies?.token ? req.cookies.token : null
-            const {name} = req.params
-            if (token) {
-                const user = await getUserFromToken(token)
-                const _community = await Community.findOne({name})
-                const moderator = user?.username === _community?.communityAuthor ? true : user?.role === 1 ? true : false
-                const edit = await Community.findOneAndUpdate({name}, {user_is_moderator: moderator})
-                const community = await Community.findOne({name})
-                if (!community) return res.status(500).json({msg: "Something went wrong"})
-                res.json(community);
+            const token = req.cookies.token ? req.cookies.token : null
+            if (!token) return res.status(401).json({msg: 'You need to login first'})
+            const {community} = req.body
+            const user = await getUserFromToken(token)
+            const check = await User.findOne({username: user?.username, subscribed: community})
+            if (check) {
+                const unsubscribe = await User.findOneAndUpdate({username: user.username}, {$pull: {subscribed: community}})
+                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscriberCount: -1}})
+                res.json({msg: `You have unfollowed ${community}`})
+            } else {
+                const subscribe = await User.findOneAndUpdate({username: user.username}, {$push: {subscribed: community}})
+                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscriberCount: +1}})
+                res.json({msg: `You now follow ${community}`})
             }
         } catch (err:any) {
             res.status(500).json({msg: err.message})

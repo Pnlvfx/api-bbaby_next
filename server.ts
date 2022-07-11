@@ -9,6 +9,8 @@ import postRouter from './components/post/postRouter'
 import userRouter from './components/user/userRouter'
 import governanceRouter from './components/governance/governanceRouter'
 import communityRouter from './components/community/communityRouter'
+import twitterRouter from './components/twitter/twitterRouter'
+import commentRouter from './components/comment/commentRouter'
 
 const {CLIENT_URL,CORS_ORIGIN1,CORS_ORIGIN2,MONGO_URI} = config
 const app = express()
@@ -30,6 +32,10 @@ app.use('/', userRouter)
 app.use('/', communityRouter)
 
 app.use('/', governanceRouter)
+
+app.use('/', twitterRouter)
+
+app.use('/', commentRouter)
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');

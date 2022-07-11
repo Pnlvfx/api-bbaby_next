@@ -24,6 +24,13 @@ interface ENV {
     MAILING_SERVICE_REFRESH_TOKEN: string | undefined
     SENDER_EMAIL_ADDRESS: string | undefined
     COOKIE_DOMAIN: string | undefined
+    GOOGLE_SECRET: string | undefined
+    ANON_ACCESS_TOKEN: string | undefined
+    ANON_ACCESS_TOKEN_SECRET: string | undefined
+    BBABYITALIA_ACCESS_TOKEN: string | undefined
+    BBABYITALIA_ACCESS_TOKEN_SECRET: string | undefined
+    BBABY_ACCESS_TOKEN: string | undefined
+    BBABY_ACCESS_TOKEN_SECRET: string | undefined
 }
 
 interface Config {
@@ -47,6 +54,13 @@ interface Config {
     MAILING_SERVICE_REFRESH_TOKEN: string
     SENDER_EMAIL_ADDRESS: string
     COOKIE_DOMAIN: string
+    GOOGLE_SECRET: string
+    ANON_ACCESS_TOKEN: string
+    ANON_ACCESS_TOKEN_SECRET: string
+    BBABYITALIA_ACCESS_TOKEN: string
+    BBABYITALIA_ACCESS_TOKEN_SECRET: string
+    BBABY_ACCESS_TOKEN: string
+    BBABY_ACCESS_TOKEN_SECRET: string
 }
 
 const getConfig = ():ENV => {
@@ -70,7 +84,14 @@ const getConfig = ():ENV => {
         MAILING_SERVICE_CLIENT_SECRET: process.env.MAILING_SERVICE_CLIENT_SECRET,
         MAILING_SERVICE_REFRESH_TOKEN: process.env.MAILING_SERVICE_REFRESH_TOKEN,
         SENDER_EMAIL_ADDRESS: process.env.SENDER_EMAIL_ADDRESS,
-        COOKIE_DOMAIN: process.env.COOKIE_DOMAIN
+        COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
+        GOOGLE_SECRET: process.env.GOOGLE_SECRET,
+        ANON_ACCESS_TOKEN: process.env.ANON_ACCESS_TOKEN,
+        ANON_ACCESS_TOKEN_SECRET: process.env.ANON_ACCESS_TOKEN_SECRET,
+        BBABYITALIA_ACCESS_TOKEN: process.env.BBABYITALIA_ACCESS_TOKEN,
+        BBABYITALIA_ACCESS_TOKEN_SECRET: process.env.BBABYITALIA_ACCESS_TOKEN_SECRET,
+        BBABY_ACCESS_TOKEN: process.env.BBABY_ACCESS_TOKEN,
+        BBABY_ACCESS_TOKEN_SECRET: process.env.BBABY_ACCESS_TOKEN_SECRET
     }
 }
 

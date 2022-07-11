@@ -5,7 +5,7 @@ import User from '../../../models/User';
 
 const {SECRET,COOKIE_DOMAIN,ACTIVATION_TOKEN_SECRET} = config
 
-export const getUserFromToken = async(token:string) => {
+export const getUserFromToken:any = async(token:string) => {
     const user:any = jwt.verify(token, SECRET);
     return User.findById(user.id)
 }

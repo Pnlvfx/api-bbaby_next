@@ -15,7 +15,7 @@ export default (oauthCallback:any) => {
 
     const oauth = {
         getOAuthRequestToken: () => {
-            return new Promise((resolve,reject) => {
+            return new Promise<any>((resolve,reject) => {
                 _oauth.getOAuthRequestToken((error,oauth_token,oauth_token_secret,results) => {
                     if (error) reject(error)
                     resolve({oauth_token,oauth_token_secret,results})
@@ -23,7 +23,7 @@ export default (oauthCallback:any) => {
             });
         },
         getOauthAccessToken: (oauth_token:string,oauth_token_secret:string,oauth_verifier:string) => {
-            return new Promise((resolve,reject) => {
+            return new Promise<any>((resolve,reject) => {
                 _oauth.getOAuthAccessToken(oauth_token,oauth_token_secret,oauth_verifier, (error,oauth_access_token,oauth_access_token_secret, results) => {
                     if (error) reject (error)
                     resolve({oauth_access_token,oauth_access_token_secret, results})
@@ -31,7 +31,7 @@ export default (oauthCallback:any) => {
             });
         },
         getProtectedResource: (url:string,method:string,oauth_access_token:string,oauth_access_token_secret:string) => {
-            return new Promise((resolve,reject) => {
+            return new Promise<any>((resolve,reject) => {
                 _oauth.getProtectedResource(url,method,oauth_access_token,oauth_access_token_secret, (error,data,response) => {
                     if (error) reject (error)
                     resolve({data,response})
