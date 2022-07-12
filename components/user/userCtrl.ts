@@ -148,6 +148,36 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
+    redditLogin: async (req:express.Request,res:express.Response) => {
+        try {
+            const token = req.cookies.token ? req.cookies.token : null
+            if (!token) return res.status(500).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token)
+            const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET,CLIENT_URL} = config
+            const {code} = req.query
+            const encondedHeader = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString("base64")
+            let response = await fetch(`https://www.reddit.com/api/v1/access_token`, {
+                method: 'POST',
+                body: `grant_type=authorization_code&code=${code}&redirect_uri=${CLIENT_URL}/settings`,
+                headers: {authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded'}
+            })
+            let body = await response.json()
+            const saveToken = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {access_token: body.access_token, refresh_token: body.refresh_token, provider: 'reddit'}}})
+            if (!saveToken) return res.status(500).json({msg: "Something went wrong, please try again"})
+            response = await fetch(`https://oauth.reddit.com/api/v1/me`, {
+                method: 'GET',
+                headers: {authorization: `bearer ${body.access_token}`}
+            })
+            let redditUser = await response.json()
+            const {verified,name,icon_img} = redditUser
+            if(!verified) return res.status(400).json({msg: "You need to verify your Reddit account to continue!"})
+            const updateUser = await User.findOneAndUpdate({username: user?.username}, {$push: {externalAccounts: {username: name, provider: 'reddit'}}})
+            if (!updateUser) return res.status(500).json({msg: 'Something went wrong, please try again.'})
+            res.status(200).json({msg: true})
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    }
 }
 
 export default userCtrl

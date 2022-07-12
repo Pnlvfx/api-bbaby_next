@@ -31,6 +31,8 @@ interface ENV {
     BBABYITALIA_ACCESS_TOKEN_SECRET: string | undefined
     BBABY_ACCESS_TOKEN: string | undefined
     BBABY_ACCESS_TOKEN_SECRET: string | undefined
+    REDDIT_CLIENT_ID: string | undefined
+    REDDIT_CLIENT_SECRET: string | undefined
 }
 
 interface Config {
@@ -61,6 +63,8 @@ interface Config {
     BBABYITALIA_ACCESS_TOKEN_SECRET: string
     BBABY_ACCESS_TOKEN: string
     BBABY_ACCESS_TOKEN_SECRET: string
+    REDDIT_CLIENT_ID: string
+    REDDIT_CLIENT_SECRET: string
 }
 
 const getConfig = ():ENV => {
@@ -91,7 +95,9 @@ const getConfig = ():ENV => {
         BBABYITALIA_ACCESS_TOKEN: process.env.BBABYITALIA_ACCESS_TOKEN,
         BBABYITALIA_ACCESS_TOKEN_SECRET: process.env.BBABYITALIA_ACCESS_TOKEN_SECRET,
         BBABY_ACCESS_TOKEN: process.env.BBABY_ACCESS_TOKEN,
-        BBABY_ACCESS_TOKEN_SECRET: process.env.BBABY_ACCESS_TOKEN_SECRET
+        BBABY_ACCESS_TOKEN_SECRET: process.env.BBABY_ACCESS_TOKEN_SECRET,
+        REDDIT_CLIENT_ID: process.env.REDDIT_CLIENT_ID,
+        REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET
     }
 }
 

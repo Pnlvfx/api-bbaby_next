@@ -7,7 +7,7 @@
   "author": "PnlVFX <simone97_19@hotmail.it>",
   "license": "MIT",
   "engines": {
-    "node": "16.x|| 17.9.0"
+    "node": "18.x.x"
   },
   "scripts": {
     "build": "rimraf dist && tsc -p tsconfig.json && cp config/config.env dist/config/config.env",
@@ -45,7 +45,6 @@
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.8",
-    "@types/mongoose": "^5.11.97",
     "@types/node": "^18.0.0",
     "@types/nodemailer": "^6.4.4",
     "@types/oauth": "^0.9.1",

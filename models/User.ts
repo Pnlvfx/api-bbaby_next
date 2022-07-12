@@ -50,7 +50,7 @@ const UserSchema = new Schema<IUser>({
         type: [Schema.Types.ObjectId],
     },
     tokens: {
-        type: {},
+        
     },
     hasExternalAccount: {
         type: Boolean,
