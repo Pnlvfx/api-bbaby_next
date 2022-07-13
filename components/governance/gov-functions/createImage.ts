@@ -7,7 +7,6 @@ import cloudinary from "../../../lib/cloudinary"
 import textToSpeech from '@google-cloud/text-to-speech'
 import util from 'util'
 import {getAudioDurationInSeconds} from 'get-audio-duration'
-import audioconcat from 'audioconcat'
 
 const {PUBLIC_PATH} = config
 
@@ -88,17 +87,3 @@ export const createAudio = async(input:string,index:number,audio:Array<any>) => 
     return audioDuration
 }
 
-export const concatenateAudio = async(audio:Array<any>) => {
-    audioconcat(audio)
-    .concat(`${PUBLIC_PATH}/final.mp3`)
-    .on('start', function(command:string) {
-        //console.log('ffmpeg process started:', command)
-    })
-    .on('error', function (err:string, stdout:string, stderr:string) {
-        console.error('Error:', err)
-        console.error('ffmpeg stderr:', stderr)
-    })
-    .on('end', function(output:string) {
-        
-    })
-}

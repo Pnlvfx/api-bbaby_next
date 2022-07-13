@@ -7,6 +7,10 @@ governanceRouter.post('/governance/create-image', governanceCtrl.createImage)
 
 governanceRouter.post('/governance/create-video', governanceCtrl.createVideo)
 
+//governanceRouter.get('/governance/youtube/login', governanceCtrl.loginYoutube)
+
+//governanceRouter.post('/governance/youtube/access_token', governanceCtrl.youtubeAccessToken)
+
 governanceRouter.post('/governance/youtube', governanceCtrl.uploadYoutube)
 
 governanceRouter.post('/governance/translate-tweet', governanceCtrl.translateTweet)

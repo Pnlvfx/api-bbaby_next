@@ -33,6 +33,8 @@ interface ENV {
     BBABY_ACCESS_TOKEN_SECRET: string | undefined
     REDDIT_CLIENT_ID: string | undefined
     REDDIT_CLIENT_SECRET: string | undefined
+    YOUTUBE_CLIENT_ID: string | undefined
+    YOUTUBE_CLIENT_SECRET: string | undefined
 }
 
 interface Config {
@@ -65,6 +67,8 @@ interface Config {
     BBABY_ACCESS_TOKEN_SECRET: string
     REDDIT_CLIENT_ID: string
     REDDIT_CLIENT_SECRET: string
+    YOUTUBE_CLIENT_ID: string
+    YOUTUBE_CLIENT_SECRET: string
 }
 
 const getConfig = ():ENV => {
@@ -97,7 +101,9 @@ const getConfig = ():ENV => {
         BBABY_ACCESS_TOKEN: process.env.BBABY_ACCESS_TOKEN,
         BBABY_ACCESS_TOKEN_SECRET: process.env.BBABY_ACCESS_TOKEN_SECRET,
         REDDIT_CLIENT_ID: process.env.REDDIT_CLIENT_ID,
-        REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET
+        REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET,
+        YOUTUBE_CLIENT_ID: process.env.YOUTUBE_CLIENT_ID,
+        YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET
     }
 }
 

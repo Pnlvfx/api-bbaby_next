@@ -2,14 +2,14 @@ import express from 'express'
 import config from '../../config/config'
 import Comment from '../../models/Comment'
 import Post from '../../models/Post'
-import {concatenateAudio, createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage'
+import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage'
 import cloudinary from '../../lib/cloudinary'
 import videoshow from 'videoshow'
-import fs from 'fs'
 import { authorize, uploadVideo } from './gov-functions/uploadYoutube'
 import {TranslationServiceClient} from '@google-cloud/translate'
+import audioconcat from 'audioconcat'
 
-const {PUBLIC_PATH,YOUTUBE_CREDENTIALS} = config
+const {PUBLIC_PATH} = config
 
 const governanceCtrl = {
     createImage: async (req:express.Request, res: express.Response) => {
@@ -40,22 +40,33 @@ const governanceCtrl = {
                 images.push(finalImage) //CLIENT
             })
         )
-        await concatenateAudio(audio)
-        const finalAudio = await cloudinary.v2.uploader.upload(`${PUBLIC_PATH}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'})
-        res.json({
-            title: post.title,
-            description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Contribuisci a far crescere bbabystyle https://bbabystyle.com`,
-            keywords: `Ucraina, News, Notizie`,
-            category: `25`,
-            privacyStatus: `public`,
-            images,
-            localImages: localImages,
-            audio,
-            finalAudio: finalAudio.secure_url,
-            width,
-            height,
-            success:'Image created successfully'
-        })
+            audioconcat(audio)
+            .concat(`${PUBLIC_PATH}/final.mp3`)
+            .on('start', function(command:string) {
+                //console.log('ffmpeg process started:', command)
+            })
+            .on('error', function (err:string, stdout:string, stderr:string) {
+                console.error('Error:', err)
+                console.error('ffmpeg stderr:', stderr)
+            })
+            .on('end', function(output:string) {
+                cloudinary.v2.uploader.upload(`${PUBLIC_PATH}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
+                    res.json({
+                        title: post.title,
+                        description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Contribuisci a far crescere bbabystyle https://bbabystyle.com`,
+                        keywords: `Ucraina, News, Notizie`,
+                        category: `25`,
+                        privacyStatus: `public`,
+                        images,
+                        localImages: localImages,
+                        audio,
+                        finalAudio: finalAudio.secure_url,
+                        width,
+                        height,
+                        success:'Image created successfully'
+                    })
+                })
+            })
     },
     createVideo: async (req:express.Request, res: express.Response) => {
         try {
@@ -92,13 +103,17 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
+    youtubeLogin: async (req:express.Request, res: express.Response) => {
+        try {
+            
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    },
     uploadYoutube: async (req:express.Request, res: express.Response) => {
         try {
             const {title,description,tags,categoryId,privacyStatus} = req.body
-            fs.readFile(`${YOUTUBE_CREDENTIALS}/youtube_client_secret.json`, function processClientSecrets(err,content) {
-                if (err) return res.status(500).json({msg: `Error during processClientSecrets : ${err.message}`})
-                authorize(JSON.parse(content.toString()), (auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
-            })
+            authorize((auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
         } catch(err:any) {
             res.status(500).json({msg: err.message})
         }

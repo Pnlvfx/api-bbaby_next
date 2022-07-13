@@ -5,17 +5,15 @@ import express from 'express'
 import { OAuth2Client } from 'google-auth-library'
 import readline from 'readline'
 
-const {PUBLIC_PATH,YOUTUBE_CREDENTIALS} = config
+const {PUBLIC_PATH,YOUTUBE_CREDENTIALS,YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,CLIENT_URL} = config
 const {OAuth2} = google.auth
 const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`
 const videoFilePath = `${PUBLIC_PATH}/video1.mp4`
 const thumbFilePath = `${PUBLIC_PATH}/image0.webp`
 
-export const authorize = (credentials:any,callback:any,res:express.Response) => {
-    const clientSecret = credentials.web.client_secret
-    const clientId = credentials.web.client_id
-    const redirectUrl = credentials.web.redirect_uris[0]
-    const oauth2Client = new OAuth2(clientId,clientSecret,redirectUrl)
+export const authorize = (callback:any,res:express.Response) => {
+    const redirectUrl = `${CLIENT_URL}/governance/youtube`
+    const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl)
     fs.readFile(TOKEN_PATH, function (err,token) {
         if (err) {
             getNewToken(oauth2Client,callback,res)
@@ -27,10 +25,10 @@ export const authorize = (credentials:any,callback:any,res:express.Response) => 
 }
 
 export const getNewToken = (oauth2Client:OAuth2Client,callback:any,res:express.Response) => {
-    const SCOPES = 'https://googleapis.com/auth/youtube.upload'
+    const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
     const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
-        scope: ['https://googleapis.com/auth/youtube.upload']
+        scope: SCOPES
     })
     console.log(`Authorize this app by visiting this url: ${authUrl}`)
     const rl = readline.createInterface({
@@ -93,7 +91,7 @@ export const uploadVideo = (auth:any,title:string,description:string,tags:string
         })
         fs.rm(`${PUBLIC_PATH}`, {recursive: true}, (err) => {
             if (err) return res.status(500).json({msg: `Cannot delete this folder`})
-            return res.status(201).json({videoInfo: videoInfo, success: `Video and thumbnail updated successfully`})
+            res.status(201).json({videoInfo: videoInfo, success: `Video and thumbnail updated successfully`})
         })
     })
 }
