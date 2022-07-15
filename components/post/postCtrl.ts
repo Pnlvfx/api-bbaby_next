@@ -58,15 +58,6 @@ const PostCtrl = {
         }
         res.json(post)
     },
-    addImage: async (req:express.Request,res:express.Response) => {
-        try {
-            const image = req.body.data
-            const uploadedResponse = await cloudinary.v2.uploader.upload(image, {upload_preset: 'bbaby_posts'})
-            res.json({url:uploadedResponse.secure_url, imageId: uploadedResponse.public_id })
-        } catch (err) {
-            res.status(500).json({err:'something went wrong with this image'})
-        }
-    },
     createPost: async (req:express.Request,res:express.Response) => {
          try {
             const {token} = req.cookies
@@ -74,22 +65,33 @@ const PostCtrl = {
                 return res.status(401).json({msg: "You need to login first"})
             }
             const user = await getUserFromToken(token)
-            const {title,body,image,community,communityIcon,isImage,imageHeight,imageWidth,imageId,sharePostToTG,sharePostToTwitter} = req.body
+            const {title,body,community,communityIcon,selectedFile,isImage,isVideo,height,width,sharePostToTG,sharePostToTwitter} = req.body
+            let image:any = {}
+            let video:any = {}
             const post = new Post({
                 author: user?.username,
                 authorAvatar: user?.avatar,
                 title,
                 body,
-                image,
                 community,
                 communityIcon,
-                imageId,
-                mediaInfo: {
-                    dimension: [imageHeight,imageWidth],
-                    isImage
-                }
             })
-            const savedPost = await post.save()
+            let savedPost:any = await post.save()
+            if (isImage) {
+                image = await cloudinary.v2.uploader.upload(selectedFile, {
+                    upload_preset: 'bbaby_posts',
+                    public_id: savedPost._id.toString()
+                })
+                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isImage:isImage,image:image.secure_url,dimension: [height,width]}}})
+            }
+            if (isVideo) {
+                video = await cloudinary.v2.uploader.upload(selectedFile, {
+                    upload_preset: 'bbaby_posts',
+                    public_id: savedPost._id.toString(),
+                    resource_type: 'video'
+                })
+                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isVideo:isVideo,video: {url: video.secure_url},dimension: [height,width]}}})
+            }
             if (sharePostToTG) {
                 await sharePostToTelegram(savedPost,res)
             }
@@ -97,6 +99,8 @@ const PostCtrl = {
                 await _sharePostToTwitter(user,savedPost,res)
             }
             if (!savedPost) return res.status(401).json({msg: 'Something went wrong!'})
+            savedPost = await Post.findById(savedPost._id)
+            console.log(savedPost)
             const updateComNumber = await Community.findOneAndUpdate({name: savedPost.community}, {$inc: {number_of_posts: +1}})
                 res.status(201).json(savedPost)
          } catch (err:any) {
@@ -156,8 +160,8 @@ const PostCtrl = {
         try {
             const {id} = req.params
             const findPost = await Post.findByIdAndDelete(id)
-            if (findPost?.mediaInfo.isImage) {
-                const deleteImage = await cloudinary.v2.uploader.destroy(findPost.imageId)
+            if (findPost && findPost.mediaInfo) {
+                //const deleteImage = await cloudinary.v2.uploader.destroy(findPost.imageId)
             }
             const findChildComments = await Comment.deleteMany({rootId: id})
             res.json({msg: "Deleted success"})

@@ -1,4 +1,5 @@
 import {Schema,model} from "mongoose";
+import { PostProps } from "../@types/post";
 
 const PostSchema = new Schema<PostProps>({
     author: 
@@ -16,9 +17,6 @@ const PostSchema = new Schema<PostProps>({
     body: {
         type:String
     },
-    image: {
-        type:String
-    },
     community: {
         type:String,
         required:true
@@ -28,20 +26,24 @@ const PostSchema = new Schema<PostProps>({
         required:true
     },
     mediaInfo: {
-            dimension: { 
-            type: [],
-            default: undefined,
+            dimension: {
+
             },
             isImage: {
                 type: Boolean,
-                default: false
             },
+            isVideo: {
+                type: Boolean,
+            },
+            image: {
+                type: String
+            },
+            video: {
+                
+            }
             // imageInfo: {
             //     type: [],
             // },
-    },
-    imageId: {
-        type: String,
     },
     ups: {
         type:Number,

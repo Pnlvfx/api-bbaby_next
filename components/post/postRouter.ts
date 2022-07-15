@@ -7,8 +7,6 @@ postRouter.get('/posts', PostCtrl.getPosts)
 
 postRouter.get('/posts/:id', PostCtrl.getPost)
 
-postRouter.post('/posts/image', PostCtrl.addImage)
-
 postRouter.post('/posts', PostCtrl.createPost)
 
 postRouter.post('/posts/:id/vote', PostCtrl.voting)

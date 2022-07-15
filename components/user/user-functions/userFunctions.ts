@@ -25,7 +25,8 @@ export const login = (user:any,res:express.Response) => {
         res.cookie('token', token, {
             httpOnly: true,
             domain: COOKIE_DOMAIN,
-            secure: true
+            secure: true,
+            maxAge: 63072000000 
         }).send()
     });
 }
