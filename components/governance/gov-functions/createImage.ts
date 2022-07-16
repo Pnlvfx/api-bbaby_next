@@ -60,8 +60,9 @@ export const _createImage = async(input:string,post:any,textColor:string,width:n
                 return res.status(500).json({msg: 'Something went wrong when trying to parse the text on the image'})
             }
             const {public_id} = imageWText
+            console.log(imageWText)
             const new_public_id = public_id.replace('/', ':')
-            const updatedImage = cloudinary.v2.image(`${post.imageId}.${format}`, {overlay: new_public_id})
+            const updatedImage = cloudinary.v2.image(`posts/${post._id}.${format}`, {overlay: new_public_id})
             if (!updatedImage) {
                 return res.status(500).json({msg: 'Final image: Something went wrong when trying to add the image with the text on the image'})
             }
