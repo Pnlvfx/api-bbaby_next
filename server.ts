@@ -11,6 +11,8 @@ import governanceRouter from './components/governance/governanceRouter'
 import communityRouter from './components/community/communityRouter'
 import twitterRouter from './components/twitter/twitterRouter'
 import commentRouter from './components/comment/commentRouter'
+import Post from './models/Post'
+import Community from './models/Community'
 
 const {CLIENT_URL,CORS_ORIGIN1,CORS_ORIGIN2,MONGO_URI} = config
 const app = express()
@@ -39,6 +41,25 @@ app.use('/', commentRouter)
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
+});
+
+app.get('/sitemaps', async(req,res) => {
+    try {
+        const posts = await Post.find({}).sort({createdAt: -1})
+        if(!posts) return res.status(500).json({msg: "For some reason we are not able to provide you this sitemaps, we will try to fix the problem as soon as possible"})
+        res.json(posts)   
+    } catch (err:any) {
+        res.status(500).json({msg: err.message})
+    }
+})
+
+app.get('/search', (req, res) => {
+    const {phrase,community} = req.query;
+    Post.find({title: {$regex: '.*'+phrase+'.*'}}).sort({postedAt: -1}).then(posts => {
+        Community.find({name:{$regex: '.*'+phrase+'.*'}}).then(communities => {
+            res.json({posts});
+        })
+    })
 });
 
 const port = 4000
