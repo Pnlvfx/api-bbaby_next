@@ -55,7 +55,7 @@ const userCtrl = {
     login: async (req:express.Request,res:express.Response) => {
         try {
             const {username,password} = req.body
-            const user = await User.findOne({username})
+            const user = await User.findOne({username: new RegExp(`^${username}$`, 'i')})
             if (user && user.username) {
                 const passOk = bcrypt.compareSync(password,user.password)
                 if (passOk) {

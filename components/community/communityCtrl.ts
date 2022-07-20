@@ -7,9 +7,21 @@ import { getUserFromToken } from '../user/user-functions/userFunctions'
 const communityCtrl = {
     createCommunity: async(req:express.Request,res:express.Response) => {
         try {
-            const {name,communityAvatar,cover} = req.body   
-        } catch (err) {
-            
+            const token = req.cookies.token ? req.cookies.token : null
+            if (!token) return res.status(401).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token)
+            const {name} = req.body;
+            if (!name) return res.status(500).json({msg: "A community name is required"})
+            const check = await Community.exists({name: new RegExp(`^${name}$`, 'i')})
+            if (check) {
+                return res.status(500).json({msg: `Sorry, b/${name} is taken. Try another.`})
+            } else {
+              const community = new Community({name, communityAuthor: user.username})
+              const savedCommunity = await community.save()
+              res.status(201).json({msg: "You have successfully created a new community"})
+            }
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
         }
     },
     getCommunity: async(req:express.Request,res:express.Response) => {
@@ -41,6 +53,7 @@ const communityCtrl = {
             if(!community) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
             const postThumb = await Post.updateMany({community: name}, {$set: {communityIcon: response.secure_url}})
             if(!postThumb) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+            res.json({msg: "Image updated successfully"})
         } catch (err:any) {
             res.status(500).json({msg: err.message})
         }

@@ -55,7 +55,7 @@ app.get('/sitemaps', async(req,res) => {
 
 app.get('/search', (req, res) => {
     const {phrase,community} = req.query;
-    Post.find({title: {$regex: '.*'+phrase+'.*'}}).sort({postedAt: -1}).then(posts => {
+    Post.find({title: {$regex: '.*'+ phrase +'.*', $options: 'i'}}).sort({postedAt: -1}).then(posts => {
         Community.find({name:{$regex: '.*'+phrase+'.*'}}).then(communities => {
             res.json({posts});
         })
