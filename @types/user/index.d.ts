@@ -14,6 +14,6 @@ interface IUser {
     downVotes: [Types.ObjectId]
     tokens: any[]
     hasExternalAccount: boolean
-    externalAccounts: []
+    externalAccounts: any[]
     subscribed: [string]
 }

@@ -35,6 +35,7 @@ interface ENV {
     REDDIT_CLIENT_SECRET: string | undefined
     YOUTUBE_CLIENT_ID: string | undefined
     YOUTUBE_CLIENT_SECRET: string | undefined
+    NODE_ENV: string | undefined
 }
 
 interface Config {
@@ -69,6 +70,7 @@ interface Config {
     REDDIT_CLIENT_SECRET: string
     YOUTUBE_CLIENT_ID: string
     YOUTUBE_CLIENT_SECRET: string
+    NODE_ENV: string
 }
 
 const getConfig = ():ENV => {
@@ -103,7 +105,8 @@ const getConfig = ():ENV => {
         REDDIT_CLIENT_ID: process.env.REDDIT_CLIENT_ID,
         REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET,
         YOUTUBE_CLIENT_ID: process.env.YOUTUBE_CLIENT_ID,
-        YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET
+        YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET,
+        NODE_ENV: process.env.NODE_ENV
     }
 }
 
