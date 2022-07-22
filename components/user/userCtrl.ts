@@ -12,7 +12,6 @@ const userCtrl = {
     register: async (req:express.Request,res:express.Response) => {
         try {
             const {email,username,password,country,countryCode,city,region,lat,lon} = req.body
-            const {SECRET,COOKIE_DOMAIN} = config
             if (!username || !email || !password)
             return res.status(400).json({msg: "Please fill in all fields"})
 
