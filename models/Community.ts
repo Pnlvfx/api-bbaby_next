@@ -49,10 +49,6 @@ const schema = new Schema<CommunityProps>({
         type: Number,
         default: 0
     },
-    subscriberCount: {
-        type: Number,
-        default: 0
-    }
 },
 {
     timestamps:true

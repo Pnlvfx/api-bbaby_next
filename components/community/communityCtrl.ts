@@ -106,17 +106,38 @@ const communityCtrl = {
             const check = await User.findOne({username: user?.username, subscribed: community})
             if (check) {
                 const unsubscribe = await User.findOneAndUpdate({username: user.username}, {$pull: {subscribed: community}})
-                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscriberCount: -1}})
+                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscribers: -1}})
                 res.json({msg: `You have unfollowed ${community}`})
             } else {
                 const subscribe = await User.findOneAndUpdate({username: user.username}, {$push: {subscribed: community}})
-                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscriberCount: +1}})
+                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscribers: +1}})
                 res.json({msg: `You now follow ${community}`})
             }
         } catch (err:any) {
             res.status(500).json({msg: err.message})
         }
     },
+    getUserPreferredCommunities: async(req:express.Request,res:express.Response) => {
+        try {
+            const token = req.cookies?.token ? req.cookies.token : null
+            const {limit} = req.query
+            const _limit:number = limit ? +limit : 0
+            let communities = []
+            const sort = {number_of_posts: -1}
+            const notSub = await Community.updateMany({}, {user_is_subscriber: false}).sort({number_of_posts: -1}).limit(_limit)
+            if (token) {
+                const user = await getUserFromToken(token)
+                const subscribedCommunities = await Community.find({name: user?.subscribed}).limit(_limit)
+                if (!subscribedCommunities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
+                if (subscribedCommunities.length <= _limit) {
+                    
+                }
+                res.json(subscribedCommunities)
+            }
+        } catch (err:any) {
+            res.status(500).json({msg: err.message})
+        }
+    }
 }
 
 export default communityCtrl

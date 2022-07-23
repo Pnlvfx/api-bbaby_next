@@ -17,4 +17,6 @@ communityRouter.get('/best-communities', communityCtrl.getBestCommunities)
 
 communityRouter.post('/communities/subscribe', communityCtrl.subscribe)
 
-export default communityRouter
+communityRouter.get('/communities/user/pref', communityCtrl.getUserPreferredCommunities)
+
+export default communityRouter;
