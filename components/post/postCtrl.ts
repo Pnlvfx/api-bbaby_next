@@ -100,7 +100,6 @@ const PostCtrl = {
             }
             if (!savedPost) return res.status(401).json({msg: 'Something went wrong!'})
             savedPost = await Post.findById(savedPost._id)
-            console.log(savedPost)
             const updateComNumber = await Community.findOneAndUpdate({name: savedPost.community}, {$inc: {number_of_posts: +1}})
                 res.status(201).json(savedPost)
          } catch (err:any) {

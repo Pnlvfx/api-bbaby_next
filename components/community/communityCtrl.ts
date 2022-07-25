@@ -20,7 +20,8 @@ const communityCtrl = {
               const savedCommunity = await community.save()
               res.status(201).json({msg: "You have successfully created a new community"})
             }
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -30,16 +31,17 @@ const communityCtrl = {
             const {name} = req.params
             if (token) {
                 const user = await getUserFromToken(token)
-                const _community = await Community.findOne({name})
+                const _community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
                 const moderator = user?.username === _community?.communityAuthor ? true : user?.role === 1 ? true : false
-                const edit = await Community.findOneAndUpdate({name}, {user_is_moderator: moderator})
+                const edit = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: moderator})
             } else {
-                const edit = await Community.findOneAndUpdate({name}, {user_is_moderator: false})
+                const edit = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: false})
             }
-                const community = await Community.findOne({name})
+                const community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
                 if (!community) return res.status(500).json({msg: "Something went wrong"})
                 res.json(community);
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -54,7 +56,8 @@ const communityCtrl = {
             const postThumb = await Post.updateMany({community: name}, {$set: {communityIcon: response.secure_url}})
             if(!postThumb) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
             res.json({msg: "Image updated successfully"})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -64,7 +67,8 @@ const communityCtrl = {
             const c = await Community.findOneAndUpdate({name}, {description})
             if (!c) return res.status(500).json({msg: 'Something went wrong, please try again'})
             res.status(200).json('Description update successfully');
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -75,7 +79,8 @@ const communityCtrl = {
             const communities = await Community.find({}).sort({}).limit(_limit)
             if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
             res.json(communities)   
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -93,7 +98,8 @@ const communityCtrl = {
             const communities = await Community.find({}).sort({number_of_posts: -1}).limit(_limit)
             if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
             res.json(communities)
-            } catch (err:any) {
+            } catch (err) {
+                if (err instanceof Error)
                 res.status(500).json({msg: err.message})
             }
     },
@@ -113,7 +119,8 @@ const communityCtrl = {
                 const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscribers: +1}})
                 res.json({msg: `You now follow ${community}`})
             }
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -134,7 +141,8 @@ const communityCtrl = {
                 }
                 res.json(subscribedCommunities)
             }
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     }

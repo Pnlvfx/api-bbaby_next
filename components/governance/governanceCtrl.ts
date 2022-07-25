@@ -99,14 +99,16 @@ const governanceCtrl = {
                     })
                 })
             })
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
     youtubeLogin: async (req:express.Request, res: express.Response) => {
         try {
             
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -114,7 +116,8 @@ const governanceCtrl = {
         try {
             const {title,description,tags,categoryId,privacyStatus} = req.body
             authorize((auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
-        } catch(err:any) {
+        } catch(err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },

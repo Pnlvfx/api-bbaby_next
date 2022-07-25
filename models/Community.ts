@@ -49,6 +49,13 @@ const schema = new Schema<CommunityProps>({
         type: Number,
         default: 0
     },
+    language: {
+        type: String,
+        default: 'en'
+    },
+    categories: {
+        
+    }
 },
 {
     timestamps:true

@@ -11,4 +11,6 @@ interface CommunityProps {
     user_is_contributor: boolean
     user_is_subscriber: boolean
     number_of_posts: number
+    language: string
+    categories: string[]
 }
