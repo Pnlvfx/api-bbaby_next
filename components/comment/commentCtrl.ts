@@ -5,7 +5,7 @@ import { getUserFromToken } from '../user/user-functions/userFunctions'
 const commentCtrl = {
     createComment: async (req:express.Request,res:express.Response) => {
         try {
-            const token = req.cookies.token ? req.cookies.token : null
+            const {token} = req.cookies
             if(!token) {
                 return res.status(401).json({msg: "You need to login first"})
             }

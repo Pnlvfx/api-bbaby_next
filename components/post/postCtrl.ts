@@ -48,8 +48,8 @@ const PostCtrl = {
         const {token} = req.cookies
         const {id} = req.params
         let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
-        const user = await getUserFromToken(token)
         if (token) {
+            const user = await getUserFromToken(token)
             const votedUp = {username: user?.username, upVotes: id}
             const votedDown = {username: user?.username, downVotes: id}
             const userUpVoted = await User.exists(votedUp)
