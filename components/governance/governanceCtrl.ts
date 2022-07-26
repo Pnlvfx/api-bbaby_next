@@ -8,6 +8,7 @@ import videoshow from 'videoshow'
 import { authorize, uploadVideo } from './gov-functions/uploadYoutube'
 import {TranslationServiceClient} from '@google-cloud/translate'
 import audioconcat from 'audioconcat'
+import { getUserFromToken } from '../user/user-functions/userFunctions'
 
 const {PUBLIC_PATH} = config
 
@@ -146,6 +147,23 @@ const governanceCtrl = {
             translateText()   
         } catch (err:any) {
             res.status(500).json({msg: err.message})
+        }
+    },
+    getNews: async (req:express.Request, res: express.Response) => {
+        try {
+            const {token} = req.cookies
+            if (!token) return res.status(500).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token);
+            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
+            const {NEWS_API_KEY} = config
+            const news_api_url_CATEGORY = `https://newsapi.org/v2/everything?q=tesla&apiKey=${NEWS_API_KEY}`;
+            const news_api_url_COUNTRY = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${NEWS_API_KEY}`;
+            const response = await fetch(news_api_url_COUNTRY)
+            const news = await response.json()
+            res.status(200).json(news);
+        } catch (err) {
+            if (err instanceof Error) 
+            return res.status(500).json({msg : err.message})
         }
     }
 }

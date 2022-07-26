@@ -8,7 +8,6 @@ const {SECRET,COOKIE_DOMAIN,ACTIVATION_TOKEN_SECRET,NODE_ENV} = config
 export const getUserFromToken = async(token:string) => {
     const verify:any = jwt.verify(token, SECRET);
     const user = await User.findById(verify.id)
-    console.log(user)
         return user as IUser
 }
 

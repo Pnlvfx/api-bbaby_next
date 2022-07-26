@@ -16,4 +16,6 @@ governanceRouter.post('/governance/youtube', governanceCtrl.uploadYoutube)
 
 governanceRouter.post('/governance/translate-tweet', governanceCtrl.translateTweet)
 
+governanceRouter.get('/governance/news', governanceCtrl.getNews)
+
 export default governanceRouter
