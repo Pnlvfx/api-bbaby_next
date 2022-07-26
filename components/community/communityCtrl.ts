@@ -16,7 +16,14 @@ const communityCtrl = {
             if (check) {
                 return res.status(500).json({msg: `Sorry, b/${name} is taken. Try another.`})
             } else {
-              const community = new Community({name, communityAuthor: user.username})
+                const language = user.countryCode === 'IT' ? "Italian" : "English"
+                const {region} = user
+              const community = new Community({
+                name,
+                communityAuthor: user.username,
+                language,
+                region
+            })
               const savedCommunity = await community.save()
               res.status(201).json({msg: "You have successfully created a new community"})
             }
@@ -25,17 +32,18 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getCommunity: async(req:express.Request,res:express.Response) => {
+    getCommunity: async (req:express.Request,res:express.Response) => {
         try {
             const token = req.cookies?.token ? req.cookies.token : null
             const {name} = req.params
+            const notSub = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: false, user_is_subscriber: false})
             if (token) {
                 const user = await getUserFromToken(token)
                 const _community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
                 const moderator = user?.username === _community?.communityAuthor ? true : user?.role === 1 ? true : false
-                const edit = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: moderator})
-            } else {
-                const edit = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: false})
+                const subscriber = await User.findOne({username: user.username, subscribed: name})
+                const isSubscriber = subscriber ? true : false
+                const update = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: moderator, user_is_subscriber : isSubscriber})
             }
                 const community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
                 if (!community) return res.status(500).json({msg: "Something went wrong"})
@@ -67,18 +75,6 @@ const communityCtrl = {
             const c = await Community.findOneAndUpdate({name}, {description})
             if (!c) return res.status(500).json({msg: 'Something went wrong, please try again'})
             res.status(200).json('Description update successfully');
-        } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
-        }
-    },
-    getCommunities: async(req:express.Request,res:express.Response) => {
-        try {
-            const {limit} = req.query
-            const _limit:number = limit ? +limit : 0
-            const communities = await Community.find({}).sort({}).limit(_limit)
-            if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
-            res.json(communities)   
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
@@ -145,7 +141,53 @@ const communityCtrl = {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
-    }
+    },
+    chooseCategory : async(req:express.Request,res:express.Response) => {
+        try {
+            const {token} = req.cookies
+            if (!token) return res.status(500).json({msg: "You are not authorized"})
+            const {name} = req.params;
+            const {category} = req.body;
+            const c = await Community.findOne({name})
+            const user = await getUserFromToken(token);
+            const check = user.role === 1 ? true : user.username === c?.communityAuthor ? true : false
+            if (!check) {
+                return res.status(500).json({msg: "You need to be a moderator to do this action!"})
+            } else {
+                const update = await Community.findOneAndUpdate({name}, {category})
+                res.json(true);
+            }
+        } catch (err) {
+            if (err instanceof Error)
+            res.status(500).json({msg: err.message})
+        }
+    },
+    searchCommunity: async(req:express.Request,res:express.Response) => {
+        try {
+            const {token} = req.cookies
+            if (!token) return res.status(500).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token);
+            const {phrase} = req.query;
+            const name = {$regex: '.*'+ phrase +'.*', $options: 'i'}
+            if (!phrase) return res.status(500).json({msg: "Please insert the name of the communities that you want to find"})
+            const communities = await Community.find({name: name}).sort({subscribers: -1})
+            // const filters = () => {
+            //     let response = user.subscribed?.filter(sub => {
+            //         return !communities.find(community => {
+
+            //             return community.name === sub
+            //         })
+            //     })
+            //     return response;
+            // }
+            // console.log(filters())
+            res.json(communities)
+        } catch (err) {
+            console.log(err)
+            if (err instanceof Error)
+            res.status(500).json({msg: err.message})
+        }
+    },
 }
 
-export default communityCtrl
+export default communityCtrl;

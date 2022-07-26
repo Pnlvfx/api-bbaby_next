@@ -47,16 +47,25 @@ const PostCtrl = {
     getPost: async (req:express.Request,res:express.Response) => {
         const {token} = req.cookies
         const {id} = req.params
-        let post
-        if (!token) {
-            post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
-        } else {
-            const user = await getUserFromToken(token)
-            let filters = {username: user?.username, upVotes: id}
-            const userUpVoted = User.findOneAndUpdate(filters, {})
+        let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
+        const user = await getUserFromToken(token)
+        if (token) {
+            const votedUp = {username: user?.username, upVotes: id}
+            const votedDown = {username: user?.username, downVotes: id}
+            const userUpVoted = await User.exists(votedUp)
+            if (!userUpVoted) {
+                const userDownVoted = await User.exists(votedDown)
+                if (!userDownVoted) {
+                    
+                } else {
+                    post = await Post.findByIdAndUpdate(id, {liked: "false"})
+                }
+            } else {
+                post = await Post.findByIdAndUpdate(id, {liked: "true"})
+            }
+            }
             post = await Post.findById(id)
-        }
-        res.json(post)
+    res.json(post)
     },
     createPost: async (req:express.Request,res:express.Response) => {
          try {
@@ -170,4 +179,4 @@ const PostCtrl = {
     }
 }
 
-export default PostCtrl
+export default PostCtrl;

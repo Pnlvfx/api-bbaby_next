@@ -7,7 +7,7 @@ const searchCtrl = {
     search: async (req:express.Request, res: express.Response) => {
         try {
             const {phrase} = req.query;
-            const posts = await Post.find({title: {$regex: '.*'+ phrase +'.*', $options: 'i'}}).sort({postedAt: -1})
+            const posts = await Post.find({title: {$regex: '.*'+ phrase +'.*', $options: 'i'}}).sort({createdAt: -1})
             if (!posts) return res.status(500).json({msg: "No posts exists"})
             //Community.find({name:{$regex: '.*'+phrase+'.*'}})
             res.json(posts)

@@ -12,5 +12,7 @@ interface CommunityProps {
     user_is_subscriber: boolean
     number_of_posts: number
     language: string
-    categories: string[]
+    region: string
+    category?: string
+    sub_categories?: string[]
 }

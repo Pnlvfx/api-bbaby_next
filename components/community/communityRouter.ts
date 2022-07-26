@@ -11,12 +11,14 @@ communityRouter.post('/communities/:name/change_avatar', communityCtrl.changeAva
 
 communityRouter.post('/communities/edit/description', communityCtrl.updateDescription)
 
-communityRouter.get('/communities', communityCtrl.getCommunities)
-
 communityRouter.get('/best-communities', communityCtrl.getBestCommunities)
 
 communityRouter.post('/communities/subscribe', communityCtrl.subscribe)
 
 communityRouter.get('/communities/user/pref', communityCtrl.getUserPreferredCommunities)
+
+communityRouter.post('/communities/:name/category', communityCtrl.chooseCategory)
+
+communityRouter.post('/communities/search', communityCtrl.searchCommunity)
 
 export default communityRouter;

@@ -53,8 +53,14 @@ const schema = new Schema<CommunityProps>({
         type: String,
         default: 'en'
     },
-    categories: {
-        
+    region: {
+        type: String,
+    },
+    category: {
+        type: String,
+    },
+    sub_categories: {
+        type: [String]
     }
 },
 {

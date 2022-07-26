@@ -10,10 +10,10 @@ interface IUser {
     region: string
     lat: string
     lon: string
-    upVotes: [Types.ObjectId]
-    downVotes: [Types.ObjectId]
-    tokens: any[]
-    hasExternalAccount: boolean
-    externalAccounts: any[]
-    subscribed: [string]
+    upVotes?: [Types.ObjectId]
+    downVotes?: [Types.ObjectId]
+    tokens?: any[]
+    hasExternalAccount?: boolean
+    externalAccounts?: any[]
+    subscribed?: [string]
 }

@@ -4,6 +4,6 @@ interface CommentProps {
     author: string
     authorAvatar: string
     body: string
-    parentId: Types.ObjectId
+    parentId?: Types.ObjectId
     rootId: Types.ObjectId
 }

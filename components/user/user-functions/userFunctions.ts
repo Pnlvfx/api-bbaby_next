@@ -5,9 +5,10 @@ import User from '../../../models/User';
 
 const {SECRET,COOKIE_DOMAIN,ACTIVATION_TOKEN_SECRET,NODE_ENV} = config
 
-export const getUserFromToken:any = async(token:string) => {
-    const user:any = jwt.verify(token, SECRET);
-    return User.findById(user.id)
+export const getUserFromToken = async(token:string) => {
+    const verify:any = jwt.verify(token, SECRET);
+    const user = await User.findById(verify.id)
+        return user as IUser
 }
 
 export const createActivationToken = ({...payload}) => {
