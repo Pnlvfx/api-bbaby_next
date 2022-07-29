@@ -74,7 +74,11 @@ const PostCtrl = {
                 return res.status(401).json({msg: "You need to login first"})
             }
             const user = await getUserFromToken(token)
-            const {title,body,community,communityIcon,selectedFile,isImage,isVideo,height,width,sharePostToTG,sharePostToTwitter} = req.body
+            const {title,body,community,communityIcon,selectedFile,isImage,isVideo,height,width,sharePostToTG,sharePostToTwitter} = req.body;
+            if (!title) return res.status(500).json({msg: "Title is required."})
+            if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
+            const communityExist = await Community.exists({name: community})
+            if (!communityExist) return res.status(500).json({msg: "Please select a valid community."})
             let image:any = {}
             let video:any = {}
             const post = new Post({

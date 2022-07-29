@@ -183,7 +183,6 @@ const communityCtrl = {
             // console.log(filters())
             res.json(communities)
         } catch (err) {
-            console.log(err)
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }

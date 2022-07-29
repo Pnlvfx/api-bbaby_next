@@ -1,39 +1,43 @@
-import express from 'express'
-import config from '../../config/config'
-import Comment from '../../models/Comment'
-import Post from '../../models/Post'
-import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage'
-import cloudinary from '../../lib/cloudinary'
-import videoshow from 'videoshow'
-import { authorize, uploadVideo } from './gov-functions/uploadYoutube'
-import {TranslationServiceClient} from '@google-cloud/translate'
-import audioconcat from 'audioconcat'
-import { getUserFromToken } from '../user/user-functions/userFunctions'
+import express from 'express';
+import config from '../../config/config';
+import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
+import cloudinary from '../../lib/cloudinary';
+import videoshow from 'videoshow';
+import { authorize, uploadVideo } from './gov-functions/uploadYoutube';
+import {TranslationServiceClient} from '@google-cloud/translate';
+import audioconcat from 'audioconcat';
+import { getUserFromToken } from '../user/user-functions/userFunctions';
+import puppeteer from 'puppeteer';
+import { createClient } from 'pexels';
+import News from '../../models/News';
 
-const {PUBLIC_PATH} = config
+const {PUBLIC_PATH} = config;
 
 const governanceCtrl = {
     createImage: async (req:express.Request, res: express.Response) => {
-        const {textColor,fontSize,community,format} = req.body
-        const post:any = await Post.findOne({"mediaInfo.isImage": true, community: community}).sort({createdAt: -1}).limit(1).skip(0)
-        const texts = await Comment.find({rootId: post?._id}).sort({createdAt: -1})
-        texts.push(post)
-        texts.reverse()
+        const {textColor,fontSize,description,newsId,format} = req.body;
+        console.log(description)
+        const news = await News.findById(newsId);
+        description.reverse()
+        description.push(news?.title)
+        description.reverse()
+        if (description.length <= 1) return res.status(500).json({msg: "Please select at least 2 paragraph."})
         let images:any = []
         let localImages:any = []
         let audio:any = []
-        const width = post.mediaInfo.dimension[1]
-        const height = post.mediaInfo.dimension[0]
+        if (!news || !news.mediaInfo.width || !news.mediaInfo.height) return res.status(500).json({msg: "You need to select one news before."})
+        const width = news.mediaInfo.width
+        const height = news.mediaInfo.height
         const wait = (ms: number) => new Promise(resolve => setTimeout(resolve,ms))
         ////START
         await makeDir(PUBLIC_PATH, res)
         await Promise.all(
-            texts.map(async (text:any,index:number) => {
+            description.map(async (text:string,index:number) => {
                 //const delayIndex = index + 2
                 const delay = parseInt(`${index}000`)
                 await wait(delay)
-                const loop = await createAudio(text.title ? text.title : text.body, index,audio)
-                const finalImage = await _createImage(text.title ? text.title : text.body,post,textColor,width,height,fontSize,format,res)
+                const loop = await createAudio(text, index, audio)
+                const finalImage = await _createImage(text,news,textColor,width,height,fontSize,format,res)
                 await saveImageToDisk(finalImage, index)
                 await wait(delay)
                 const imagePath = `${PUBLIC_PATH}/image${index}.webp`
@@ -53,25 +57,27 @@ const governanceCtrl = {
             .on('end', function(output:string) {
                 cloudinary.v2.uploader.upload(`${PUBLIC_PATH}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
                     res.json({
-                        title: post.title,
+                        title: news.title,
                         description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Contribuisci a far crescere bbabystyle https://bbabystyle.com`,
                         keywords: `Ucraina, News, Notizie`,
                         category: `25`,
                         privacyStatus: `public`,
                         images,
-                        localImages: localImages,
+                        localImages,
                         audio,
                         finalAudio: finalAudio.secure_url,
                         width,
                         height,
-                        success:'Image created successfully'
+                        msg:'Image created successfully'
                     })
                 })
             })
     },
     createVideo: async (req:express.Request, res: express.Response) => {
         try {
-            const {_videoOptions,images} = req.body
+            const {_videoOptions,images} = req.body;
+            if (!images) return res.status(500).json({msg: "You have 0 images selected. Was this  a bug?"})
+            if (!_videoOptions || _videoOptions.fps || _videoOptions.transition || _videoOptions.transitionDuration) return res.status(500).json({msg: "Please insert all the required fields."})
             const videoOptions = {
                 fps: _videoOptions.fps,
                 transition: _videoOptions.transition,
@@ -95,7 +101,7 @@ const governanceCtrl = {
                 cloudinary.v2.uploader.upload(output, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}, (err,response) => {
                     if (err) return res.status(500).json({msg: err.message})
                     return res.status(201).json({
-                        success: "Video created successfully",
+                        msg: "Video created successfully",
                         video: response?.secure_url
                     })
                 })
@@ -149,23 +155,104 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getNews: async (req:express.Request, res: express.Response) => {
+    getArticles: async (req:express.Request, res: express.Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
-            const {NEWS_API_KEY} = config
-            const news_api_url_CATEGORY = `https://newsapi.org/v2/everything?q=tesla&apiKey=${NEWS_API_KEY}`;
-            const news_api_url_COUNTRY = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${NEWS_API_KEY}`;
-            const response = await fetch(news_api_url_COUNTRY)
-            const news = await response.json()
-            res.status(200).json(news);
+            const browser = await puppeteer.launch()
+            const page = await browser.newPage()
+            const url = `https://www.bbc.com`
+            await page.goto(url);
+            const links = await page.evaluate(() => 
+                Array.from(document.querySelectorAll("a.media__link") as NodeListOf<HTMLAnchorElement>).map((link) => (
+                    link.href
+                )
+            ));
+            await browser.close()
+            res.set('Cache-control', 'public, max-age=3600')
+            res.status(200).json(links)
         } catch (err) {
             if (err instanceof Error) 
-            return res.status(500).json({msg : err.message})
+            res.status(500).json({msg : err.message})
         }
-    }
+    },
+    getArticle: async (req:express.Request, res: express.Response) => {
+        try {
+            const {url} = req.body;
+            const {token} = req.cookies
+            if (!token) return res.status(500).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token);
+            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
+            const browser = await puppeteer.launch()
+            const page = await browser.newPage();
+            await page.goto(url);
+            const description = await page.evaluate(() => 
+                Array.from(document.querySelectorAll('article p') as NodeListOf<HTMLParagraphElement>).map((descr) => (
+                    `${descr.innerText}\n\n`
+                ))
+            )
+            await browser.close()
+            res.status(200).json(description)
+        } catch (err) {
+            if (err instanceof Error) {
+                res.status(500).json({msg: err.message})
+            }
+            
+        }
+    },
+    postArticle: async (req:express.Request, res: express.Response) => {
+        try {
+            const {token} = req.cookies
+            if (!token) return res.status(500).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token);
+            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
+            const {title,description,mediaInfo} = req.body;
+            if (!title || !description || !mediaInfo.image) return res.status(500).json({msg: 'Missing required input!'})
+            const width = mediaInfo.width >= 1920 ? 1920 : parseInt(mediaInfo.width);
+            const height = mediaInfo.height >= 1080 ? 1080 : parseInt(mediaInfo.height);
+            let savedNews:any = {}
+            const news = new News({
+                author: user.username,
+                title,
+                description,
+                mediaInfo
+            })
+            savedNews = await news.save()
+            const newImage = await cloudinary.v2.uploader.upload(mediaInfo.image, {
+                upload_preset: 'bbaby_news',
+                public_id: savedNews._id.toString(),
+                transformation: {width, height, crop: 'fill'}
+            })
+            if (!newImage) return res.status(500).json({msg: "This image cannot be uploaded."})
+            savedNews = await News.findByIdAndUpdate({_id: savedNews._id}, {$set: {'mediaInfo.image': newImage.secure_url}})
+            savedNews = await News.findById(savedNews._id);
+            res.status(201).json(savedNews);
+        } catch (err) {
+            if (err instanceof Error) {
+                res.status(500).json({msg: err.message})
+            }
+        }
+    },
+    getPexelsImage: async (req:express.Request, res: express.Response) => {
+        try {
+            const {token} = req.cookies
+            const {PEXELS_API_KEY} = config
+            if (!token) return res.status(500).json({msg: "You need to login first"})
+            const user = await getUserFromToken(token);
+            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
+            const {text, page} = req.query
+            const client = createClient(PEXELS_API_KEY)
+            if (text === undefined) return res.status(500).json({msg: "You need to insert a phrase to be searched"})
+            if (page === undefined) return res.status(500).json({msg: "You need to insert a phrase to be searched"})
+            const photos = await client.photos.search({query: text.toString(),orientation: 'landscape', per_page: 15, page: parseInt(page.toString())})
+            res.status(200).json(photos);
+        } catch (err) {
+            if (err instanceof Error)
+            res.status(500).json({msg: err.message})
+        }
+    },
 }
 
 export default governanceCtrl;

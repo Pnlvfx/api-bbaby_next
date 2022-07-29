@@ -14,6 +14,7 @@ import commentRouter from './components/comment/commentRouter'
 import Post from './models/Post'
 import searchRouter from './components/search/searchRouter'
 import categoryRouter from './components/category/categoryRouter'
+import newsRouter from './components/news/newsRouter'
 
 const {CLIENT_URL,CORS_ORIGIN1,CORS_ORIGIN2,MONGO_URI} = config
 const app = express()
@@ -44,9 +45,13 @@ app.use('/', searchRouter)
 
 app.use('/', categoryRouter);
 
+app.use('/', newsRouter);
+
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });
+
+app.use(express.static('public'))
 
 app.get('/sitemaps', async(req,res) => {
     try {

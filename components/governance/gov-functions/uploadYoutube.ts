@@ -91,7 +91,7 @@ export const uploadVideo = (auth:any,title:string,description:string,tags:string
         })
         fs.rm(`${PUBLIC_PATH}`, {recursive: true}, (err) => {
             if (err) return res.status(500).json({msg: `Cannot delete this folder`})
-            res.status(201).json({videoInfo: videoInfo, success: `Video and thumbnail updated successfully`})
+            res.status(201).json({videoInfo: videoInfo, msg: `Video and thumbnail updated successfully`})
         })
     })
 }

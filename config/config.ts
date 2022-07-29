@@ -6,6 +6,7 @@ dotenv.config({path: path.resolve(__dirname, "../config/config.env")})
 interface ENV {
     MONGO_URI: string | undefined
     CLIENT_URL: string | undefined
+    SERVER_URL: string | undefined
     CORS_ORIGIN1: string | undefined
     CORS_ORIGIN2: string | undefined
     TELEGRAM_TOKEN: string | undefined
@@ -36,12 +37,13 @@ interface ENV {
     YOUTUBE_CLIENT_ID: string | undefined
     YOUTUBE_CLIENT_SECRET: string | undefined
     NODE_ENV: string | undefined
-    NEWS_API_KEY: string | undefined
+    PEXELS_API_KEY: string | undefined
 }
 
 interface Config {
     MONGO_URI: string
     CLIENT_URL: string
+    SERVER_URL: string
     CORS_ORIGIN1: string
     CORS_ORIGIN2: string
     TELEGRAM_TOKEN: string
@@ -72,13 +74,14 @@ interface Config {
     YOUTUBE_CLIENT_ID: string
     YOUTUBE_CLIENT_SECRET: string
     NODE_ENV: string
-    NEWS_API_KEY: string;
+    PEXELS_API_KEY: string
 }
 
 const getConfig = ():ENV => {
     return {
         MONGO_URI: process.env.MONGO_URI,
         CLIENT_URL: process.env.CLIENT_URL,
+        SERVER_URL: process.env.SERVER_URL,
         CORS_ORIGIN1: process.env.CORS_ORIGIN1,
         CORS_ORIGIN2: process.env.CORS_ORIGIN2,
         TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
@@ -109,7 +112,7 @@ const getConfig = ():ENV => {
         YOUTUBE_CLIENT_ID: process.env.YOUTUBE_CLIENT_ID,
         YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET,
         NODE_ENV: process.env.NODE_ENV,
-        NEWS_API_KEY: process.env.NEWS_API_KEY,
+        PEXELS_API_KEY: process.env.PEXELS_API_KEY
     }
 }
 

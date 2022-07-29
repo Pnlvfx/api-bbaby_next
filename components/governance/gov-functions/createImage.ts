@@ -39,7 +39,7 @@ export const saveImageToDisk = async(imageUrl:any,index:number) => {
         browser.close
 }
 
-export const _createImage = async(input:string,post:any,textColor:string,width:number,height:number,fontSize:number,format:string,res:express.Response) => {
+export const _createImage = async(input:string,news:any,textColor:string,width:number,height:number,fontSize:number,format:string,res:express.Response) => {
     const bgColor = 'rgba(0,0,0,0'
         const data = await TextToImage.generate(`${input}`, {
             maxWidth: width,
@@ -60,9 +60,8 @@ export const _createImage = async(input:string,post:any,textColor:string,width:n
                 return res.status(500).json({msg: 'Something went wrong when trying to parse the text on the image'})
             }
             const {public_id} = imageWText
-            console.log(imageWText)
             const new_public_id = public_id.replace('/', ':')
-            const updatedImage = cloudinary.v2.image(`posts/${post._id}.${format}`, {overlay: new_public_id})
+            const updatedImage = cloudinary.v2.image(`news/${news._id}.${format}`, {overlay: new_public_id})
             if (!updatedImage) {
                 return res.status(500).json({msg: 'Final image: Something went wrong when trying to add the image with the text on the image'})
             }
@@ -70,7 +69,7 @@ export const _createImage = async(input:string,post:any,textColor:string,width:n
             const cleanImage2 = cleanImage.replace('/>','')
             const cleanImage3 = cleanImage2.replace('http', 'https')
             const finalImage = cleanImage3.replaceAll("'", "")
-            return finalImage
+            return finalImage;
 }
 
 export const createAudio = async(input:string,index:number,audio:Array<any>) => {

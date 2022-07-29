@@ -1,6 +1,5 @@
-import express from 'express'
-import youtubeCtrl from '../youtube/youtubeCtrl'
-import governanceCtrl from './governanceCtrl'
+import express from 'express';
+import governanceCtrl from './governanceCtrl';
 
 const governanceRouter = express.Router()
 
@@ -8,14 +7,18 @@ governanceRouter.post('/governance/create-image', governanceCtrl.createImage)
 
 governanceRouter.post('/governance/create-video', governanceCtrl.createVideo)
 
-governanceRouter.get('/governance/youtube/login', youtubeCtrl.login)
-
 //governanceRouter.post('/governance/youtube/access_token', governanceCtrl.youtubeAccessToken)
 
 governanceRouter.post('/governance/youtube', governanceCtrl.uploadYoutube)
 
 governanceRouter.post('/governance/translate-tweet', governanceCtrl.translateTweet)
 
-governanceRouter.get('/governance/news', governanceCtrl.getNews)
+governanceRouter.get('/governance/BBCnews', governanceCtrl.getArticles)
+
+governanceRouter.post('/governance/news/article', governanceCtrl.getArticle)
+
+governanceRouter.post('/governance/news', governanceCtrl.postArticle)
+
+governanceRouter.get('/governance/pexels', governanceCtrl.getPexelsImage)
 
 export default governanceRouter
