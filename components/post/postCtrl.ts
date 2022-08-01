@@ -13,12 +13,13 @@ const PostCtrl = {
         try {
             const {token} = req.cookies
             const userLang = req.acceptsLanguages('en', 'it')
-            const {community,author,limit,skip} = req.query
+            const {community,author,limit,skip} = req.query;
+            if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."})
             if (token) {
                 const user = await getUserFromToken(token)
-                const userNullVote = await Post.find({_id: {'$nin': user?.downVotes && user?.upVotes}}).updateMany({'liked': 'null'})
-                const userUpVote = await Post.find({_id : {'$in': user?.upVotes}}).updateMany({"liked" : "true"})
-                const userDownVote = await Post.find({_id : {'$in': user?.downVotes}}).updateMany({"liked" : "false"})
+                const userNullVote = await Post.find({_id: {'$nin': user.downVotes && user.upVotes}}).updateMany({'liked': 'null'})
+                const userUpVote = await Post.find({_id : {'$in': user.upVotes}}).updateMany({"liked" : "true"})
+                const userDownVote = await Post.find({_id : {'$in': user.downVotes}}).updateMany({"liked" : "false"})
             } else {
                 const nullVote = await Post.find({}).updateMany({'liked' : null})
             }
@@ -35,12 +36,11 @@ const PostCtrl = {
                     filters.community = ['Italy', 'calciomercato']
                 }
             }
-            const _limit:number = limit ? +limit : 0
-            const _skip:number = skip ? +skip : 0
-            const posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip)
+            const posts = await Post.find(filters).sort({createdAt: -1}).limit(parseInt(limit.toString())).skip(parseInt(skip.toString()))
             //res.setHeader('Cache-Control', 'private, max-age=3600')
-            res.json(posts)   
-        } catch (err:any) {
+            res.json(posts)
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
