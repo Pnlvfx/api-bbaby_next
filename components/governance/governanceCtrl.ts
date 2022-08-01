@@ -77,7 +77,6 @@ const governanceCtrl = {
         try {
             const {_videoOptions,images} = req.body;
             if (!images) return res.status(500).json({msg: "You have 0 images selected. Was this  a bug?"})
-            if (!_videoOptions || _videoOptions.fps || _videoOptions.transition || _videoOptions.transitionDuration) return res.status(500).json({msg: "Please insert all the required fields."})
             const videoOptions = {
                 fps: _videoOptions.fps,
                 transition: _videoOptions.transition,
