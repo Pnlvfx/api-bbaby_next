@@ -72,7 +72,8 @@ const TwitterCtrl = {
             const oauth_token = await User.findOneAndUpdate({username: user?.username}, {$pull: {tokens: {provider: 'twitter'}, 'externalAccounts': {provider: 'twitter'}}})
             if (!oauth_token) return res.status(403).json({msg: "Missing, invalid, or expired tokens"})
             res.status(200).json({success:true})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(403).json({msg: err.message})
         }
     },

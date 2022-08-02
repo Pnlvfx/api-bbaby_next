@@ -38,7 +38,7 @@ const governanceCtrl = {
                 await wait(delay)
                 const loop = await createAudio(text, index, audio)
                 const finalImage = await _createImage(text,news,textColor,width,height,fontSize,format,res)
-                await saveImageToDisk(finalImage, index)
+                await saveImageToDisk(finalImage.toString(), index)
                 await wait(delay)
                 const imagePath = `${PUBLIC_PATH}/image${index}.webp`
                 localImages.push({path: imagePath, loop:loop})
@@ -143,15 +143,16 @@ const governanceCtrl = {
                     sourceLanguageCode: lang === 'en' ? lang : 'it',
                     targetLanguageCode: lang === 'en' ? 'it' : 'en'
                 }
-                const [response]:any = await translationClient.translateText(request)
-
+                const [response] = await translationClient.translateText(request)
+                if (!response.translations) return res.status(500).json({msg: "Cannot translate!"})
                 for (const translation of response.translations) {
                     res.json(translation.translatedText)
                 }
             }
             
             translateText()   
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -185,7 +186,9 @@ const governanceCtrl = {
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
-            const browser = await puppeteer.launch()
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox', '--disabled-setupid-sandbox']
+            })
             const page = await browser.newPage();
             await page.goto(url);
             const description = await page.evaluate(() => 

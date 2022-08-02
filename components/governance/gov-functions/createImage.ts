@@ -20,7 +20,7 @@ export const makeDir = async(path:string,res:express.Response) => {
     }
 }
 
-export const saveImageToDisk = async(imageUrl:any,index:number) => {
+export const saveImageToDisk = async(imageUrl:string,index:number) => {
     const browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disabled-setupid-sandbox']
     })
