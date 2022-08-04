@@ -35,7 +35,8 @@ const userCtrl = {
             sendEMail(email,url,"Verify your email address")
             const savedUser = await user.save()
             login(savedUser,res)
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -47,7 +48,8 @@ const userCtrl = {
             const check = await User.findOne({email})
             if (check) return res.status(400).json({msg: "This email already exists"})
             res.json({msg: "Success"})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -65,7 +67,8 @@ const userCtrl = {
             } else {
                 return res.status(422).json({msg:'Invalid username or password'});
             }
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -82,7 +85,8 @@ const userCtrl = {
                     res.json({user: {username:user.username, avatar: user.avatar, role: user.role}})
                 }
             }
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -100,7 +104,8 @@ const userCtrl = {
                 role: user?.role,
                 username: user?.username
             })
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -114,7 +119,8 @@ const userCtrl = {
             const _changeAvatar = await User.findOneAndUpdate({username: username}, {avatar: uploadedImage.secure_url})
             if (!_changeAvatar) return res.status(500).json({msg: 'Something went wrong with this image, please try again or change type of image'})
             res.json({success: "Avatar updated successfully"})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -123,7 +129,8 @@ const userCtrl = {
             const {email} = req.body
             const user = await User.findOne({email})
             if (!user) return res.status(400).json({msg:"This email does not exist."})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -135,7 +142,8 @@ const userCtrl = {
                 domain: COOKIE_DOMAIN,
                 secure: true
             }).send()
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: "Cannot proceed to logout, please retry"})
         }
     },
@@ -143,7 +151,8 @@ const userCtrl = {
         try {
             const {tokenId} = req.body
              _googleLogin(tokenId,req,res)
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -173,7 +182,8 @@ const userCtrl = {
             const updateUser = await User.findOneAndUpdate({username: user?.username}, {$push: {externalAccounts: {username: name, provider: 'reddit'}}})
             if (!updateUser) return res.status(500).json({msg: 'Something went wrong, please try again.'})
             res.status(200).json({msg: true})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     }

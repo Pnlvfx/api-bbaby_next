@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 import config from '../../../config/config';
 import fs from 'fs';
 
-export const saveImageToDisk = async(imageUrl:any,index:number) => {
+export const saveImageToDisk = async(imageUrl:string,index:number) => {
     const {PUBLIC_PATH} = config
     const browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disabled-setupid-sandbox']

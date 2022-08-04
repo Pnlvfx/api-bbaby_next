@@ -45,7 +45,8 @@ const TwitterCtrl = {
             const saveTokens = await User.findOneAndUpdate({username: user?.username}, {$push: {tokens: {oauth_access_token: oauth_access_token, oauth_access_token_secret: oauth_access_token_secret, provider: 'twitter'}}})
             if (!saveTokens) return res.status(500).json({msg: 'Something went wrong in bbaby database'})
             res.status(200).json({success: true})
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(403).json({message: err.message});
         }
     },
@@ -53,7 +54,7 @@ const TwitterCtrl = {
         try {
             const {token} = req.cookies
             const internalUser = await getUserFromToken(token)
-            const twitter = internalUser?.tokens?.find((provider:any) => provider.provider === 'twitter')
+            const twitter = internalUser?.tokens?.find((provider) => provider.provider === 'twitter')
             const {oauth_access_token, oauth_access_token_secret} = twitter
             const response = await oauth.getProtectedResource(`https://api.twitter.com/1.1/account/verify_credentials.json`, 'GET',oauth_access_token,oauth_access_token_secret)
             const user = JSON.parse(response.data)
@@ -82,7 +83,7 @@ const TwitterCtrl = {
             const token = req.cookies.token ? req.cookies.token : null
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token)
-            const twitter = user?.tokens?.find((provider:any) => provider.provider === 'twitter')
+            const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter')
             const {oauth_access_token,oauth_access_token_secret} = twitter
             const {slug,owner_screen_name} = req.query
             const response = await oauth.getProtectedResource(`https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,'GET',oauth_access_token,oauth_access_token_secret)
