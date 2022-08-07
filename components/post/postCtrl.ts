@@ -37,7 +37,7 @@ const PostCtrl = {
                 }
             }
             const posts = await Post.find(filters).sort({createdAt: -1}).limit(parseInt(limit.toString())).skip(parseInt(skip.toString()))
-            //res.setHeader('Cache-Control', 'private, max-age=3600')
+            res.setHeader('Cache-Control', 'private, max-age=3600, must-revalidate')
             res.json(posts)
         } catch (err) {
             if (err instanceof Error)
@@ -45,27 +45,32 @@ const PostCtrl = {
         }
     },
     getPost: async (req:express.Request,res:express.Response) => {
-        const {token} = req.cookies
-        const {id} = req.params
-        let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
-        if (token) {
-            const user = await getUserFromToken(token)
-            const votedUp = {username: user?.username, upVotes: id}
-            const votedDown = {username: user?.username, downVotes: id}
-            const userUpVoted = await User.exists(votedUp)
-            if (!userUpVoted) {
-                const userDownVoted = await User.exists(votedDown)
-                if (!userDownVoted) {
-                    
+        try {
+            const {token} = req.cookies
+            const {id} = req.params
+            let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
+            if (token) {
+                const user = await getUserFromToken(token)
+                const votedUp = {username: user?.username, upVotes: id}
+                const votedDown = {username: user?.username, downVotes: id}
+                const userUpVoted = await User.exists(votedUp)
+                if (!userUpVoted) {
+                    const userDownVoted = await User.exists(votedDown)
+                    if (!userDownVoted) {
+                        
+                    } else {
+                        post = await Post.findByIdAndUpdate(id, {liked: "false"})
+                    }
                 } else {
-                    post = await Post.findByIdAndUpdate(id, {liked: "false"})
+                    post = await Post.findByIdAndUpdate(id, {liked: "true"})
                 }
-            } else {
-                post = await Post.findByIdAndUpdate(id, {liked: "true"})
-            }
-            }
-            post = await Post.findById(id)
-    res.json(post)
+                }
+                post = await Post.findById(id)
+            res.json(post)
+        } catch (err) {
+            if (err instanceof Error)
+            res.status(500).json({msg: err.message})
+        }
     },
     createPost: async (req:express.Request,res:express.Response) => {
          try {
