@@ -15,13 +15,11 @@ const PostCtrl = {
             const userLang = req.acceptsLanguages('en', 'it')
             const {community,author,limit,skip} = req.query;
             if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."})
+            const nullVote = await Post.find({}).updateMany({'liked' : null})
             if (token) {
                 const user = await getUserFromToken(token)
-                const userNullVote = await Post.find({_id: {'$nin': user.downVotes && user.upVotes}}).updateMany({'liked': 'null'})
                 const userUpVote = await Post.find({_id : {'$in': user.upVotes}}).updateMany({"liked" : "true"})
                 const userDownVote = await Post.find({_id : {'$in': user.downVotes}}).updateMany({"liked" : "false"})
-            } else {
-                const nullVote = await Post.find({}).updateMany({'liked' : null})
             }
             let filters:any = {}
 
@@ -120,13 +118,14 @@ const PostCtrl = {
             savedPost = await Post.findById(savedPost._id)
             const updateComNumber = await Community.findOneAndUpdate({name: savedPost.community}, {$inc: {number_of_posts: +1}})
                 res.status(201).json(savedPost)
-         } catch (err:any) {
+         } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
          }
     },
     voting: async (req:express.Request,res:express.Response) => {
         try {
-            const token = req.cookies.token ? req.cookies.token : null
+            const {token} = req.cookies
             if (!token) return res.status(401).json({msg: "You need to login first"})
             const user = await getUserFromToken(token)
             const {id} = req.params
@@ -169,7 +168,8 @@ const PostCtrl = {
                     res.status(200).json({vote: post ? post.ups -1 : 0})
                 }
             }
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },

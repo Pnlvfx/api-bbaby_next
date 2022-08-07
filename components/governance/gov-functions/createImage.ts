@@ -8,7 +8,7 @@ import textToSpeech from '@google-cloud/text-to-speech'
 import util from 'util'
 import {getAudioDurationInSeconds} from 'get-audio-duration'
 
-const {PUBLIC_PATH} = config
+const {PUBLIC_PATH} = config;
 
 export const makeDir = async(path:string,res:express.Response) => {
     try {
@@ -20,7 +20,7 @@ export const makeDir = async(path:string,res:express.Response) => {
     }
 }
 
-export const saveImageToDisk = async(imageUrl:any,index:number) => {
+export const saveImageToDisk = async(imageUrl:string,index:number) => {
     const browser = await puppeteer.launch({
         args: ['--no-sandbox', '--disabled-setupid-sandbox']
     })
@@ -72,18 +72,19 @@ export const _createImage = async(input:string,news:any,textColor:string,width:n
             return finalImage;
 }
 
-export const createAudio = async(input:string,index:number,audio:Array<any>) => {
+export const createAudio = async(input:string,index:number,audio:Array<any>,res:express.Response) => {
     const client = new textToSpeech.TextToSpeechClient()
-    const [response]:any = await client.synthesizeSpeech({
+    const [response] = await client.synthesizeSpeech({
         input: {text:input},
         voice: {languageCode: 'it', ssmlGender: 'MALE'},
         audioConfig: {audioEncoding: 'MP3'}
     });
+    if (!response.audioContent) return res.status(500).json({msg: "Something went wrong. Don't panic. Try again."})
     const audioPath = `${PUBLIC_PATH}/audio${index}.mp3`
     const writeFile = util.promisify(fs.writeFile)
     await writeFile(audioPath,response.audioContent, 'binary')
     const audioDuration = await getAudioDurationInSeconds(audioPath)
-    audio.push(audioPath)
-    return audioDuration
+    audio.push(audioPath);
+    return audioDuration;
 }
 

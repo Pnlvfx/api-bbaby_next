@@ -16,7 +16,6 @@ const {PUBLIC_PATH} = config;
 const governanceCtrl = {
     createImage: async (req:express.Request, res: express.Response) => {
         const {textColor,fontSize,description,newsId,format} = req.body;
-        console.log(description)
         const news = await News.findById(newsId);
         description.reverse()
         description.push(news?.title)
@@ -36,9 +35,9 @@ const governanceCtrl = {
                 //const delayIndex = index + 2
                 const delay = parseInt(`${index}000`)
                 await wait(delay)
-                const loop = await createAudio(text, index, audio)
+                const loop = await createAudio(text, index, audio, res)
                 const finalImage = await _createImage(text,news,textColor,width,height,fontSize,format,res)
-                await saveImageToDisk(finalImage, index)
+                await saveImageToDisk(finalImage.toString(), index)
                 await wait(delay)
                 const imagePath = `${PUBLIC_PATH}/image${index}.webp`
                 localImages.push({path: imagePath, loop:loop})
@@ -58,7 +57,9 @@ const governanceCtrl = {
                 cloudinary.v2.uploader.upload(`${PUBLIC_PATH}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
                     res.json({
                         title: news.title,
-                        description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Contribuisci a far crescere bbabystyle https://bbabystyle.com`,
+                        description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi.
+                        Questo è il link all'articolo completo: https://bbabystyle.com/news/${newsId} .
+                        Contribuisci a far crescere bbabystyle https://bbabystyle.com`,
                         keywords: `Ucraina, News, Notizie`,
                         category: `25`,
                         privacyStatus: `public`,
@@ -96,8 +97,10 @@ const governanceCtrl = {
                 return res.status(500).json({msg: `Some error occured ${err ? err : stdout ? stdout : stderr}`})
             })
             .on('end', (output:string) => {
-                //console.log(output)
-                cloudinary.v2.uploader.upload(output, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}, (err,response) => {
+                cloudinary.v2.uploader.upload(output, {
+                    upload_preset: 'bbaby_gov_video',
+                    resource_type: 'video'},
+                    (err,response) => {
                     if (err) return res.status(500).json({msg: err.message})
                     return res.status(201).json({
                         msg: "Video created successfully",
@@ -142,15 +145,16 @@ const governanceCtrl = {
                     sourceLanguageCode: lang === 'en' ? lang : 'it',
                     targetLanguageCode: lang === 'en' ? 'it' : 'en'
                 }
-                const [response]:any = await translationClient.translateText(request)
-
+                const [response] = await translationClient.translateText(request)
+                if (!response.translations) return res.status(500).json({msg: "Cannot translate!"})
                 for (const translation of response.translations) {
                     res.json(translation.translatedText)
                 }
             }
             
             translateText()   
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
@@ -184,7 +188,9 @@ const governanceCtrl = {
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
-            const browser = await puppeteer.launch()
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox', '--disabled-setupid-sandbox']
+            })
             const page = await browser.newPage();
             await page.goto(url);
             const description = await page.evaluate(() => 

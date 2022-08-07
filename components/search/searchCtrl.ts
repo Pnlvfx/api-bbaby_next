@@ -11,15 +11,18 @@ const searchCtrl = {
             if (!posts) return res.status(500).json({msg: "No posts exists"})
             //Community.find({name:{$regex: '.*'+phrase+'.*'}})
             res.json(posts)
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
     searchTrend: async (req:express.Request, res: express.Response) => {
         try {
             const posts = await Post.find({createdAt: {$gte: startOfDay(new Date()),$lt: endOfDay(new Date())}}).sort({ups: -1})
+            res.set('Cache-control', 'public,max-age=3600')
             res.json(posts)
-        } catch (err:any) {
+        } catch (err) {
+            if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     }
