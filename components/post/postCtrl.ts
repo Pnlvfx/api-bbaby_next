@@ -98,7 +98,7 @@ const PostCtrl = {
                     upload_preset: 'bbaby_posts',
                     public_id: savedPost._id.toString()
                 })
-                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isImage:isImage,image:image.secure_url,dimension: [height,width]}}})
+                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isImage,image:image.secure_url,dimension: [height,width]}}})
             }
             if (isVideo) {
                 video = await cloudinary.v2.uploader.upload(selectedFile, {
@@ -106,7 +106,7 @@ const PostCtrl = {
                     public_id: savedPost._id.toString(),
                     resource_type: 'video'
                 })
-                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isVideo:isVideo,video: {url: video.secure_url},dimension: [height,width]}}})
+                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isVideo,video: {url: video.secure_url},dimension: [height,width]}}})
             }
             if (sharePostToTG) {
                 await sharePostToTelegram(savedPost,res)

@@ -13,9 +13,8 @@ let tokens:any = {}
 const TwitterCtrl = {
     twitterReqToken: async (req:express.Request,res:express.Response) => {
         try {
-            const token = req.cookies.token ? req.cookies.token : null
+            const token = req.cookies.token
             if (!token) return res.status(500).json({msg: "You need to create an account first"})
-            const user = await getUserFromToken(token)
             const {oauth_token,oauth_token_secret} = await oauth.getOAuthRequestToken();
             res.cookie(COOKIE_NAME, oauth_token, {
                 maxAge: 15 * 60 * 1000, // 15 minutes
@@ -80,12 +79,14 @@ const TwitterCtrl = {
     },
     twitterGetUserPost: async (req:express.Request,res:express.Response) => {
         try {
-            const token = req.cookies.token ? req.cookies.token : null
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token)
+            const token = req.cookies.token;
+            if (!token) return res.status(500).json({msg: "You need to login first"});
+            const user = await getUserFromToken(token);
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter')
-            const {oauth_access_token,oauth_access_token_secret} = twitter
-            const {slug,owner_screen_name} = req.query
+            if (!twitter) return res.status(500).json({msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?"});
+            const {oauth_access_token,oauth_access_token_secret} = twitter;
+            const {slug,owner_screen_name} = req.query;
+            if (! slug || !owner_screen_name) return res.status(500).json({msg: 'This API require a slug parameter and an owner_screen_name.'})
             const response = await oauth.getProtectedResource(`https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,'GET',oauth_access_token,oauth_access_token_secret)
             res.json(JSON.parse(response.data))
         } catch (error) {
