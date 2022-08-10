@@ -50,14 +50,14 @@ const UserSchema = new Schema<IUser>({
         type: [Schema.Types.ObjectId],
     },
     tokens: {
-        
+        type: []
     },
     hasExternalAccount: {
         type: Boolean,
         default: false
     },
     externalAccounts: {
-    
+        type: []
     },
     subscribed: {
         type: [String],

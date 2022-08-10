@@ -18,6 +18,7 @@ export const sharePostToTelegram = async(savedPost:any,res:express.Response) => 
 export const _sharePostToTwitter = async(user:IUser,savedPost:any,res:express.Response) => {
     const {TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET,ANON_ACCESS_TOKEN,ANON_ACCESS_TOKEN_SECRET,BBABYITALIA_ACCESS_TOKEN,BBABYITALIA_ACCESS_TOKEN_SECRET,BBABY_ACCESS_TOKEN,BBABY_ACCESS_TOKEN_SECRET} = config
     const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter')
+    if (!twitter) return res.status(500).json({msg: "You need to authorize the twitter API into the User Settings page."})
     const {oauth_access_token, oauth_access_token_secret} = twitter
     if (!oauth_access_token && oauth_access_token_secret) {
         return res.status(500).json({msg:'You need to access to your twitter account first'})

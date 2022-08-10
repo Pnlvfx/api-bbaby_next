@@ -23,4 +23,8 @@ userRouter.post('/google_login',userCtrl.googleLogin)
 
 userRouter.get('/reddit_login', userCtrl.redditLogin)
 
-export default userRouter
+userRouter.get('/reddit_logout', userCtrl.redditLogout)
+
+userRouter.get('/reddit_posts', userCtrl.redditPosts)
+
+export default userRouter;

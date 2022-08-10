@@ -10,6 +10,7 @@ const communityCtrl = {
             const token = req.cookies.token ? req.cookies.token : null
             if (!token) return res.status(401).json({msg: "You need to login first"})
             const user = await getUserFromToken(token)
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const {name} = req.body;
             if (!name) return res.status(500).json({msg: "A community name is required"})
             const check = await Community.exists({name: new RegExp(`^${name}$`, 'i')})
@@ -34,11 +35,12 @@ const communityCtrl = {
     },
     getCommunity: async (req:express.Request,res:express.Response) => {
         try {
-            const token = req.cookies?.token ? req.cookies.token : null
+            const token = req.cookies.token
             const {name} = req.params
             const notSub = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: false, user_is_subscriber: false})
             if (token) {
                 const user = await getUserFromToken(token)
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
                 const _community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
                 const moderator = user?.username === _community?.communityAuthor ? true : user?.role === 1 ? true : false
                 const subscriber = await User.findOne({username: user.username, subscribed: name})
@@ -89,6 +91,7 @@ const communityCtrl = {
             const notSub = await Community.updateMany({}, {user_is_subscriber: false}).sort({number_of_posts: -1}).limit(_limit)
             if (token) {
                 const user = await getUserFromToken(token)
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
                 const subscribed = await Community.updateMany({name: user?.subscribed}, {user_is_subscriber: true}).sort({number_of_posts: -1}).limit(_limit)
             }
             const communities = await Community.find({}).sort({number_of_posts: -1}).limit(_limit)
@@ -105,6 +108,7 @@ const communityCtrl = {
             if (!token) return res.status(401).json({msg: 'You need to login first'})
             const {community} = req.body
             const user = await getUserFromToken(token)
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const check = await User.findOne({username: user?.username, subscribed: community})
             if (check) {
                 const unsubscribe = await User.findOneAndUpdate({username: user.username}, {$pull: {subscribed: community}})
@@ -130,6 +134,7 @@ const communityCtrl = {
             const notSub = await Community.updateMany({}, {user_is_subscriber: false}).sort({number_of_posts: -1}).limit(_limit)
             if (token) {
                 const user = await getUserFromToken(token)
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
                 const subscribedCommunities = await Community.find({name: user?.subscribed}).limit(_limit)
                 if (!subscribedCommunities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
                 if (subscribedCommunities.length <= _limit) {
@@ -150,6 +155,7 @@ const communityCtrl = {
             const {category} = req.body;
             const c = await Community.findOne({name})
             const user = await getUserFromToken(token);
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const check = user.role === 1 ? true : user.username === c?.communityAuthor ? true : false
             if (!check) {
                 return res.status(500).json({msg: "You need to be a moderator to do this action!"})
@@ -167,6 +173,7 @@ const communityCtrl = {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const {phrase} = req.query;
             const name = {$regex: '.*'+ phrase +'.*', $options: 'i'}
             if (!phrase) return res.status(500).json({msg: "Please insert the name of the communities that you want to find"})

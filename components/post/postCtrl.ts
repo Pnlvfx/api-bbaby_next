@@ -18,8 +18,9 @@ const PostCtrl = {
             const nullVote = await Post.find({}).updateMany({'liked' : null})
             if (token) {
                 const user = await getUserFromToken(token)
-                const userUpVote = await Post.find({_id : {'$in': user.upVotes}}).updateMany({"liked" : "true"})
-                const userDownVote = await Post.find({_id : {'$in': user.downVotes}}).updateMany({"liked" : "false"})
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+                const userUpVote = await Post.find({_id : {'$in': user?.upVotes}}).updateMany({"liked" : "true"})
+                const userDownVote = await Post.find({_id : {'$in': user?.downVotes}}).updateMany({"liked" : "false"})
             }
             let filters:any = {}
 
@@ -49,6 +50,7 @@ const PostCtrl = {
             let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
             if (token) {
                 const user = await getUserFromToken(token)
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
                 const votedUp = {username: user?.username, upVotes: id}
                 const votedDown = {username: user?.username, downVotes: id}
                 const userUpVoted = await User.exists(votedUp)
@@ -77,13 +79,12 @@ const PostCtrl = {
                 return res.status(401).json({msg: "You need to login first"})
             }
             const user = await getUserFromToken(token)
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const {title,body,community,communityIcon,selectedFile,isImage,isVideo,height,width,sharePostToTG,sharePostToTwitter} = req.body;
             if (!title) return res.status(500).json({msg: "Title is required."})
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
             const communityExist = await Community.exists({name: community})
             if (!communityExist) return res.status(500).json({msg: "Please select a valid community."})
-            let image:any = {}
-            let video:any = {}
             const post = new Post({
                 author: user?.username,
                 authorAvatar: user?.avatar,
@@ -92,32 +93,30 @@ const PostCtrl = {
                 community,
                 communityIcon,
             })
-            let savedPost:any = await post.save()
             if (isImage) {
-                image = await cloudinary.v2.uploader.upload(selectedFile, {
+                const image = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
-                    public_id: savedPost._id.toString()
+                    public_id: post._id.toString()
                 })
-                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isImage,image:image.secure_url,dimension: [height,width]}}})
+                post.$set({mediaInfo: {isImage,image:image.secure_url,dimension: [height,width]}})
             }
             if (isVideo) {
-                video = await cloudinary.v2.uploader.upload(selectedFile, {
+                const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
-                    public_id: savedPost._id.toString(),
+                    public_id: post._id.toString(),
                     resource_type: 'video'
                 })
-                savedPost = await Post.findByIdAndUpdate({_id: savedPost._id}, {$set: {mediaInfo: {isVideo,video: {url: video.secure_url},dimension: [height,width]}}})
+                post.$set({mediaInfo: {isVideo,video: {url: video.secure_url},dimension: [height,width]}})
             }
+            const savedPost = await post.save()
             if (sharePostToTG) {
                 await sharePostToTelegram(savedPost,res)
             }
             if (sharePostToTwitter) {
                 await _sharePostToTwitter(user,savedPost,res)
             }
-            if (!savedPost) return res.status(401).json({msg: 'Something went wrong!'})
-            savedPost = await Post.findById(savedPost._id)
-            const updateComNumber = await Community.findOneAndUpdate({name: savedPost.community}, {$inc: {number_of_posts: +1}})
-                res.status(201).json(savedPost)
+            const updateComNumber = await Community.findOneAndUpdate({name: post.community}, {$inc: {number_of_posts: +1}})
+            res.status(201).json(savedPost)
          } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
@@ -128,6 +127,7 @@ const PostCtrl = {
             const {token} = req.cookies
             if (!token) return res.status(401).json({msg: "You need to login first"})
             const user = await getUserFromToken(token)
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const {id} = req.params
             const _id = new Types.ObjectId(id)
             const {dir} = req.body

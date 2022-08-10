@@ -163,6 +163,7 @@ const governanceCtrl = {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
             const browser = await puppeteer.launch()
             const page = await browser.newPage()
@@ -187,6 +188,7 @@ const governanceCtrl = {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
@@ -212,6 +214,7 @@ const governanceCtrl = {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
             const {title,description,mediaInfo} = req.body;
             if (!title || !description || !mediaInfo.image) return res.status(500).json({msg: 'Missing required input!'})
@@ -246,6 +249,7 @@ const governanceCtrl = {
             const {PEXELS_API_KEY} = config
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
+            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
             const {text, page} = req.query
             const client = createClient(PEXELS_API_KEY)

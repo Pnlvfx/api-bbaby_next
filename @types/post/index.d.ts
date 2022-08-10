@@ -18,7 +18,7 @@ interface MediaInfoProps {
     dimension?: Types.Array
     isImage?: boolean
     isVideo?: boolean
-    image?: string
+    image?:string
     video?: {
         url?: string
     }

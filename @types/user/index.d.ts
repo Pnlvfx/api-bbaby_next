@@ -12,8 +12,23 @@ interface IUser {
     lon: string
     upVotes?: [Types.ObjectId]
     downVotes?: [Types.ObjectId]
-    tokens?: any[]
+    tokens?: TokensProps[]
     hasExternalAccount?: boolean
-    externalAccounts?: any[]
+    externalAccounts?: ExternalAccountsProps[]
     subscribed?: [string]
+}
+
+interface TokensProps {
+    access_token?: string
+    refresh_token?: string
+    provider: 'reddit' | 'twitter'
+    oauth_access_token?: string
+    oauth_access_token_secret?: string
+    access_token_expiration?: Date
+}
+
+interface ExternalAccountsProps {
+    username: string
+    provider: 'reddit' | 'twitter'
+    link?: string
 }
