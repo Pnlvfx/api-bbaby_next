@@ -14,19 +14,19 @@ import News from '../../models/News';
 const {PUBLIC_PATH} = config;
 
 const governanceCtrl = {
-    createImage: async (req:express.Request, res: express.Response) => {
+    createImage: async (req: express.Request, res: express.Response) => {
         const {textColor,fontSize,description,newsId,format} = req.body;
+        if (description.length <= 1) return res.status(500).json({msg: "Please select at least 2 paragraph."})
         const news = await News.findById(newsId);
         description.reverse()
         description.push(news?.title)
         description.reverse()
-        if (description.length <= 1) return res.status(500).json({msg: "Please select at least 2 paragraph."})
         let images:any = []
         let localImages:any = []
         let audio:any = []
         if (!news || !news.mediaInfo.width || !news.mediaInfo.height) return res.status(500).json({msg: "You need to select one news before."})
-        const width = news.mediaInfo.width
-        const height = news.mediaInfo.height
+        const {width} = news.mediaInfo
+        const {height} = news.mediaInfo
         const wait = (ms: number) => new Promise(resolve => setTimeout(resolve,ms))
         ////START
         await makeDir(PUBLIC_PATH, res)
@@ -164,7 +164,7 @@ const governanceCtrl = {
             if (!token) return res.status(500).json({msg: "You need to login first"})
             const user = await getUserFromToken(token);
             if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
+            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this API"})
             const browser = await puppeteer.launch()
             const page = await browser.newPage()
             const url = `https://www.bbc.com`

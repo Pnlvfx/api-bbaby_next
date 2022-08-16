@@ -7,7 +7,6 @@ const {SECRET,COOKIE_DOMAIN,ACTIVATION_TOKEN_SECRET,NODE_ENV} = config;
 
 export const getUserFromToken = async(token:string) => {
     const verify:any = jwt.verify(token, SECRET);
-    console.log(verify)
     const user = await User.findById(verify.id)
     return user
 }
@@ -22,7 +21,7 @@ export const validateEmail = (email:string) => {
 }
 
 export const login = (user:any,res:express.Response) => {
-    jwt.sign({id:user._id},SECRET, (err:any,token: any) => {
+    jwt.sign({id:user._id},SECRET, (err:any,token:any) => {
         if (err) return res.status(500).json({msg: 'For some reason you are able to login. Please retry.'})
         if (NODE_ENV === 'development') {
             res.cookie('token', token, {

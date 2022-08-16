@@ -56,7 +56,7 @@ const storeToken = (token:any,res:express.Response) => {
 export const uploadVideo = (auth:any,title:string,description:string,tags:string[],privacyStatus:string,res:express.Response) => {
     const youtube = google.youtube('v3')
     youtube.videos.insert({
-        auth: auth,
+        auth,
         part: ['snippet,status'],
         requestBody: {
             snippet: {

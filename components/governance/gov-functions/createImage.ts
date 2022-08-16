@@ -65,10 +65,7 @@ export const _createImage = async(input:string,news:any,textColor:string,width:n
             if (!updatedImage) {
                 return res.status(500).json({msg: 'Final image: Something went wrong when trying to add the image with the text on the image'})
             }
-            const cleanImage = updatedImage.replace('<img src=','')
-            const cleanImage2 = cleanImage.replace('/>','')
-            const cleanImage3 = cleanImage2.replace('http', 'https')
-            const finalImage = cleanImage3.replaceAll("'", "")
+            const finalImage = updatedImage.replace('<img src=','').replace('/>','').replace('http', 'https').replaceAll("'", "")
             return finalImage;
 }
 
