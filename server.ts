@@ -16,14 +16,14 @@ import searchRouter from './components/search/searchRouter'
 import categoryRouter from './components/category/categoryRouter'
 import newsRouter from './components/news/newsRouter'
 
-const {CLIENT_URL,CORS_ORIGIN1,CORS_ORIGIN2,MONGO_URI} = config
+const {CLIENT_URL,CORS_ORIGIN1,MONGO_URI} = config
 const app = express()
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json({limit: '50mb'}))
 app.use(compression())
 app.use(cors({
-    origin: [CLIENT_URL,CORS_ORIGIN1,CORS_ORIGIN2],
+    origin: [CLIENT_URL,CORS_ORIGIN1],
     credentials:true
 }))
 
