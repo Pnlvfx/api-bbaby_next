@@ -1,6 +1,6 @@
-import { Types } from "mongoose"
+import { Document, Types } from "mongoose"
 
-interface CommentProps {
+interface CommentProps extends Document {
     author: string
     authorAvatar: string
     body: string

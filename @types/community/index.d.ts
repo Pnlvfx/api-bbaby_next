@@ -1,4 +1,6 @@
-interface CommunityProps {
+import { Document } from "mongoose"
+
+interface CommunityProps extends Document {
     name:string
     communityAvatar: string
     cover: string

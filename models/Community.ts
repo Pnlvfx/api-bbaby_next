@@ -1,4 +1,5 @@
 import {Schema, model} from "mongoose";
+import { CommunityProps } from "../@types/community";
 
 const schema = new Schema<CommunityProps>({
     name: {

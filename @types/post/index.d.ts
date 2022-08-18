@@ -1,6 +1,6 @@
-import { Types } from "mongoose"
+import { Types, Document } from "mongoose";
 
-interface PostProps {
+interface PostProps extends Document {
     author: string
     authorAvatar: string
     title: string

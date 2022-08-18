@@ -1,4 +1,5 @@
 import {Schema,model} from "mongoose";
+import { CategoryProps } from "../@types/category";
 
 const CategorySchema = new Schema<CategoryProps>({
     name: String

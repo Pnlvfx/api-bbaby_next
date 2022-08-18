@@ -2,6 +2,7 @@ import config from '../../../config/config'
 import express from 'express'
 import TelegramBot from 'node-telegram-bot-api'
 import {TwitterApi} from 'twitter-api-v2';
+import { IUser } from '../../../@types/user';
 
 const telegramToken = config.TELEGRAM_TOKEN
 const bot = new TelegramBot(telegramToken)

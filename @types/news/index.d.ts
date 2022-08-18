@@ -1,3 +1,5 @@
+import { Document } from "mongoose"
+
 interface mediaInfoProps {
     isImage?: boolean
     isVideo?: boolean
@@ -8,7 +10,7 @@ interface mediaInfoProps {
     alt?: string
 }
 
-export interface NewsProps {
+export interface NewsProps extends Document {
     author: string
     title: string
     description: string
