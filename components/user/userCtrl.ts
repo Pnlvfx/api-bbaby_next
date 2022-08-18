@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
 
-const {CLIENT_URL} = config
+const {CLIENT_URL,NODE_ENV} = config
 const USER_AGENT = `bbabysyle/1.0.0 (${CLIENT_URL})`;
 
 const userCtrl = {
@@ -141,11 +141,17 @@ const userCtrl = {
     logout: async (req:express.Request,res:express.Response) => {
         try {
             const {COOKIE_DOMAIN} = config
-            res.clearCookie('token',{
-                httpOnly: true,
-                domain: COOKIE_DOMAIN,
-                secure: true
-            }).send()
+            if (NODE_ENV === 'development') {
+                res.clearCookie('token',{
+                    httpOnly: true,
+                }).send()
+            } else {
+                res.clearCookie('token',{
+                    httpOnly: true,
+                    domain: COOKIE_DOMAIN,
+                    secure: true
+                }).send()
+            }
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: "Cannot proceed to logout, please retry"})

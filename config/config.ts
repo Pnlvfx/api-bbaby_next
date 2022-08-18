@@ -8,7 +8,6 @@ interface ENV {
     CLIENT_URL: string | undefined
     SERVER_URL: string | undefined
     CORS_ORIGIN1: string | undefined
-    CORS_ORIGIN2: string | undefined
     TELEGRAM_TOKEN: string | undefined
     SECRET: string | undefined
     PUBLIC_PATH: string | undefined
@@ -45,7 +44,6 @@ interface Config {
     CLIENT_URL: string
     SERVER_URL: string
     CORS_ORIGIN1: string
-    CORS_ORIGIN2: string
     TELEGRAM_TOKEN: string
     SECRET: string
     PUBLIC_PATH: string
@@ -73,7 +71,7 @@ interface Config {
     REDDIT_CLIENT_SECRET: string
     YOUTUBE_CLIENT_ID: string
     YOUTUBE_CLIENT_SECRET: string
-    NODE_ENV: string
+    NODE_ENV: 'development' | 'production';
     PEXELS_API_KEY: string
 }
 
@@ -83,7 +81,6 @@ const getConfig = ():ENV => {
         CLIENT_URL: process.env.CLIENT_URL,
         SERVER_URL: process.env.SERVER_URL,
         CORS_ORIGIN1: process.env.CORS_ORIGIN1,
-        CORS_ORIGIN2: process.env.CORS_ORIGIN2,
         TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
         SECRET: process.env.SECRET,
         PUBLIC_PATH: process.env.PUBLIC_PATH,
