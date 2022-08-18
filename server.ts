@@ -15,6 +15,7 @@ import Post from './models/Post'
 import searchRouter from './components/search/searchRouter'
 import categoryRouter from './components/category/categoryRouter'
 import newsRouter from './components/news/newsRouter'
+import Community from './models/Community'
 
 const {CLIENT_URL,CORS_ORIGIN1,MONGO_URI} = config
 const app = express()
@@ -55,9 +56,14 @@ app.use(express.static('public'))
 
 app.get('/sitemaps', async(req,res) => {
     try {
-        const posts = await Post.find({}).sort({createdAt: -1})
-        if(!posts) return res.status(500).json({msg: "For some reason we are not able to provide you this sitemaps, we will try to fix the problem as soon as possible"})
-        res.json(posts)   
+        const {type} = req.query;
+        if (!type) {
+            const posts = await Post.find({}).sort({createdAt: -1})
+            res.status(200).json(posts)
+        } else {
+            const communities = await Community.find({})
+            res.status(200).json(communities)
+        }
     } catch (err) {
         if (err instanceof Error)
         res.status(500).json({msg: err.message})

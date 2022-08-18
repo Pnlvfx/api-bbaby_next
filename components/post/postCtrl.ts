@@ -2,16 +2,17 @@ import express from 'express'
 import { getUserFromToken } from '../user/user-functions/userFunctions'
 import Post from '../../models/Post'
 import User from '../../models/User'
-import { Types } from 'mongoose'
+import { Types, isValidObjectId } from 'mongoose'
 import cloudinary from '../../lib/cloudinary'
 import Comment from '../../models/Comment'
 import { sharePostToTelegram, _sharePostToTwitter } from './post-functions/createPost'
 import Community from '../../models/Community'
 
+
 const PostCtrl = {
     getPosts: async (req:express.Request,res:express.Response) => {
         try {
-            const {token} = req.cookies
+            const {token} = req.cookies;
             const userLang = req.acceptsLanguages('en', 'it')
             const {community,author,limit,skip} = req.query;
             if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."})
@@ -47,6 +48,8 @@ const PostCtrl = {
         try {
             const {token} = req.cookies;
             const {id} = req.params;
+            const check = isValidObjectId(id);
+            if (!check) return res.status(500).json({msg: "This post not exists."})
             let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
             if (!post) return console.log('error')
             if (token) {
@@ -69,9 +72,10 @@ const PostCtrl = {
                 post = await Post.findById(id)
             res.json(post)
         } catch (err) {
-            if (err instanceof Error)
+            if (err instanceof Error) {
+            console.log(err)
             res.status(500).json({msg: err.message})
-        }
+        }}
     },
     createPost: async (req:express.Request,res:express.Response) => {
          try {
