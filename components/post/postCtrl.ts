@@ -25,9 +25,9 @@ const PostCtrl = {
             let filters:any = {}
 
             if (community) {
-                filters.community = community
+                filters.community = new RegExp(`^${community}$`, 'i')
             } else if (author) {
-                filters.author = author
+                filters.author = new RegExp(`^${author}$`, 'i')
             } else {
                 if (userLang !== 'it') {
                     filters.community = {'$nin': ['Italy', 'calciomercato']}
@@ -45,9 +45,10 @@ const PostCtrl = {
     },
     getPost: async (req:express.Request,res:express.Response) => {
         try {
-            const {token} = req.cookies
-            const {id} = req.params
+            const {token} = req.cookies;
+            const {id} = req.params;
             let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
+            if (!post) return console.log('error')
             if (token) {
                 const user = await getUserFromToken(token)
                 if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})

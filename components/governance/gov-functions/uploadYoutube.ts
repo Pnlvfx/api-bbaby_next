@@ -11,10 +11,10 @@ const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`
 const videoFilePath = `${PUBLIC_PATH}/video1.mp4`
 const thumbFilePath = `${PUBLIC_PATH}/image0.webp`
 
-export const authorize = (callback:any,res:express.Response) => {
+export const authorize = (callback:Function,res:express.Response) => {
     const redirectUrl = `${CLIENT_URL}/governance/youtube`
     const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl)
-    fs.readFile(TOKEN_PATH, function (err,token) {
+    fs.readFile(TOKEN_PATH, (err,token) => {
         if (err) {
             getNewToken(oauth2Client,callback,res)
         } else {
@@ -24,11 +24,12 @@ export const authorize = (callback:any,res:express.Response) => {
     })
 }
 
-export const getNewToken = (oauth2Client:OAuth2Client,callback:any,res:express.Response) => {
+export const getNewToken = (oauth2Client:OAuth2Client,callback:Function,res:express.Response) => {
     const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
     const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
-        scope: SCOPES
+        scope: SCOPES,
+        prompt: 'consent'
     })
     console.log(`Authorize this app by visiting this url: ${authUrl}`)
     const rl = readline.createInterface({
@@ -75,7 +76,7 @@ export const uploadVideo = (auth:any,title:string,description:string,tags:string
             body: fs.createReadStream(videoFilePath)
         }
     }, 
-    function (err:any,response: any) {
+    (err:any,response: any) => {
         if (err) return res.status(500).json({msg: `Error while trying to upload the video: ${err.message}`})
         const videoInfo = response?.data
         console.log(`Video uploaded successfully. Uploading the thumbnail now`)
@@ -86,7 +87,7 @@ export const uploadVideo = (auth:any,title:string,description:string,tags:string
                 body: fs.createReadStream(thumbFilePath)
             },
         },
-        function (err:any,response:any) {
+        (err:any,response:any) => {
             if (err) return res.status(500).json({msg: `Error while trying to upload the thumbnail: ${err.message}`})
         })
         fs.rm(`${PUBLIC_PATH}`, {recursive: true}, (err) => {
