@@ -1,7 +1,10 @@
 import {Router} from 'express';
+import auth from '../../middleware/auth';
 import TwitterCtrl from './twitterCtrl';
 
 const twitterRouter = Router()
+
+twitterRouter.use(auth);
 
 twitterRouter.post('/twitter/oauth/request_token', TwitterCtrl.twitterReqToken)
 

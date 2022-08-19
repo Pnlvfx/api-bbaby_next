@@ -1,7 +1,7 @@
 import config from '../config/config'
 import OAuth from 'oauth'
 
-export default (oauthCallback:any) => {
+export default (oauthCallback:string) => {
     const {TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET} = config
     const _oauth = new (OAuth.OAuth)(
         'https://api.twitter.com/oauth/request_token',

@@ -17,7 +17,6 @@ import categoryRouter from './components/category/categoryRouter';
 import newsRouter from './components/news/newsRouter';
 import Community from './models/Community';
 import { corsOrigin } from './lib/APIaccess';
-import auth from './middleware/auth';
 
 const {MONGO_URI} = config;
 const app = express()
@@ -32,15 +31,13 @@ app.use(cors({
 
 connect(MONGO_URI).catch(error => console.log(`Cannot connect to bbabystyle database: ${error}`))
 
-app.use('/', postRouter)
-
 app.use('/', userRouter)
+
+app.use('/', postRouter)
 
 app.use('/', communityRouter)
 
 app.use('/', governanceRouter)
-
-app.use('/', auth, twitterRouter)
 
 app.use('/', commentRouter)
 
@@ -49,6 +46,8 @@ app.use('/', searchRouter)
 app.use('/', categoryRouter);
 
 app.use('/', newsRouter);
+
+app.use('/', twitterRouter)
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');

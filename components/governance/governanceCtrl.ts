@@ -10,6 +10,7 @@ import { getUserFromToken } from '../user/user-functions/userFunctions';
 import puppeteer from 'puppeteer';
 import { createClient } from 'pexels';
 import News from '../../models/News';
+import { isGoogleAPI } from '../../lib/APIaccess';
 
 const {PUBLIC_PATH} = config;
 
@@ -123,7 +124,11 @@ const governanceCtrl = {
     },
     uploadYoutube: async (req:Request, res: Response) => {
         try {
-            const {title,description,tags,categoryId,privacyStatus} = req.body
+            const {title,description,tags,categoryId,privacyStatus} = req.body;
+            const {origin} = req.headers;
+            if (!origin) return res.status(400).json({msg: 'Please make your origin visible!'})
+            const validOrigin = await isGoogleAPI(origin);
+            
             authorize((auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
         } catch(err) {
             if (err instanceof Error)

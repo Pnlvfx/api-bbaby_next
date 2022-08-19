@@ -6,7 +6,7 @@ import User from '../../../models/User'
 import { login } from './userFunctions'
 
 const {OAuth2} = google.auth
-const {MAILING_SERVICE_CLIENT_ID,CLIENT_URL,COOKIE_DOMAIN,SECRET,GOOGLE_SECRET} = config
+const {MAILING_SERVICE_CLIENT_ID,GOOGLE_SECRET} = config
 const client = new OAuth2()
 
 export const _googleLogin = async(tokenId: string,req:express.Request,res:express.Response) => {

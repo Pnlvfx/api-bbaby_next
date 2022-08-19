@@ -1,9 +1,9 @@
-import {google} from 'googleapis'
-import config from '../../../config/config'
-import fs from 'fs'
-import express from 'express'
-import { OAuth2Client } from 'google-auth-library'
-import readline from 'readline'
+import {google} from 'googleapis';
+import config from '../../../config/config';
+import fs from 'fs';
+import express from 'express';
+import { OAuth2Client } from 'google-auth-library';
+import readline from 'readline';
 
 const {PUBLIC_PATH,YOUTUBE_CREDENTIALS,YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,CLIENT_URL} = config
 const {OAuth2} = google.auth
@@ -12,8 +12,8 @@ const videoFilePath = `${PUBLIC_PATH}/video1.mp4`
 const thumbFilePath = `${PUBLIC_PATH}/image0.webp`
 
 export const authorize = (callback:Function,res:express.Response) => {
-    const redirectUrl = `${CLIENT_URL}/governance/youtube`
-    const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl)
+    const redirectUrl = `${CLIENT_URL}/governance/youtube`;
+    const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl);
     fs.readFile(TOKEN_PATH, (err,token) => {
         if (err) {
             getNewToken(oauth2Client,callback,res)

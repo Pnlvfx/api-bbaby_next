@@ -1,10 +1,11 @@
-import config from "../config/config"
+import config from "../config/config";
 
 const {NODE_ENV} = config;
 
 export const corsOrigin = () => {
     const origin = NODE_ENV === 'production' ? [
-        'https://www.bbabystyle.com'
+        'https://www.bbabystyle.com',
+        'https://new.bbabystyle.com'
     ] : [
         'http://localhost:3000',
         'http://192.168.1.22:3000',
@@ -13,8 +14,14 @@ export const corsOrigin = () => {
     return origin;
 }
 
-export const isGoogleAPI = (req_origin:string) => {
+export const validGoogleOrigin = [
+    'https://www.bbabystyle.com',
+    'https://new.bbabystyle.com',
+    'http://localhost:3000',
+]
+
+export const isGoogleAPI = async (req_origin:string) => {
     const origins = corsOrigin();
-    const check = origins.find((origin) => origin === req_origin);
-    console.log(check)
+    const check = origins.find((origin) => origin === req_origin) ? true : false;
+    return check;
 }

@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken';
 import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
 
-const {CLIENT_URL,NODE_ENV,COOKIE_DOMAIN} = config
+const {CLIENT_URL,NODE_ENV} = config;
 const USER_AGENT = `bbabysyle/1.0.0 (${CLIENT_URL})`;
 
 const userCtrl = {
@@ -173,7 +173,12 @@ const userCtrl = {
             let response = await fetch(`https://www.reddit.com/api/v1/access_token`, {
                 method: 'POST',
                 body: `grant_type=authorization_code&code=${code}&redirect_uri=${CLIENT_URL}/settings`,
-                headers: {authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': USER_AGENT}
+                headers: {
+                    authorization: 
+                    `Basic ${encondedHeader}`,
+                    'Content-Type': 'application/x-www-form-urlencoded', 
+                    'User-Agent': USER_AGENT
+                }
             });
             if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
             let body = await response.json()

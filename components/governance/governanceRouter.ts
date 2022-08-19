@@ -1,7 +1,7 @@
-import express from 'express';
+import {Router} from 'express';
 import governanceCtrl from './governanceCtrl';
 
-const governanceRouter = express.Router()
+const governanceRouter = Router()
 
 governanceRouter.post('/governance/create-image', governanceCtrl.createImage)
 
@@ -21,4 +21,4 @@ governanceRouter.post('/governance/news', governanceCtrl.postArticle)
 
 governanceRouter.get('/governance/pexels', governanceCtrl.getPexelsImage)
 
-export default governanceRouter
+export default governanceRouter;

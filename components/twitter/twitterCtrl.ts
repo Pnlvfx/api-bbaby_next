@@ -5,8 +5,8 @@ import _oauth from '../../lib/twitter_oauth'
 import User from '../../models/User'
 import { isGoogleAPI } from '../../lib/APIaccess'
 
-const {COOKIE_DOMAIN,CLIENT_URL} = config
-const oauthCallback = `${CLIENT_URL}/settings` //redirect
+const {COOKIE_DOMAIN,CLIENT_URL} = config;
+const oauthCallback = `${CLIENT_URL}/settings`; //redirect
 const oauth = _oauth(oauthCallback)
 const COOKIE_NAME = 'oauth_token'
 let tokens:any = {}
@@ -83,10 +83,10 @@ const TwitterCtrl = {
             const req = expressRequest as UserRequest;
             const {user} = req
             const {origin} = req.headers;
-            if (!origin) return res.status(500).json({msg: "Please show the origin in your header request"})
+            if (!origin) return res.status(400).json({msg: "Please show the origin in your header request"})
             isGoogleAPI(origin)
-            const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter')
-            if (!twitter) return res.status(500).json({msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?"})
+            const twitter = user.tokens?.find((provider) => provider.provider === 'twitter')
+            if (!twitter) return res.redirect(origin);
             const {oauth_access_token,oauth_access_token_secret} = twitter;
             if (!oauth_access_token || !oauth_access_token_secret) return res.status(500).json({msg: "Please, try to login to twitter again!"})
             const {slug,owner_screen_name} = req.query;
