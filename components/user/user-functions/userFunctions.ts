@@ -7,7 +7,7 @@ const {SECRET,COOKIE_DOMAIN,ACTIVATION_TOKEN_SECRET,NODE_ENV} = config;
 
 export const getUserFromToken = async(token:string) => {
     const verify:any = jwt.verify(token, SECRET);
-    const user = await User.findById(verify.id)
+    const user = await User.findById(verify.id);
     return user
 }
 
@@ -26,7 +26,7 @@ export const login = (user:any,res:express.Response) => {
         if (NODE_ENV === 'development') {
             res.cookie('token', token, {
                 httpOnly: true,
-                maxAge: 63072000000 
+                maxAge: 63072000000
             }).send()
         }
         res.cookie('token', token, {

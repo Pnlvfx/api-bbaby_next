@@ -32,19 +32,15 @@ const schema = new Schema<CommunityProps>({
     },
     user_is_moderator: {
         type: Boolean,
-        default: false
     },
     user_is_banned: {
         type: Boolean,
-        default: false
     },
     user_is_contributor: {
         type: Boolean,
-        default: false
     },
     user_is_subscriber: {
         type: Boolean,
-        default: false
     },
     number_of_posts: {
         type: Number,

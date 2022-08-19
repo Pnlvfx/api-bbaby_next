@@ -9,13 +9,12 @@ import jwt from 'jsonwebtoken';
 import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
 
-const {CLIENT_URL,NODE_ENV} = config
+const {CLIENT_URL,NODE_ENV,COOKIE_DOMAIN} = config
 const USER_AGENT = `bbabysyle/1.0.0 (${CLIENT_URL})`;
 
 const userCtrl = {
     register: async (req:Request,res:Response) => {
         try {
-            const client_url = 'https://www.bbabystyle.com';
             const {email,username,password,country,countryCode,city,region,lat,lon} = req.body;
             if (!username || !email || !password) return res.status(400).json({msg: "Please fill in all fields"})
             if(!validateEmail(email)) return res.status(400).json({msg: "That email is invalid"})
@@ -29,7 +28,7 @@ const userCtrl = {
 
             const user = new User({email,username,password:passwordHash,country,countryCode,city,region,lat,lon})
             const activation_token = createActivationToken(user)
-            const url = `${client_url}/activation/${activation_token}`
+            const url = `${CLIENT_URL}/activation/${activation_token}`
             sendEMail(email,url,"Verify your email address")
             const savedUser = await user.save()
             login(savedUser,res)
@@ -43,6 +42,7 @@ const userCtrl = {
             const {activation_token} = req.body;
             const {ACTIVATION_TOKEN_SECRET} = config;
             const user:any = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET);
+
             const {email} = user
             const check = await User.findOne({email})
             if (check) return res.status(400).json({msg: "This email already exists"})
@@ -74,10 +74,18 @@ const userCtrl = {
     user: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
-            if (!token) return res.status(200).json(null)
+            if (!token) return res.status(200).json(null);
             const user = await getUserFromToken(token)
-            if (!user) return res.status(500).json({msg: 'Token expired'})
-            res.status(200).json({user: {username:user.username, avatar: user.avatar, role: user.role}})
+            if (!user) {
+                const deleteToken = res.clearCookie('token', {
+                    httpOnly: true,
+                    path: '/',
+                })
+                console.log(deleteToken);
+                res.json(null).send();
+            } else {
+                res.status(200).json({user: {username:user.username, avatar: user.avatar, role: user.role}})
+            }
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})

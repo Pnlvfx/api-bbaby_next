@@ -36,21 +36,28 @@ const communityCtrl = {
     },
     getCommunity: async (req:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            const {name} = req.params
-            const notSub = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: false, user_is_subscriber: false})
-            if (token) {
+            const {token} = req.cookies;
+            const {name} = req.params;
+            const regex = new RegExp(`^${name}$`, 'i')
+            const community = await Community.findOne({name: regex})
+            if (!community) return res.status(500).json({msg: "Something went wrong"})
+            if (!token) {
+                community.user_is_banned = false;
+                community.user_is_contributor = false
+                community.user_is_moderator = false
+                community.user_is_subscriber = false
+            } else {
                 const user = await getUserFromToken(token)
                 if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-                const _community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
-                const moderator = user?.username === _community?.communityAuthor ? true : user?.role === 1 ? true : false
+                const moderator = user.username === community.communityAuthor ? true : user.role === 1 ? true : false;
                 const subscriber = await User.findOne({username: user.username, subscribed: name})
                 const isSubscriber = subscriber ? true : false
-                const update = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: moderator, user_is_subscriber : isSubscriber})
+                community.user_is_banned = false;
+                community.user_is_contributor = false;
+                community.user_is_moderator = moderator;
+                community.user_is_subscriber = isSubscriber;
             }
-                const community = await Community.findOne({name: new RegExp(`^${name}$`, 'i')})
-                if (!community) return res.status(500).json({msg: "Something went wrong"})
-                res.json(community);
+            res.json(community);
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})

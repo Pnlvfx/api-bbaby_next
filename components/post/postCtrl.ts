@@ -1,13 +1,13 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
-import { getUserFromToken } from '../user/user-functions/userFunctions'
-import Post from '../../models/Post'
-import User from '../../models/User'
-import { Types, isValidObjectId } from 'mongoose'
-import cloudinary from '../../lib/cloudinary'
-import Comment from '../../models/Comment'
-import { sharePostToTelegram, _sharePostToTwitter } from './post-functions/createPost'
-import Community from '../../models/Community'
+import { getUserFromToken } from '../user/user-functions/userFunctions';
+import Post from '../../models/Post';
+import User from '../../models/User';
+import { Types, isValidObjectId } from 'mongoose';
+import cloudinary from '../../lib/cloudinary';
+import Comment from '../../models/Comment';
+import { sharePostToTelegram, _sharePostToTwitter } from './post-functions/createPost';
+import Community from '../../models/Community';
 
 
 const PostCtrl = {
