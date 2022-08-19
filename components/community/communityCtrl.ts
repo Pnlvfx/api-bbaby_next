@@ -1,14 +1,15 @@
-import express from 'express'
+import type {Request, Response} from 'express'
+import type { UserRequest } from '../../@types/express'
 import cloudinary from '../../lib/cloudinary'
 import Community from '../../models/Community'
 import Post from '../../models/Post'
 import User from '../../models/User'
 import { getUserFromToken } from '../user/user-functions/userFunctions'
 const communityCtrl = {
-    createCommunity: async(req:express.Request,res:express.Response) => {
+    createCommunity: async(req:Request,res:Response) => {
         try {
-            const token = req.cookies.token ? req.cookies.token : null
-            if (!token) return res.status(401).json({msg: "You need to login first"})
+            const {token} = req.cookies
+            if (!token) return res.status(400).json({msg: "Invalid"})
             const user = await getUserFromToken(token)
             if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const {name} = req.body;
@@ -33,9 +34,9 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getCommunity: async (req:express.Request,res:express.Response) => {
+    getCommunity: async (req:Request,res:Response) => {
         try {
-            const token = req.cookies.token
+            const {token} = req.cookies
             const {name} = req.params
             const notSub = await Community.findOneAndUpdate({name: new RegExp(`^${name}$`, 'i')}, {user_is_moderator: false, user_is_subscriber: false})
             if (token) {
@@ -55,7 +56,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    changeAvatar: async(req:express.Request,res:express.Response) => {
+    changeAvatar: async(req:Request,res:Response) => {
         try {
             const {image} = req.body
             const {name} = req.params
@@ -71,7 +72,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    updateDescription: async(req:express.Request,res:express.Response) => {
+    updateDescription: async(req:Request,res:Response) => {
         try {
             const {name,descr:description} = req.body
             const c = await Community.findOneAndUpdate({name}, {description})
@@ -82,9 +83,9 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getBestCommunities: async(req:express.Request,res:express.Response) => {
+    getBestCommunities: async(req:Request,res:Response) => {
         try {
-            const token = req.cookies?.token ? req.cookies.token : null
+            const {token} = req.cookies
             const {limit} = req.query
             const _limit:number = limit ? +limit : 0
             const sort = {number_of_posts: -1}
@@ -102,13 +103,11 @@ const communityCtrl = {
                 res.status(500).json({msg: err.message})
             }
     },
-    subscribe: async(req:express.Request,res:express.Response) => {
+    subscribe: async (expressRequest:Request,res:Response) => {
         try {
-            const token = req.cookies.token ? req.cookies.token : null
-            if (!token) return res.status(401).json({msg: 'You need to login first'})
-            const {community} = req.body
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {community} = req.body;
+            const {user} = req;
             const check = await User.findOne({username: user?.username, subscribed: community})
             if (check) {
                 const unsubscribe = await User.findOneAndUpdate({username: user.username}, {$pull: {subscribed: community}})
@@ -124,7 +123,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getUserPreferredCommunities: async(req:express.Request,res:express.Response) => {
+    getUserPreferredCommunities: async(req:Request,res:Response) => {
         try {
             const token = req.cookies?.token ? req.cookies.token : null
             const {limit} = req.query
@@ -147,7 +146,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    chooseCategory : async(req:express.Request,res:express.Response) => {
+    chooseCategory : async(req:Request,res:Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You are not authorized"})
@@ -168,7 +167,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    searchCommunity: async(req:express.Request,res:express.Response) => {
+    searchCommunity: async(req:Request,res:Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})

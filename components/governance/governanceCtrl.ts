@@ -1,4 +1,4 @@
-import express from 'express';
+import type {Request, Response} from 'express';
 import config from '../../config/config';
 import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
 import cloudinary from '../../lib/cloudinary';
@@ -14,7 +14,7 @@ import News from '../../models/News';
 const {PUBLIC_PATH} = config;
 
 const governanceCtrl = {
-    createImage: async (req: express.Request, res: express.Response) => {
+    createImage: async (req: Request, res: Response) => {
         const {textColor,fontSize,description,newsId,format} = req.body;
         if (description.length <= 1) return res.status(500).json({msg: "Please select at least 2 paragraph."})
         const news = await News.findById(newsId);
@@ -74,7 +74,7 @@ const governanceCtrl = {
                 })
             })
     },
-    createVideo: async (req:express.Request, res: express.Response) => {
+    createVideo: async (req:Request, res: Response) => {
         try {
             const {_videoOptions,images} = req.body;
             if (!images) return res.status(500).json({msg: "You have 0 images selected. Was this  a bug?"})
@@ -113,7 +113,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    youtubeLogin: async (req:express.Request, res: express.Response) => {
+    youtubeLogin: async (req:Request, res: Response) => {
         try {
             
         } catch (err) {
@@ -121,7 +121,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    uploadYoutube: async (req:express.Request, res: express.Response) => {
+    uploadYoutube: async (req:Request, res: Response) => {
         try {
             const {title,description,tags,categoryId,privacyStatus} = req.body
             authorize((auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
@@ -130,7 +130,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    translateTweet: async (req:express.Request, res: express.Response) => {
+    translateTweet: async (req:Request, res: Response) => {
         try {
             const translationClient = new TranslationServiceClient()
             const {text} = req.body
@@ -158,7 +158,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getArticles: async (req:express.Request, res: express.Response) => {
+    getArticles: async (req:Request, res: Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
@@ -182,7 +182,7 @@ const governanceCtrl = {
             res.status(500).json({msg : err.message})
         }
     },
-    getArticle: async (req:express.Request, res: express.Response) => {
+    getArticle: async (req:Request, res: Response) => {
         try {
             const {url} = req.body;
             const {token} = req.cookies
@@ -209,7 +209,7 @@ const governanceCtrl = {
             
         }
     },
-    postArticle: async (req:express.Request, res: express.Response) => {
+    postArticle: async (req:Request, res: Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
@@ -243,7 +243,7 @@ const governanceCtrl = {
             }
         }
     },
-    getPexelsImage: async (req:express.Request, res: express.Response) => {
+    getPexelsImage: async (req:Request, res: Response) => {
         try {
             const {token} = req.cookies
             const {PEXELS_API_KEY} = config

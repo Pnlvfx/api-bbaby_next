@@ -1,7 +1,8 @@
-import express from 'express'
+import {Router} from 'express'
+import auth from '../../middleware/auth'
 import userCtrl from './userCtrl'
 
-const userRouter = express.Router()
+const userRouter = Router()
 
 userRouter.post('/register', userCtrl.register)
 
@@ -11,7 +12,7 @@ userRouter.post('/login', userCtrl.login)
 
 userRouter.get('/user', userCtrl.user)
 
-userRouter.get('/user/about', userCtrl.userInfo)
+userRouter.get('/user/about', auth, userCtrl.userInfo)
 
 userRouter.post('/user/change_avatar', userCtrl.changeAvatar)
 
@@ -21,10 +22,10 @@ userRouter.post('/logout', userCtrl.logout)
 
 userRouter.post('/google_login',userCtrl.googleLogin)
 
-userRouter.get('/reddit_login', userCtrl.redditLogin)
+userRouter.get('/reddit_login', auth,  userCtrl.redditLogin)
 
-userRouter.get('/reddit_logout', userCtrl.redditLogout)
+userRouter.get('/reddit_logout', auth, userCtrl.redditLogout)
 
-userRouter.get('/reddit_posts', userCtrl.redditPosts)
+userRouter.get('/reddit_posts', auth, userCtrl.redditPosts)
 
 export default userRouter;

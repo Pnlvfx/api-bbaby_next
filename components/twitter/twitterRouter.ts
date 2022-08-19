@@ -1,7 +1,7 @@
-import express from 'express'
-import TwitterCtrl from './twitterCtrl'
+import {Router} from 'express';
+import TwitterCtrl from './twitterCtrl';
 
-const twitterRouter = express.Router()
+const twitterRouter = Router()
 
 twitterRouter.post('/twitter/oauth/request_token', TwitterCtrl.twitterReqToken)
 
@@ -13,4 +13,4 @@ twitterRouter.get('/twitter/selected-tweets', TwitterCtrl.twitterGetUserPost)
 
 twitterRouter.post('/twitter/logout', TwitterCtrl.twitterLogout)
 
-export default twitterRouter
+export default twitterRouter;

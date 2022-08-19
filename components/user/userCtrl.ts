@@ -1,4 +1,5 @@
-import express from 'express';
+import type {Request, Response} from 'express';
+import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
 import User from '../../models/User';
 import { createActivationToken, getUserFromToken, login, validateEmail } from './user-functions/userFunctions';
@@ -12,21 +13,15 @@ const {CLIENT_URL,NODE_ENV} = config
 const USER_AGENT = `bbabysyle/1.0.0 (${CLIENT_URL})`;
 
 const userCtrl = {
-    register: async (req:express.Request,res:express.Response) => {
+    register: async (req:Request,res:Response) => {
         try {
+            const client_url = 'https://www.bbabystyle.com';
             const {email,username,password,country,countryCode,city,region,lat,lon} = req.body;
-            if (!username || !email || !password)
-            return res.status(400).json({msg: "Please fill in all fields"})
-
-            if(!validateEmail(email))
-            return res.status(400).json({msg: "That email is invalid"})
-
+            if (!username || !email || !password) return res.status(400).json({msg: "Please fill in all fields"})
+            if(!validateEmail(email)) return res.status(400).json({msg: "That email is invalid"})
             const existingEmail = await User.findOne({email})
             if(existingEmail) return res.status(400).json({msg: "This email already exist!"})
-
-            if(password.length < 8)
-            return res.status(400).json({msg: "Password must be at least 8 characters long."})
-
+            if(password.length < 8) return res.status(400).json({msg: "Password must be at least 8 characters long."})
             const passwordHash = bcrypt.hashSync(password, 10)
 
             const existingUser = await User.findOne({username})
@@ -34,7 +29,7 @@ const userCtrl = {
 
             const user = new User({email,username,password:passwordHash,country,countryCode,city,region,lat,lon})
             const activation_token = createActivationToken(user)
-            const url = `${CLIENT_URL}/activation/${activation_token}`
+            const url = `${client_url}/activation/${activation_token}`
             sendEMail(email,url,"Verify your email address")
             const savedUser = await user.save()
             login(savedUser,res)
@@ -43,10 +38,11 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    activateEmail: async (req:express.Request,res:express.Response) => {
+    activateEmail: async (req:Request,res:Response) => {
         try {
-            const {activation_token} = req.body
-            const user:any = jwt.verify(activation_token, config.ACTIVATION_TOKEN_SECRET)
+            const {activation_token} = req.body;
+            const {ACTIVATION_TOKEN_SECRET} = config;
+            const user:any = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET);
             const {email} = user
             const check = await User.findOne({email})
             if (check) return res.status(400).json({msg: "This email already exists"})
@@ -56,7 +52,7 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    login: async (req:express.Request,res:express.Response) => {
+    login: async (req:Request,res:Response) => {
         try {
             const {username,password} = req.body
             const user = await User.findOne({username: new RegExp(`^${username}$`, 'i')})
@@ -75,7 +71,7 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    user: async (req:express.Request,res:express.Response) => {
+    user: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
             if (!token) return res.status(200).json(null)
@@ -87,12 +83,10 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    userInfo: async (req:express.Request,res:express.Response) => {
+    userInfo: async (expressRequest:Request,res:Response) => {
         try {
-            const token = req.cookies?.token ? req.cookies.token : null
-            if (!token) return res.status(400).json({msg: 'You need to login first'})
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             res.json({
                 avatar: user?.avatar,
                 country: user?.country, 
@@ -107,7 +101,7 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    changeAvatar: async (req:express.Request,res:express.Response) => {
+    changeAvatar: async (req:Request,res:Response) => {
         try {
             const {image,username} = req.body
             const uploadedImage = await cloudinary.v2.uploader.upload(image, {
@@ -122,7 +116,7 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    forgotPassword: async (req:express.Request,res:express.Response) => {
+    forgotPassword: async (req:Request,res:Response) => {
         try {
             const {email} = req.body
             const user = await User.findOne({email})
@@ -132,7 +126,7 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    logout: async (req:express.Request,res:express.Response) => {
+    logout: async (req:Request,res:Response) => {
         try {
             const {COOKIE_DOMAIN} = config
             if (NODE_ENV === 'development') {
@@ -151,7 +145,7 @@ const userCtrl = {
             res.status(500).json({msg: "Cannot proceed to logout, please retry"})
         }
     },
-    googleLogin: async (req:express.Request,res:express.Response) => {
+    googleLogin: async (req:Request,res:Response) => {
         try {
             const {tokenId} = req.body
              _googleLogin(tokenId,req,res)
@@ -160,12 +154,10 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    redditLogin: async (req:express.Request,res:express.Response) => {
+    redditLogin: async (expressRequest:Request,res:Response) => {
         try {
-            const token = req.cookies.token
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET} = config;
             const {code} = req.query;
             if (!code) return res.status(500).json({msg: 'No code find!'});
@@ -200,13 +192,11 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    redditLogout: async (req:express.Request,res:express.Response) => {
+    redditLogout: async (expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies;
-            if (!token) return res.status(500).json({msg: `You need to login first`})
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            const oauth_token = await User.findOneAndUpdate({username: user?.username}, {$pull: {tokens: {provider: 'reddit'}, 'externalAccounts': {provider: 'reddit'}}})
+            const req = expressRequest as UserRequest;
+            const {user} = req
+            const oauth_token = await User.findOneAndUpdate({username: user.username}, {$pull: {tokens: {provider: 'reddit'}, 'externalAccounts': {provider: 'reddit'}}})
             if (!oauth_token) return res.status(403).json({msg: "Missing, invalid, or expired tokens"})
             res.status(200).json({success:true})
         } catch (err) {
@@ -214,12 +204,10 @@ const userCtrl = {
             res.status(403).json({msg: err.message})
         }
     },
-    redditPosts: async (req:express.Request,res:express.Response) => {
+    redditPosts: async (expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies;
-            if (!token) return res.status(500).json({msg: 'You need to login first!'});
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const now = new Date();
             const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET} = config;
             const redditTokens = user?.tokens?.find(provider => provider.provider === 'reddit')

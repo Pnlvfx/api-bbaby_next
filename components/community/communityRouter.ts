@@ -1,4 +1,5 @@
 import express from 'express'
+import auth from '../../middleware/auth'
 import communityCtrl from './communityCtrl'
 
 const communityRouter = express.Router()
@@ -13,7 +14,7 @@ communityRouter.post('/communities/edit/description', communityCtrl.updateDescri
 
 communityRouter.get('/best-communities', communityCtrl.getBestCommunities)
 
-communityRouter.post('/communities/subscribe', communityCtrl.subscribe)
+communityRouter.post('/communities/subscribe',auth, communityCtrl.subscribe)
 
 communityRouter.get('/communities/user/pref', communityCtrl.getUserPreferredCommunities)
 

@@ -1,6 +1,6 @@
-import express from 'express'
+import type {Request, Response} from 'express';
+import type { UserRequest } from '../../@types/express';
 import config from '../../config/config'
-import { getUserFromToken } from '../user/user-functions/userFunctions'
 import _oauth from '../../lib/twitter_oauth'
 import User from '../../models/User'
 import { isGoogleAPI } from '../../lib/APIaccess'
@@ -12,10 +12,10 @@ const COOKIE_NAME = 'oauth_token'
 let tokens:any = {}
 
 const TwitterCtrl = {
-    twitterReqToken: async (req:express.Request,res:express.Response) => {
+    twitterReqToken: async (expressRequest:Request,res:Response) => {
         try {
-            const token = req.cookies.token
-            if (!token) return res.status(500).json({msg: "You need to create an account first"})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {oauth_token,oauth_token_secret} = await oauth.getOAuthRequestToken();
             res.cookie(COOKIE_NAME, oauth_token, {
                 maxAge: 15 * 60 * 1000, // 15 minutes
@@ -30,11 +30,10 @@ const TwitterCtrl = {
             res.status(403).json({msg: err})
         }
     },
-    twitterAccessToken: async (req:express.Request,res:express.Response) => {
+    twitterAccessToken: async (expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req
             const {oauth_token: req_oauth_token,oauth_verifier} = req.body;
             const oauth_token = req.cookies[COOKIE_NAME]
             const oauth_token_secret = tokens[oauth_token].oauth_token_secret
@@ -42,7 +41,7 @@ const TwitterCtrl = {
                 return res.status(403).json({msg: 'Request token do not match'})
             }
             const {oauth_access_token, oauth_access_token_secret} = await oauth.getOauthAccessToken(oauth_token,oauth_token_secret,oauth_verifier)
-            const saveTokens = await User.findOneAndUpdate({username: user?.username}, {$push: {tokens: {oauth_access_token: oauth_access_token, oauth_access_token_secret: oauth_access_token_secret, provider: 'twitter'}}})
+            const saveTokens = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {oauth_access_token: oauth_access_token, oauth_access_token_secret: oauth_access_token_secret, provider: 'twitter'}}})
             if (!saveTokens) return res.status(500).json({msg: 'Something went wrong in bbaby database'})
             res.status(200).json({success: true})
         } catch (err) {
@@ -50,10 +49,10 @@ const TwitterCtrl = {
             res.status(403).json({message: err.message});
         }
     },
-    twitterUserInfo: async (req:express.Request,res:express.Response) => {
+    twitterUserInfo: async (expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            const internalUser = await getUserFromToken(token)
+            const req = expressRequest as UserRequest;
+            const internalUser = req.user
             const twitter = internalUser?.tokens?.find((provider) => provider.provider === 'twitter');
             if (!twitter) return res.status(500).json({msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?"});
             const {oauth_access_token, oauth_access_token_secret} = twitter
@@ -67,12 +66,10 @@ const TwitterCtrl = {
             res.status(403).json({message: error});
         }
     },
-    twitterLogout: async (req:express.Request,res:express.Response) => {
+    twitterLogout: async (expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            if (!token) return res.status(500).json({msg: `You need to login first`})
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const oauth_token = await User.findOneAndUpdate({username: user?.username}, {$pull: {tokens: {provider: 'twitter'}, 'externalAccounts': {provider: 'twitter'}}})
             if (!oauth_token) return res.status(403).json({msg: "Missing, invalid, or expired tokens"})
             res.status(200).json({success:true})
@@ -81,15 +78,13 @@ const TwitterCtrl = {
             res.status(403).json({msg: err.message})
         }
     },
-    twitterGetUserPost: async (req:express.Request,res:express.Response) => {
+    twitterGetUserPost: async (expressRequest:Request,res:Response) => {
         try {
+            const req = expressRequest as UserRequest;
+            const {user} = req
             const {origin} = req.headers;
-            if (!origin) return res.status(500).json({msg: "Please add the host in your header request"})
+            if (!origin) return res.status(500).json({msg: "Please show the origin in your header request"})
             isGoogleAPI(origin)
-            const {token} = req.cookies;
-            if (!token) return res.status(500).json({msg: "You need to login first"});
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter')
             if (!twitter) return res.status(500).json({msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?"})
             const {oauth_access_token,oauth_access_token_secret} = twitter;

@@ -1,9 +1,10 @@
-import express from 'express'
-import Comment from '../../models/Comment'
-import Post from '../../models/Post'
-import { getUserFromToken } from '../user/user-functions/userFunctions'
+import type {Request, Response} from 'express';
+import Comment from '../../models/Comment';
+import Post from '../../models/Post';
+import { getUserFromToken } from '../user/user-functions/userFunctions';
+
 const commentCtrl = {
-    createComment: async (req:express.Request,res:express.Response) => {
+    createComment: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies
             if(!token) {
@@ -29,7 +30,7 @@ const commentCtrl = {
             res.status(500).json({msg:err.message})
         }
     },
-    childComments: async (req:express.Request,res:express.Response) => {
+    childComments: async (req:Request,res:Response) => {
         try {
             const {rootId} = req.params
             const comments = await Comment.find({rootId:rootId}).sort({createdAt: -1})

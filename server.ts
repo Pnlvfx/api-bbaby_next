@@ -17,6 +17,7 @@ import categoryRouter from './components/category/categoryRouter';
 import newsRouter from './components/news/newsRouter';
 import Community from './models/Community';
 import { corsOrigin } from './lib/APIaccess';
+import auth from './middleware/auth';
 
 const {MONGO_URI} = config;
 const app = express()
@@ -39,7 +40,7 @@ app.use('/', communityRouter)
 
 app.use('/', governanceRouter)
 
-app.use('/', twitterRouter)
+app.use('/', auth, twitterRouter)
 
 app.use('/', commentRouter)
 

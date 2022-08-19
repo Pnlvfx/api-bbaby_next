@@ -1,4 +1,5 @@
-import express from 'express'
+import type {Request, Response} from 'express';
+import type { UserRequest } from '../../@types/express';
 import { getUserFromToken } from '../user/user-functions/userFunctions'
 import Post from '../../models/Post'
 import User from '../../models/User'
@@ -10,7 +11,7 @@ import Community from '../../models/Community'
 
 
 const PostCtrl = {
-    getPosts: async (req:express.Request,res:express.Response) => {
+    getPosts: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
             const userLang = req.acceptsLanguages('en', 'it')
@@ -44,7 +45,7 @@ const PostCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getPost: async (req:express.Request,res:express.Response) => {
+    getPost: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
             const {id} = req.params;
@@ -77,14 +78,10 @@ const PostCtrl = {
             res.status(500).json({msg: err.message})
         }}
     },
-    createPost: async (req:express.Request,res:express.Response) => {
+    createPost: async (expressRequest:Request,res:Response) => {
          try {
-            const {token} = req.cookies
-            if (!token) {
-                return res.status(401).json({msg: "You need to login first"})
-            }
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {title,body,community,communityIcon,selectedFile,isImage,isVideo,height,width,sharePostToTG,sharePostToTwitter} = req.body;
             if (!title) return res.status(500).json({msg: "Title is required."})
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
@@ -127,18 +124,16 @@ const PostCtrl = {
             res.status(500).json({msg: err.message})
          }
     },
-    voting: async (req:express.Request,res:express.Response) => {
+    voting: async (expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            if (!token) return res.status(401).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {id} = req.params
             const _id = new Types.ObjectId(id)
             const {dir} = req.body
 
-            const hasVotedUp = await User.findOne({username: user?.username, upVotes: _id})
-            const hasVotedDown = await User.findOne({username: user?.username, downVotes: _id})
+            const hasVotedUp = await User.findOne({username: user.username, upVotes: _id})
+            const hasVotedDown = await User.findOne({username: user.username, downVotes: _id})
 
             if (hasVotedUp) {
                 if (dir === 1) {
@@ -147,14 +142,14 @@ const PostCtrl = {
                     res.status(200).json({vote: post ? post.ups -1 : 0})
                 } else {
                     const deletePrevVote = await User.findOneAndUpdate({upVotes: _id}, {$pull: {upVotes: _id}})
-                    const userVote = await User.findOneAndUpdate({username: user?.username},{$push: {downVotes: _id}})
+                    const userVote = await User.findOneAndUpdate({username: user.username},{$push: {downVotes: _id}})
                     const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : -2}})
                     res.status(200).json({vote: post ? post.ups -2 : 0})
                 }
             } else if (hasVotedDown) {
                 if (dir === 1) {
                     const deletePrevVote = await User.findOneAndUpdate({downVotes: _id}, {$pull: {downVotes: _id}})
-                    const userVote = await User.findOneAndUpdate({username: user?.username},{$push: {upVotes : _id}})
+                    const userVote = await User.findOneAndUpdate({username: user.username},{$push: {upVotes : _id}})
                     const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : +2}})
                     res.status(200).json({vote: post ? post.ups +2 : 0})
                 } else {
@@ -164,12 +159,12 @@ const PostCtrl = {
                 }
             } else {
                 if(dir === 1) {
-                    const userVote = await User.findOneAndUpdate({username: user?.username},{$push: {upVotes : _id}})
+                    const userVote = await User.findOneAndUpdate({username: user.username},{$push: {upVotes : _id}})
                     const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : +1}})
                     res.status(200).json({vote: post ? post.ups + 1: 0})
                 } else {
                     const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : -1}})
-                    const userVote = await User.findOneAndUpdate({username: user?.username},{$push: {downVotes: _id}})
+                    const userVote = await User.findOneAndUpdate({username: user.username},{$push: {downVotes: _id}})
                     res.status(200).json({vote: post ? post.ups -1 : 0})
                 }
             }
@@ -178,9 +173,9 @@ const PostCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    deletePost: async (req:express.Request,res:express.Response) => {
+    deletePost: async (req:Request,res:Response) => {
         try {
-            const {id} = req.params
+            const {id} = req.params;
             const findPost = await Post.findByIdAndDelete(id)
             if (findPost && findPost.mediaInfo) {
                 //const deleteImage = await cloudinary.v2.uploader.destroy(findPost.imageId)
