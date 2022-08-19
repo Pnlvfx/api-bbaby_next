@@ -1,9 +1,10 @@
 import type {Request, Response} from 'express';
+import type { OAuth2Client } from 'google-auth-library';
 import config from '../../config/config';
 import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
 import cloudinary from '../../lib/cloudinary';
 import videoshow from 'videoshow';
-import { authorize, uploadVideo } from './gov-functions/uploadYoutube';
+import { authorize, getNewToken, uploadVideo } from './gov-functions/uploadYoutube';
 import {TranslationServiceClient} from '@google-cloud/translate';
 import audioconcat from 'audioconcat';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
@@ -11,6 +12,9 @@ import puppeteer from 'puppeteer';
 import { createClient } from 'pexels';
 import News from '../../models/News';
 import { isGoogleAPI } from '../../lib/APIaccess';
+import {google} from 'googleapis';
+import fs from 'fs';
+import readline from 'readline';
 
 const {PUBLIC_PATH} = config;
 
@@ -75,7 +79,7 @@ const governanceCtrl = {
                 })
             })
     },
-    createVideo: async (req:Request, res: Response) => {
+    createVideo: async (req: Request, res: Response) => {
         try {
             const {_videoOptions,images} = req.body;
             if (!images) return res.status(500).json({msg: "You have 0 images selected. Was this  a bug?"})
@@ -114,28 +118,51 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    youtubeLogin: async (req:Request, res: Response) => {
+    youtubeLogin: async (req: Request, res: Response) => {
         try {
-            
+
+            const getNewToken = async (oauth2Client:OAuth2Client) => {
+                const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
+                const authUrl = oauth2Client.generateAuthUrl({
+                    access_type: 'offline',
+                    scope: SCOPES,
+                    prompt: 'consent',
+                })
+                return authUrl;
+            }
+
+            const authorize = async () => {
+                const {YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,YOUTUBE_CREDENTIALS} = config;
+                const redirectUrl = `${origin}/governance/youtube`;
+                const {OAuth2} = google.auth;
+                const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl);
+                const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`;
+                try {
+                const token = fs.readFileSync(TOKEN_PATH);
+                oauth2Client.credentials = JSON.parse(token.toString())
+                } catch (err) {
+                    getNewToken(oauth2Client);
+                }
+            }
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
-    uploadYoutube: async (req:Request, res: Response) => {
+    uploadYoutube: async (req: Request, res: Response) => {
         try {
             const {title,description,tags,categoryId,privacyStatus} = req.body;
             const {origin} = req.headers;
             if (!origin) return res.status(400).json({msg: 'Please make your origin visible!'})
             const validOrigin = await isGoogleAPI(origin);
-            
+            if (!validOrigin) return res.status(400).json({msg: "For access this API you need to use a specific domain!"})
             authorize((auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
         } catch(err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
-    translateTweet: async (req:Request, res: Response) => {
+    translateTweet: async (req: Request, res: Response) => {
         try {
             const translationClient = new TranslationServiceClient()
             const {text} = req.body
@@ -163,7 +190,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getArticles: async (req:Request, res: Response) => {
+    getArticles: async (req: Request, res: Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
@@ -187,7 +214,7 @@ const governanceCtrl = {
             res.status(500).json({msg : err.message})
         }
     },
-    getArticle: async (req:Request, res: Response) => {
+    getArticle: async (req: Request, res: Response) => {
         try {
             const {url} = req.body;
             const {token} = req.cookies
@@ -214,7 +241,7 @@ const governanceCtrl = {
             
         }
     },
-    postArticle: async (req:Request, res: Response) => {
+    postArticle: async (req: Request, res: Response) => {
         try {
             const {token} = req.cookies
             if (!token) return res.status(500).json({msg: "You need to login first"})
@@ -248,7 +275,7 @@ const governanceCtrl = {
             }
         }
     },
-    getPexelsImage: async (req:Request, res: Response) => {
+    getPexelsImage: async (req: Request, res: Response) => {
         try {
             const {token} = req.cookies
             const {PEXELS_API_KEY} = config
