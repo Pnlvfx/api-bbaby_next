@@ -7,7 +7,6 @@ interface ENV {
     MONGO_URI: string | undefined
     CLIENT_URL: string | undefined
     SERVER_URL: string | undefined
-    CORS_ORIGIN1: string | undefined
     TELEGRAM_TOKEN: string | undefined
     SECRET: string | undefined
     PUBLIC_PATH: string | undefined
@@ -43,7 +42,6 @@ interface Config {
     MONGO_URI: string
     CLIENT_URL: string
     SERVER_URL: string
-    CORS_ORIGIN1: string
     TELEGRAM_TOKEN: string
     SECRET: string
     PUBLIC_PATH: string
@@ -80,7 +78,6 @@ const getConfig = ():ENV => {
         MONGO_URI: process.env.MONGO_URI,
         CLIENT_URL: process.env.CLIENT_URL,
         SERVER_URL: process.env.SERVER_URL,
-        CORS_ORIGIN1: process.env.CORS_ORIGIN1,
         TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
         SECRET: process.env.SECRET,
         PUBLIC_PATH: process.env.PUBLIC_PATH,

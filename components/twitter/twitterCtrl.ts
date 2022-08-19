@@ -3,6 +3,7 @@ import config from '../../config/config'
 import { getUserFromToken } from '../user/user-functions/userFunctions'
 import _oauth from '../../lib/twitter_oauth'
 import User from '../../models/User'
+import { isGoogleAPI } from '../../lib/APIaccess'
 
 const {COOKIE_DOMAIN,CLIENT_URL} = config
 const oauthCallback = `${CLIENT_URL}/settings` //redirect
@@ -82,12 +83,15 @@ const TwitterCtrl = {
     },
     twitterGetUserPost: async (req:express.Request,res:express.Response) => {
         try {
-            const {token} = req.cookies
+            const {origin} = req.headers;
+            if (!origin) return res.status(500).json({msg: "Please add the host in your header request"})
+            isGoogleAPI(origin)
+            const {token} = req.cookies;
             if (!token) return res.status(500).json({msg: "You need to login first"});
             const user = await getUserFromToken(token);
             if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter')
-            if (!twitter) return res.status(500).json({msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?"});
+            if (!twitter) return res.status(500).json({msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?"})
             const {oauth_access_token,oauth_access_token_secret} = twitter;
             if (!oauth_access_token || !oauth_access_token_secret) return res.status(500).json({msg: "Please, try to login to twitter again!"})
             const {slug,owner_screen_name} = req.query;
@@ -100,4 +104,4 @@ const TwitterCtrl = {
     },
 }
 
-export default TwitterCtrl
+export default TwitterCtrl;

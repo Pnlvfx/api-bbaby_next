@@ -77,7 +77,7 @@ const userCtrl = {
     },
     user: async (req:express.Request,res:express.Response) => {
         try {
-            const {token} = req.cookies
+            const {token} = req.cookies;
             if (!token) return res.status(200).json(null)
             const user = await getUserFromToken(token)
             if (!user) return res.status(500).json({msg: 'Token expired'})
