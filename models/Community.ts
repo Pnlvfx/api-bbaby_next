@@ -3,23 +3,23 @@ import { CommunityProps } from "../@types/community";
 
 const schema = new Schema<CommunityProps>({
     name: {
-        type:String,
+        type: String,
         required:true,
     },
     communityAvatar: {
-        type:String,
+        type: String,
         default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1652738651/default/defaultCommunityAvatar_zdywvw.jpg'
     },
     cover: {
-        type:String,
+        type: String,
         default:'https://res.cloudinary.com/bbabystyle/image/upload/v1652738627/default/defaultCommunityCover_h9scxu.jpg'
     },
     communityAuthor: {
-        type:String,
+        type: String,
         required: true
     },
     description: {
-        type:String,
+        type: String,
         default: 'Add your description'
     },
     acceptFollowers: {

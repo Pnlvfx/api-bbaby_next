@@ -16,11 +16,9 @@ const CommentSchema = new Schema<CommentProps>({
     },
     parentId: {
         type:Schema.Types.ObjectId,
-        required:false
     },
     rootId: {
         type:Schema.Types.ObjectId,
-        required:false
     },
 },
 {

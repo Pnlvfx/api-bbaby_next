@@ -39,11 +39,8 @@ const PostSchema = new Schema<PostProps>({
                 type: String
             },
             video: {
-                
+                type: Object
             }
-            // imageInfo: {
-            //     type: [],
-            // },
     },
     ups: {
         type:Number,
