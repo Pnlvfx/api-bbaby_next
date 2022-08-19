@@ -4,14 +4,16 @@ import PostCtrl from './postCtrl'
 
 const postRouter = Router()
 
-postRouter.get('/posts', PostCtrl.getPosts)
+postRouter.get('/', PostCtrl.getPosts)
 
-postRouter.get('/posts/:id', PostCtrl.getPost)
+postRouter.get('/:id', PostCtrl.getPost)
 
-postRouter.post('/posts', auth, PostCtrl.createPost)
+postRouter.use('/', auth)
 
-postRouter.post('/posts/:id/vote', auth, PostCtrl.voting)
+postRouter.post('/', PostCtrl.createPost)
 
-postRouter.delete('/posts/:id', PostCtrl.deletePost)
+postRouter.post('/:id/vote', PostCtrl.voting)
 
-export default postRouter
+postRouter.delete('/:id', PostCtrl.deletePost)
+
+export default postRouter;

@@ -1,31 +1,17 @@
-import {Router} from 'express'
-import auth from '../../middleware/auth'
-import userCtrl from './userCtrl'
+import {Router} from 'express';
+import auth from '../../middleware/auth';
+import userCtrl from './userCtrl';
 
 const userRouter = Router()
 
-userRouter.post('/register', userCtrl.register)
+userRouter.get('/', userCtrl.user);
 
-userRouter.post('/activation', userCtrl.activateEmail)
+userRouter.use('/', auth);
 
-userRouter.post('/login', userCtrl.login)
+userRouter.get('/about', userCtrl.userInfo);
 
-userRouter.get('/user', userCtrl.user)
+userRouter.post('/change_avatar', userCtrl.changeAvatar);
 
-userRouter.get('/user/about', auth, userCtrl.userInfo)
-
-userRouter.post('/user/change_avatar', userCtrl.changeAvatar)
-
-userRouter.post('/forgot', userCtrl.forgotPassword)
-
-userRouter.post('/logout', userCtrl.logout)
-
-userRouter.post('/google_login',userCtrl.googleLogin)
-
-userRouter.get('/reddit_login', auth,  userCtrl.redditLogin)
-
-userRouter.get('/reddit_logout', auth, userCtrl.redditLogout)
-
-userRouter.get('/reddit_posts', auth, userCtrl.redditPosts)
+userRouter.post('/forgot', userCtrl.forgotPassword);
 
 export default userRouter;

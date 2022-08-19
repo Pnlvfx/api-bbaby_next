@@ -1,5 +1,4 @@
 import type {Request, Response} from 'express';
-import type { OAuth2Client } from 'google-auth-library';
 import config from '../../config/config';
 import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
 import cloudinary from '../../lib/cloudinary';
@@ -13,8 +12,6 @@ import { createClient } from 'pexels';
 import News from '../../models/News';
 import { isGoogleAPI } from '../../lib/APIaccess';
 import {google} from 'googleapis';
-import fs from 'fs';
-import readline from 'readline';
 
 const {PUBLIC_PATH} = config;
 
@@ -120,30 +117,22 @@ const governanceCtrl = {
     },
     youtubeLogin: async (req: Request, res: Response) => {
         try {
-
-            const getNewToken = async (oauth2Client:OAuth2Client) => {
-                const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
-                const authUrl = oauth2Client.generateAuthUrl({
-                    access_type: 'offline',
-                    scope: SCOPES,
-                    prompt: 'consent',
-                })
-                return authUrl;
-            }
-
-            const authorize = async () => {
-                const {YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,YOUTUBE_CREDENTIALS} = config;
-                const redirectUrl = `${origin}/governance/youtube`;
-                const {OAuth2} = google.auth;
-                const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl);
-                const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`;
-                try {
-                const token = fs.readFileSync(TOKEN_PATH);
-                oauth2Client.credentials = JSON.parse(token.toString())
-                } catch (err) {
-                    getNewToken(oauth2Client);
-                }
-            }
+            const {origin} = req.headers;
+            console.log(origin)
+            const {YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET} = config;
+            if (!origin) return res.status(400).json({msg: 'Please make your origin visible!'})
+            const validOrigin = await isGoogleAPI(origin);
+            if (!validOrigin) return res.status(400).json({msg: "For access this API you need to use a specific domain!"})
+            const redirectUrl = `${origin}/governance/youtube`;
+            const {OAuth2} = google.auth;
+            const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl);
+            const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
+            const authUrl = oauth2Client.generateAuthUrl({
+                access_type: 'offline',
+                scope: SCOPES,
+                prompt: 'consent',
+            })
+            res.status(200).json(authUrl);
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})

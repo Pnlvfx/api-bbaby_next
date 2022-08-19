@@ -3,8 +3,8 @@ import searchCtrl from './searchCtrl';
 
 const searchRouter = express.Router()
 
-searchRouter.get('/search', searchCtrl.search)
+searchRouter.get('/', searchCtrl.search)
 
-searchRouter.get('/search/today-trend', searchCtrl.searchTrend)
+searchRouter.get('/today-trend', searchCtrl.searchTrend)
 
 export default searchRouter;

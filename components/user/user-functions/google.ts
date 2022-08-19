@@ -17,7 +17,7 @@ export const _googleLogin = async(tokenId: string,req:express.Request,res:expres
         if (!email_verified) return res.status(400).json({msg: "Email verification failed."})
         const user = await User.findOne({email})
         if (user) {
-            const match = bcrypt.compareSync(password,user?.password)
+            const match = bcrypt.compareSync(password, user.password)
             if(!match) return res.status(400).json({msg: "Password is incorrect."})
             login(user,res)
         } else {

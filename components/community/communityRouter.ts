@@ -1,25 +1,25 @@
-import express from 'express'
-import auth from '../../middleware/auth'
-import communityCtrl from './communityCtrl'
+import {Router} from 'express';
+import auth from '../../middleware/auth';
+import communityCtrl from './communityCtrl';
 
-const communityRouter = express.Router()
+const communityRouter = Router()
 
-communityRouter.post('/communities', communityCtrl.createCommunity)
-
-communityRouter.get('/communities/:name', communityCtrl.getCommunity)
-
-communityRouter.post('/communities/:name/change_avatar', communityCtrl.changeAvatar)
-
-communityRouter.post('/communities/edit/description', communityCtrl.updateDescription)
+communityRouter.post('', communityCtrl.createCommunity)
 
 communityRouter.get('/best-communities', communityCtrl.getBestCommunities)
 
-communityRouter.post('/communities/subscribe', auth, communityCtrl.subscribe)
+communityRouter.get('/:name', communityCtrl.getCommunity)
 
-communityRouter.get('/communities/user/pref', communityCtrl.getUserPreferredCommunities)
+communityRouter.post('/:name/change_avatar', communityCtrl.changeAvatar)
 
-communityRouter.post('/communities/:name/category', communityCtrl.chooseCategory)
+communityRouter.post('/edit/description', communityCtrl.updateDescription)
 
-communityRouter.post('/communities/search', communityCtrl.searchCommunity)
+communityRouter.post('/subscribe', auth, communityCtrl.subscribe)
+
+communityRouter.get('/user/pref', communityCtrl.getUserPreferredCommunities)
+
+communityRouter.post('/:name/category', communityCtrl.chooseCategory)
+
+communityRouter.post('/search', communityCtrl.searchCommunity)
 
 export default communityRouter;

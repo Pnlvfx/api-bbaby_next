@@ -3,8 +3,8 @@ import commentCtrl from './commentCtrl'
 
 const commentRouter = express.Router()
 
-commentRouter.post('/comments', commentCtrl.createComment)
+commentRouter.post('/', commentCtrl.createComment)
 
-commentRouter.get('/comments/root/:rootId', commentCtrl.childComments)
+commentRouter.get('/root/:rootId', commentCtrl.childComments)
 
-export default commentRouter
+export default commentRouter;

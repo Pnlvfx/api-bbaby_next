@@ -3,8 +3,8 @@ import newsCtrl from './newsCtrl';
 
 const newsRouter = express.Router();
 
-newsRouter.get('/news', newsCtrl.getNews);
+newsRouter.get('/', newsCtrl.getNews);
 
-newsRouter.get('/news/:id', newsCtrl.getOneNews)
+newsRouter.get('/:id', newsCtrl.getOneNews)
 
 export default newsRouter;

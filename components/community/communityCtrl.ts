@@ -94,7 +94,7 @@ const communityCtrl = {
         try {
             const {token} = req.cookies
             const {limit} = req.query
-            const _limit:number = limit ? +limit : 0
+            const _limit = limit ? + limit : 0
             const sort = {number_of_posts: -1}
             const notSub = await Community.updateMany({}, {user_is_subscriber: false}).sort({number_of_posts: -1}).limit(_limit)
             if (token) {
@@ -104,7 +104,7 @@ const communityCtrl = {
             }
             const communities = await Community.find({}).sort({number_of_posts: -1}).limit(_limit)
             if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
-            res.json(communities)
+            res.status(200).json(communities)
             } catch (err) {
                 if (err instanceof Error)
                 res.status(500).json({msg: err.message})

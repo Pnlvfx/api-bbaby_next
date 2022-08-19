@@ -3,6 +3,6 @@ import categoryCtrl from './categoryCtrl';
 
 const categoryRouter = express.Router();
 
-categoryRouter.get("/categories", categoryCtrl.getCategories)
+categoryRouter.get("/", categoryCtrl.getCategories)
 
 export default categoryRouter;

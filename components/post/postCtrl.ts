@@ -173,8 +173,10 @@ const PostCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    deletePost: async (req:Request,res:Response) => {
+    deletePost: async (expressRequest:Request,res:Response) => {
         try {
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {id} = req.params;
             const findPost = await Post.findByIdAndDelete(id)
             if (findPost && findPost.mediaInfo) {

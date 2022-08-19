@@ -3,24 +3,24 @@ import governanceCtrl from './governanceCtrl';
 
 const governanceRouter = Router()
 
-governanceRouter.post('/governance/create-image', governanceCtrl.createImage)
+governanceRouter.post('/create-image', governanceCtrl.createImage)
 
-governanceRouter.post('/governance/create-video', governanceCtrl.createVideo)
+governanceRouter.post('/create-video', governanceCtrl.createVideo)
 
-governanceRouter.get('governance/youtube/login', governanceCtrl.youtubeLogin);
+governanceRouter.get('/youtube/login', governanceCtrl.youtubeLogin);
 
 //governanceRouter.post('/governance/youtube/access_token', governanceCtrl.youtubeAccessToken)
 
-governanceRouter.post('/governance/youtube', governanceCtrl.uploadYoutube)
+governanceRouter.post('/youtube', governanceCtrl.uploadYoutube)
 
-governanceRouter.post('/governance/translate-tweet', governanceCtrl.translateTweet)
+governanceRouter.post('/translate-tweet', governanceCtrl.translateTweet)
 
-governanceRouter.get('/governance/BBCnews', governanceCtrl.getArticles)
+governanceRouter.get('/BBCnews', governanceCtrl.getArticles)
 
-governanceRouter.post('/governance/news/article', governanceCtrl.getArticle)
+governanceRouter.post('/news/article', governanceCtrl.getArticle)
 
-governanceRouter.post('/governance/news', governanceCtrl.postArticle)
+governanceRouter.post('/news', governanceCtrl.postArticle)
 
-governanceRouter.get('/governance/pexels', governanceCtrl.getPexelsImage)
+governanceRouter.get('/pexels', governanceCtrl.getPexelsImage)
 
 export default governanceRouter;

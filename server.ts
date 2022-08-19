@@ -17,6 +17,9 @@ import categoryRouter from './components/category/categoryRouter';
 import newsRouter from './components/news/newsRouter';
 import Community from './models/Community';
 import { corsOrigin } from './lib/APIaccess';
+import redditRouter from './components/reddit/redditRouter';
+import oauthRouter from './components/oauth/oauthRouter';
+import auth from './middleware/auth';
 
 const {MONGO_URI} = config;
 const app = express()
@@ -31,29 +34,33 @@ app.use(cors({
 
 connect(MONGO_URI).catch(error => console.log(`Cannot connect to bbabystyle database: ${error}`))
 
-app.use('/', userRouter)
-
-app.use('/', postRouter)
-
-app.use('/', communityRouter)
-
-app.use('/', governanceRouter)
-
-app.use('/', commentRouter)
-
-app.use('/', searchRouter)
-
-app.use('/', categoryRouter);
-
-app.use('/', newsRouter);
-
-app.use('/', twitterRouter)
-
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });
 
-app.use(express.static('public'))
+app.use('/', oauthRouter)
+
+app.use('/user', userRouter)
+
+app.use('/posts', postRouter)
+
+app.use('/communities', communityRouter)
+
+app.use('/governance', governanceRouter)
+
+app.use('/comments', commentRouter)
+
+app.use('/search', searchRouter)
+
+app.use('/categories', categoryRouter);
+
+app.use('/news', newsRouter);
+
+app.use('/twitter', twitterRouter)
+
+app.use('/reddit', auth, redditRouter);
+
+app.use('/', express.static('public'))
 
 app.get('/sitemaps', async(req,res) => {
     try {
