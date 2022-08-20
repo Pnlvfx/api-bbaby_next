@@ -36,9 +36,11 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    updateDescription: async(req:Request,res:Response) => {
+    updateDescription: async(expressRequest:Request,res:Response) => {
         try {
-            const {name,descr:description} = req.body
+            const req = expressRequest as UserRequest;
+            const {user} = req;
+            const {name,descr:description} = req.body;
             const c = await Community.findOneAndUpdate({name}, {description})
             if (!c) return res.status(500).json({msg: 'Something went wrong, please try again'})
             res.status(200).json('Description update successfully');
@@ -51,8 +53,8 @@ const communityCtrl = {
         try {
             const {token} = req.cookies;
             const {limit} = req.query;
-            const _limit = limit ? + limit : 0;
-            const communities = await Community.find({}).sort({number_of_posts: -1}).limit(_limit)
+            if (!limit) return res.status(400).json({msg: 'Please add a limit field into your query request.'})
+            const communities = await Community.find({}).sort({number_of_posts: -1}).limit(parseInt(limit.toString()))
             if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
             if (token) {
                 const user = await getUserFromToken(token);
@@ -134,18 +136,16 @@ const communityCtrl = {
     },
     getUserPreferredCommunities: async(req:Request,res:Response) => {
         try {
-            const token = req.cookies?.token ? req.cookies.token : null
-            const {limit} = req.query
-            const _limit:number = limit ? +limit : 0
-            let communities = []
-            const sort = {number_of_posts: -1}
-            const notSub = await Community.updateMany({}, {user_is_subscriber: false}).sort({number_of_posts: -1}).limit(_limit)
+            const {token} = req.cookies;
+            const {limit} = req.query;
+            if (!limit) return res.status(400).json({msg: 'Please add a limit field into your query request.'})
+            let communities = [];
             if (token) {
                 const user = await getUserFromToken(token)
                 if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-                const subscribedCommunities = await Community.find({name: user?.subscribed}).limit(_limit)
+                const subscribedCommunities = await Community.find({name: user?.subscribed}).limit(parseInt(limit.toString()))
                 if (!subscribedCommunities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
-                if (subscribedCommunities.length <= _limit) {
+                if (subscribedCommunities.length <= parseInt(limit.toString())) {
                     
                 }
                 res.json(subscribedCommunities)
@@ -155,15 +155,13 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    chooseCategory : async(req:Request,res:Response) => {
+    chooseCategory : async(expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            if (!token) return res.status(500).json({msg: "You are not authorized"})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {name} = req.params;
             const {category} = req.body;
             const c = await Community.findOne({name})
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
             const check = user.role === 1 ? true : user.username === c?.communityAuthor ? true : false
             if (!check) {
                 return res.status(500).json({msg: "You need to be a moderator to do this action!"})
@@ -176,12 +174,10 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    searchCommunity: async(req:Request,res:Response) => {
+    searchCommunity: async(expressRequest:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {phrase} = req.query;
             const name = {$regex: '.*'+ phrase +'.*', $options: 'i'}
             if (!phrase) return res.status(500).json({msg: "Please insert the name of the communities that you want to find"})

@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import redditCtrl from './redditCtrl';
 
-const redditRouter = Router();
+const redditRouter = Router(); //used with governance Router
 
 redditRouter.get('/login',  redditCtrl.redditLogin);
 

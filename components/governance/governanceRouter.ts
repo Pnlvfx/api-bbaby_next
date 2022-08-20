@@ -6,9 +6,9 @@ const governanceRouter = Router()
 
 governanceRouter.use('/youtube', youtubeRouter);
 
-governanceRouter.post('/create-image', governanceCtrl.createImage)
+governanceRouter.post('/create-image', governanceCtrl.createImage);
 
-governanceRouter.post('/create-video', governanceCtrl.createVideo)
+governanceRouter.post('/create-video', governanceCtrl.createVideo);
 
 governanceRouter.post('/translate-tweet', governanceCtrl.translateTweet)
 

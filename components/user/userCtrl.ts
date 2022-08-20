@@ -1,13 +1,9 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
-import config from '../../config/config';
 import User from '../../models/User';
 import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
-
-const {CLIENT_URL,NODE_ENV} = config;
-
 
 const userCtrl = {
     user: async (req:Request,res:Response) => {
@@ -48,8 +44,10 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    changeAvatar: async (req:Request,res:Response) => {
+    changeAvatar: async (expressRequest:Request,res:Response) => {
         try {
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {image,username} = req.body
             const uploadedImage = await cloudinary.v2.uploader.upload(image, {
                 upload_preset: 'bbaby_avatar'
@@ -63,9 +61,9 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    forgotPassword: async (req:Request,res:Response) => {
+    forgotPassword: async (expressRequest:Request,res:Response) => {
         try {
-            
+            const req = expressRequest as UserRequest;
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})

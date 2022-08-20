@@ -6,10 +6,16 @@ const auth = async (expressRequest:Request,res:Response,next:NextFunction) => {
     try {
         const req = expressRequest as UserRequest
         const {token} = req.cookies;
-        if (!token) return res.status(400).json({msg: "Invalid authorizathion."});
+        if (!token) {
+            res.statusMessage = 'This API require user authentication'
+            return res.status(400).json({msg: "This API require user authentication"})
+        };
         const user = await getUserFromToken(req.cookies.token);
-        if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-        req.user = user
+        if (!user) {
+            res.statusMessage = 'This API require user authentication'
+            return res.status(401).json({msg: "This API require user authentication"})
+        }
+        req.user = user;
         next();
     } catch (err) {
         if (err instanceof Error)

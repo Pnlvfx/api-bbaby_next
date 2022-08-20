@@ -1,19 +1,20 @@
 import type {Request, Response} from 'express';
+import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
 import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
 import cloudinary from '../../lib/cloudinary';
 import videoshow from 'videoshow';
 import {TranslationServiceClient} from '@google-cloud/translate';
 import audioconcat from 'audioconcat';
-import { getUserFromToken } from '../user/user-functions/userFunctions';
 import puppeteer from 'puppeteer';
-import { createClient } from 'pexels';
+import { createClient, PhotosWithTotalResults } from 'pexels';
 import News from '../../models/News';
 
 const {PUBLIC_PATH} = config;
 
 const governanceCtrl = {
-    createImage: async (req: Request, res: Response) => {
+    createImage: async (expressRequest: Request, res: Response) => {
+        const req = expressRequest as UserRequest;
         const {textColor,fontSize,description,newsId,format} = req.body;
         if (description.length <= 1) return res.status(500).json({msg: "Please select at least 2 paragraph."})
         const news = await News.findById(newsId);
@@ -73,8 +74,9 @@ const governanceCtrl = {
                 })
             })
     },
-    createVideo: async (req: Request, res: Response) => {
+    createVideo: async (expressRequest: Request, res: Response) => {
         try {
+            const req = expressRequest as UserRequest;
             const {_videoOptions,images} = req.body;
             if (!images) return res.status(500).json({msg: "You have 0 images selected. Was this  a bug?"})
             const videoOptions = {
@@ -112,13 +114,16 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    translateTweet: async (req: Request, res: Response) => {
+    translateTweet: async (expressRequest: Request, res: Response) => {
         try {
-            const translationClient = new TranslationServiceClient()
-            const {text} = req.body
-            const {lang} = req.query
-            const projectId = 'bbabystyle'
-            const location = 'us-central1'
+            const req = expressRequest as UserRequest;
+            const {text} = req.body;
+            if (!text) return res.status(400).json({msg: "You need to send one text with in your request body."})
+            const {lang} = req.query;
+            if (!lang) return res.status(400).json({msg: "Add the source language in your query url."})
+            const projectId = 'bbabystyle';
+            const location = 'us-central1';
+            const translationClient = new TranslationServiceClient();
             async function translateText() {
                 const request = {
                     parent: `projects/${projectId}/locations/${location}`,
@@ -133,20 +138,16 @@ const governanceCtrl = {
                     res.json(translation.translatedText)
                 }
             }
-            
             translateText()   
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }
     },
-    getArticles: async (req: Request, res: Response) => {
+    getArticles: async (expressRequest: Request, res: Response) => {
         try {
-            const {token} = req.cookies
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this API"})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const browser = await puppeteer.launch()
             const page = await browser.newPage()
             const url = `https://www.bbc.com`
@@ -164,14 +165,10 @@ const governanceCtrl = {
             res.status(500).json({msg : err.message})
         }
     },
-    getArticle: async (req: Request, res: Response) => {
+    getArticle: async (expressRequest: Request, res: Response) => {
         try {
+            const req = expressRequest as UserRequest;
             const {url} = req.body;
-            const {token} = req.cookies
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
             })
@@ -191,13 +188,10 @@ const governanceCtrl = {
             
         }
     },
-    postArticle: async (req: Request, res: Response) => {
+    postArticle: async (expressRequest: Request, res: Response) => {
         try {
-            const {token} = req.cookies
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {title,description,mediaInfo} = req.body;
             if (!title || !description || !mediaInfo.image) return res.status(500).json({msg: 'Missing required input!'})
             const width = mediaInfo.width >= 1920 ? 1920 : parseInt(mediaInfo.width);
@@ -225,20 +219,18 @@ const governanceCtrl = {
             }
         }
     },
-    getPexelsImage: async (req: Request, res: Response) => {
+    getPexelsImage: async (expressRequest: Request, res: Response) => {
         try {
-            const {token} = req.cookies
-            const {PEXELS_API_KEY} = config
-            if (!token) return res.status(500).json({msg: "You need to login first"})
-            const user = await getUserFromToken(token);
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            if (user.role < 1) return res.status(500).json({msg: "You need to be an admin to access this page"})
-            const {text, page} = req.query
-            const client = createClient(PEXELS_API_KEY)
-            if (text === undefined) return res.status(500).json({msg: "You need to insert a phrase to be searched"})
-            if (page === undefined) return res.status(500).json({msg: "You need to insert a phrase to be searched"})
-            const photos = await client.photos.search({query: text.toString(),orientation: 'landscape', per_page: 15, page: parseInt(page.toString())})
-            res.status(200).json(photos);
+            const req = expressRequest as UserRequest;
+            const {PEXELS_API_KEY} = config;
+            const {text, page} = req.query;
+            const client = await createClient(PEXELS_API_KEY);
+            if (!text) return res.status(400).json({msg: "Please add a search text in your query params."})
+            if (!page) return res.status(500).json({msg: "Please add a pageNumber in your query params."})
+            const pexelsData = await client.photos.search({query: text.toString(),orientation: 'landscape', per_page: 15, page: parseInt(page.toString())})
+            if (!pexelsData) return res.status(400).json({msg: "No photos on pexels with this phrase."});
+            const response = pexelsData as PhotosWithTotalResults;
+            res.status(200).json(response.photos);
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
