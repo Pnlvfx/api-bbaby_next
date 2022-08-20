@@ -1,39 +1,12 @@
-import type {Request, Response} from 'express'
-import type { UserRequest } from '../../@types/express'
-import cloudinary from '../../lib/cloudinary'
-import Community from '../../models/Community'
-import Post from '../../models/Post'
-import User from '../../models/User'
-import { getUserFromToken } from '../user/user-functions/userFunctions'
+import type {Request, Response} from 'express';
+import type { UserRequest } from '../../@types/express';
+import cloudinary from '../../lib/cloudinary';
+import Community from '../../models/Community';
+import Post from '../../models/Post';
+import User from '../../models/User';
+import { getUserFromToken } from '../user/user-functions/userFunctions';
+
 const communityCtrl = {
-    createCommunity: async(req:Request,res:Response) => {
-        try {
-            const {token} = req.cookies
-            if (!token) return res.status(400).json({msg: "Invalid"})
-            const user = await getUserFromToken(token)
-            if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-            const {name} = req.body;
-            if (!name) return res.status(500).json({msg: "A community name is required"})
-            const check = await Community.exists({name: new RegExp(`^${name}$`, 'i')})
-            if (check) {
-                return res.status(500).json({msg: `Sorry, b/${name} is taken. Try another.`})
-            } else {
-                const language = user.countryCode === 'IT' ? "Italian" : "English"
-                const {region} = user
-              const community = new Community({
-                name,
-                communityAuthor: user.username,
-                language,
-                region
-            })
-              const savedCommunity = await community.save()
-              res.status(201).json({msg: "You have successfully created a new community"})
-            }
-        } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
-        }
-    },
     getCommunity: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
@@ -63,22 +36,6 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    changeAvatar: async(req:Request,res:Response) => {
-        try {
-            const {image} = req.body
-            const {name} = req.params
-            const response = await cloudinary.v2.uploader.upload(image, {height: 256, width: 256, crop: 'scale'})
-            if (!response) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
-            const community = await Community.findOneAndUpdate({name}, {communityAvatar: response.secure_url})
-            if(!community) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
-            const postThumb = await Post.updateMany({community: name}, {$set: {communityIcon: response.secure_url}})
-            if(!postThumb) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
-            res.json({msg: "Image updated successfully"})
-        } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
-        }
-    },
     updateDescription: async(req:Request,res:Response) => {
         try {
             const {name,descr:description} = req.body
@@ -92,23 +49,68 @@ const communityCtrl = {
     },
     getBestCommunities: async(req:Request,res:Response) => {
         try {
-            const {token} = req.cookies
-            const {limit} = req.query
-            const _limit = limit ? + limit : 0
-            const sort = {number_of_posts: -1}
-            const notSub = await Community.updateMany({}, {user_is_subscriber: false}).sort({number_of_posts: -1}).limit(_limit)
-            if (token) {
-                const user = await getUserFromToken(token)
-                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-                const subscribed = await Community.updateMany({name: user?.subscribed}, {user_is_subscriber: true}).sort({number_of_posts: -1}).limit(_limit)
-            }
+            const {token} = req.cookies;
+            const {limit} = req.query;
+            const _limit = limit ? + limit : 0;
             const communities = await Community.find({}).sort({number_of_posts: -1}).limit(_limit)
             if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
+            if (token) {
+                const user = await getUserFromToken(token);
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."});
+                communities.map((community) => {
+                    if (community.name === user.subscribed?.toString())
+                    community.user_is_subscriber = true
+                })
+            }
             res.status(200).json(communities)
             } catch (err) {
                 if (err instanceof Error)
                 res.status(500).json({msg: err.message})
             }
+    },
+    createCommunity: async(expressRequest:Request,res:Response) => {
+        try {
+            const req = expressRequest as UserRequest;
+            const {user} = req;
+            const {name} = req.body;
+            if (!name) return res.status(500).json({msg: "A community name is required"})
+            const check = await Community.exists({name: new RegExp(`^${name}$`, 'i')})
+            if (check) {
+                return res.status(401).json({msg: `Sorry, b/${name} is taken. Try another.`})
+            } else {
+                const language = user.countryCode === 'IT' ? "Italian" : "English"
+                const {region} = user
+                const community = new Community({
+                    name,
+                    communityAuthor: user.username,
+                    language,
+                    region
+                })
+                const savedCommunity = await community.save()
+                res.status(201).json({msg: "You have successfully created a new community"})
+            }
+        } catch (err) {
+            if (err instanceof Error)
+            res.status(500).json({msg: err.message})
+        }
+    },
+    changeAvatar: async(expressRequest:Request,res:Response) => {
+        try {
+            const req = expressRequest as UserRequest;
+            const {user} = req
+            const {image} = req.body;
+            const {name} = req.params;
+            const response = await cloudinary.v2.uploader.upload(image, {height: 256, width: 256, crop: 'scale'})
+            if (!response) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+            const community = await Community.findOneAndUpdate({name}, {communityAvatar: response.secure_url})
+            if(!community) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+            const postThumb = await Post.updateMany({community: name}, {$set: {communityIcon: response.secure_url}})
+            if(!postThumb) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
+            res.json({msg: "Image updated successfully"})
+        } catch (err) {
+            if (err instanceof Error)
+            res.status(500).json({msg: err.message})
+        }
     },
     subscribe: async (expressRequest:Request,res:Response) => {
         try {

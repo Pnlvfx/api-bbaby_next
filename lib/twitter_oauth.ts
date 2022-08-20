@@ -1,5 +1,5 @@
-import config from '../config/config'
-import OAuth from 'oauth'
+import config from '../config/config';
+import OAuth from 'oauth';
 
 export default (oauthCallback:string) => {
     const {TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET} = config

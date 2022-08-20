@@ -4,17 +4,18 @@ import communityCtrl from './communityCtrl';
 
 const communityRouter = Router()
 
-communityRouter.post('', communityCtrl.createCommunity)
-
 communityRouter.get('/best-communities', communityCtrl.getBestCommunities)
 
 communityRouter.get('/:name', communityCtrl.getCommunity)
+communityRouter.post('/edit/description', communityCtrl.updateDescription)
+
+communityRouter.use(auth);
+
+communityRouter.post('/', communityCtrl.createCommunity);
 
 communityRouter.post('/:name/change_avatar', communityCtrl.changeAvatar)
 
-communityRouter.post('/edit/description', communityCtrl.updateDescription)
-
-communityRouter.post('/subscribe', auth, communityCtrl.subscribe)
+communityRouter.post('/subscribe', communityCtrl.subscribe)
 
 communityRouter.get('/user/pref', communityCtrl.getUserPreferredCommunities)
 

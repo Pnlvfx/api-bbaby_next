@@ -17,6 +17,7 @@ const TwitterCtrl = {
             const req = expressRequest as UserRequest;
             const {user} = req;
             const {oauth_token,oauth_token_secret} = await oauth.getOAuthRequestToken();
+            if (!oauth_token) return res.status(500).json({msg: 'Twitter error.'})
             res.cookie(COOKIE_NAME, oauth_token, {
                 maxAge: 15 * 60 * 1000, // 15 minutes
                 secure: true,
@@ -81,12 +82,12 @@ const TwitterCtrl = {
     twitterGetUserPost: async (expressRequest:Request,res:Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const {user} = req
+            const {user} = req;
             const {origin} = req.headers;
             if (!origin) return res.status(400).json({msg: "Please show the origin in your header request"})
             isGoogleAPI(origin)
             const twitter = user.tokens?.find((provider) => provider.provider === 'twitter')
-            if (!twitter) return res.redirect(origin);
+            if (!twitter) return res.status(401).json({msg: 'You need to connect your twitter account to access this page!'})
             const {oauth_access_token,oauth_access_token_secret} = twitter;
             if (!oauth_access_token || !oauth_access_token_secret) return res.status(500).json({msg: "Please, try to login to twitter again!"})
             const {slug,owner_screen_name} = req.query;

@@ -3,15 +3,12 @@ import config from '../../config/config';
 import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
 import cloudinary from '../../lib/cloudinary';
 import videoshow from 'videoshow';
-import { authorize, getNewToken, uploadVideo } from './gov-functions/uploadYoutube';
 import {TranslationServiceClient} from '@google-cloud/translate';
 import audioconcat from 'audioconcat';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 import puppeteer from 'puppeteer';
 import { createClient } from 'pexels';
 import News from '../../models/News';
-import { isGoogleAPI } from '../../lib/APIaccess';
-import {google} from 'googleapis';
 
 const {PUBLIC_PATH} = config;
 
@@ -111,42 +108,6 @@ const governanceCtrl = {
                 })
             })
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
-        }
-    },
-    youtubeLogin: async (req: Request, res: Response) => {
-        try {
-            const {origin} = req.headers;
-            console.log(origin)
-            const {YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET} = config;
-            if (!origin) return res.status(400).json({msg: 'Please make your origin visible!'})
-            const validOrigin = await isGoogleAPI(origin);
-            if (!validOrigin) return res.status(400).json({msg: "For access this API you need to use a specific domain!"})
-            const redirectUrl = `${origin}/governance/youtube`;
-            const {OAuth2} = google.auth;
-            const oauth2Client = new OAuth2(YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,redirectUrl);
-            const SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
-            const authUrl = oauth2Client.generateAuthUrl({
-                access_type: 'offline',
-                scope: SCOPES,
-                prompt: 'consent',
-            })
-            res.status(200).json(authUrl);
-        } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
-        }
-    },
-    uploadYoutube: async (req: Request, res: Response) => {
-        try {
-            const {title,description,tags,categoryId,privacyStatus} = req.body;
-            const {origin} = req.headers;
-            if (!origin) return res.status(400).json({msg: 'Please make your origin visible!'})
-            const validOrigin = await isGoogleAPI(origin);
-            if (!validOrigin) return res.status(400).json({msg: "For access this API you need to use a specific domain!"})
-            authorize((auth:any) => uploadVideo(auth,title,description,tags,privacyStatus,res),res)
-        } catch(err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
         }

@@ -38,6 +38,22 @@ app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });
 
+app.get('/sitemaps', async(req,res) => {
+    try {
+        const {type} = req.query;
+        if (!type) {
+            const posts = await Post.find({}).sort({createdAt: -1})
+            res.status(200).json(posts)
+        } else {
+            const communities = await Community.find({})
+            res.status(200).json(communities)
+        }
+    } catch (err) {
+        if (err instanceof Error)
+        res.status(500).json({msg: err.message})
+    }
+})
+
 app.use('/', oauthRouter)
 
 app.use('/user', userRouter)
@@ -56,27 +72,11 @@ app.use('/categories', categoryRouter);
 
 app.use('/news', newsRouter);
 
-app.use('/twitter', twitterRouter)
+app.use('/twitter', auth, twitterRouter)
 
 app.use('/reddit', auth, redditRouter);
 
 app.use('/', express.static('public'))
-
-app.get('/sitemaps', async(req,res) => {
-    try {
-        const {type} = req.query;
-        if (!type) {
-            const posts = await Post.find({}).sort({createdAt: -1})
-            res.status(200).json(posts)
-        } else {
-            const communities = await Community.find({})
-            res.status(200).json(communities)
-        }
-    } catch (err) {
-        if (err instanceof Error)
-        res.status(500).json({msg: err.message})
-    }
-})
 
 const port = 4000
 
