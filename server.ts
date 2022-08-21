@@ -1,6 +1,5 @@
 import express from 'express';
 import config from './config/config';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import compression from 'compression';
@@ -21,14 +20,16 @@ import redditRouter from './components/reddit/redditRouter';
 import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
+import contentType from './middleware/contentType';
 
 const {MONGO_URI} = config;
 const app = express();
+app.use(contentType)
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(express.urlencoded({extended: true}))
+app.use(express.json({limit: '50mb'}))
 app.use(compression());
-app.use(cors({origin: corsOrigin(),credentials:true}));
+app.use(cors({origin: corsOrigin,credentials:true}));
 connect(MONGO_URI).catch(error => console.log(`Cannot connect to bbabystyle database: ${error}`))
 
 app.get('/', (req, res) => {
@@ -67,14 +68,10 @@ app.use('/categories', categoryRouter);
 
 app.use('/news', newsRouter);
 
-app.use(auth);
+app.use('/twitter', auth,  twitterRouter)
 
-app.use('/twitter', twitterRouter)
+app.use('/reddit', auth,  redditRouter);
 
-app.use('/reddit', redditRouter);
+app.use('/governance', auth, governance, governanceRouter);
 
-app.use('/governance', governance, governanceRouter);
-
-const port = 4000
-
-const server = app.listen(port)
+app.listen(4000)

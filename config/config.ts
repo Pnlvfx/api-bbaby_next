@@ -122,4 +122,4 @@ const config = getConfig()
 
 const sanitizedConfig = getSanitzedConfig(config);
 
-export default sanitizedConfig
+export default sanitizedConfig;

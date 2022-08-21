@@ -16,10 +16,11 @@ const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
         const req = expressRequest as UserRequest;
         const {textColor,fontSize,description,newsId,format} = req.body;
-        if (description.length <= 1) return res.status(500).json({msg: "Please select at least 2 paragraph."})
+        if (description.length <= 1) return res.status(400).json({msg: "Please select at least 2 paragraph."})
         const news = await News.findById(newsId);
+        if (!news) return res.status(400).json({msg: "Invalid request, this article does not exist."})
         description.reverse()
-        description.push(news?.title)
+        description.push(news.title)
         description.reverse()
         let images:any = []
         let localImages:any = []
@@ -78,7 +79,7 @@ const governanceCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {_videoOptions,images} = req.body;
-            if (!images) return res.status(500).json({msg: "You have 0 images selected. Was this  a bug?"})
+            if (!images) return res.status(400).json({msg: "You have 0 images selected. Was this  a bug?"})
             const videoOptions = {
                 fps: _videoOptions.fps,
                 transition: _videoOptions.transition,
@@ -103,10 +104,8 @@ const governanceCtrl = {
                     resource_type: 'video'},
                     (err,response) => {
                     if (err) return res.status(500).json({msg: err.message})
-                    return res.status(201).json({
-                        msg: "Video created successfully",
-                        video: response?.secure_url
-                    })
+                    if (!response) return res.status(500).json({msg: "Cloudinary error"})
+                    return res.status(201).json({msg: "Video created successfully",video: response.secure_url})
                 })
             })
         } catch (err) {
