@@ -78,9 +78,6 @@ const youtubeCtrl = {
                 },
                 status: {
                     privacyStatus
-                },
-                media: {
-                    body: fs.createReadStream(videoFilePath)
                 }
             })
             const response = await fetch(base_url, {

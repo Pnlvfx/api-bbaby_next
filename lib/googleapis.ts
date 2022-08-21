@@ -21,9 +21,11 @@ export const getAccessTokenWithRefreshToken = async (refresh_token: string) => {
         })
         const credentials = await getToken.json()
         const error = {msg: 'Error while trying to get a new token!'}
+        console.log(credentials)
         if (!getToken.ok) return error;
         if (!fs.existsSync(YOUTUBE_CREDENTIALS)) fs.mkdirSync(YOUTUBE_CREDENTIALS)
         fs.writeFileSync(TOKEN_PATH, JSON.stringify(credentials));
+        return {msg: 'Created'}
     } catch (err) {
         if (err instanceof Error) {
             return {msg: err.message}
