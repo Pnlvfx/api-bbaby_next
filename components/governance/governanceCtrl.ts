@@ -9,6 +9,8 @@ import audioconcat from 'audioconcat';
 import puppeteer from 'puppeteer';
 import { createClient, PhotosWithTotalResults } from 'pexels';
 import News from '../../models/News';
+import BBC from '../../models/BBC';
+import { linkPreview, LinkPreviewProps } from '../../externals/linkPreview';
 
 const {PUBLIC_PATH} = config;
 
@@ -143,22 +145,51 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getArticles: async (expressRequest: Request, res: Response) => { 
+    getBBCnews: async (expressRequest: Request, res: Response) => { 
         try {
             const req = expressRequest as UserRequest;
-            const {user} = req;
-            const browser = await puppeteer.launch()
-            const page = await browser.newPage()
-            const url = `https://www.bbc.com`
-            await page.goto(url);
-            const links = await page.evaluate(() => 
-                Array.from(document.querySelectorAll("a.media__link") as NodeListOf<HTMLAnchorElement>).map((link) => (
-                    link.href
+            const {limit, skip, ssr} = req.query;
+            if (!limit || !skip) return res.status(400).json({msg: "This API require a pagination query params!"})
+            const _limit = parseInt(limit.toString());
+            const _skip = parseInt(limit.toString());
+            let response:Array<LinkPreviewProps | []> = [];
+            let scraped = 0;
+            const BBCconnect = async () => {
+                const browser = await puppeteer.launch()
+                const page = await browser.newPage()
+                const url = `https://www.bbc.com`
+                await page.goto(url);
+                const links = await page.evaluate(() => 
+                    Array.from(document.querySelectorAll("a.media__link") as NodeListOf<HTMLAnchorElement>).map((link) => (
+                        link.href
+                    )
+                ));
+                await browser.close();
+                return links            
+            }
+            if (ssr) {
+                const links = await BBCconnect();
+                await Promise.all(
+                    links.map(async (link:string,) => {
+                        const metadata = await linkPreview(link);
+                        const exists = await BBC.exists({title: metadata.title})
+                        if (exists) return;
+                        const news = new BBC({
+                            title: metadata.title,
+                            description: metadata.description,
+                            image: metadata.image,
+                            link
+                        })
+                        const save = await news.save()
+                        scraped += 1
+                    })
                 )
-            ));
-            await browser.close()
-            res.set('Cache-control', 'public, max-age=3600')
-            res.status(200).json(links)
+            }
+            response = await BBC.find({}).sort({createdAt: -1}).limit(_limit).skip(_skip)
+            if (response.length < 9) return res.status(500).json({msg : "Less than 9 posts retrieved."})
+            res.set('Cache-Control', 'private, max-age=3600');
+            console.log({totalNewsScraped : scraped});
+            res.status(200).json(response);
         } catch (err) {
             if (err instanceof Error) 
             res.status(500).json({msg : err.message})
@@ -167,12 +198,13 @@ const governanceCtrl = {
     getArticle: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest; 
-            const {url} = req.body;
+            const {link} = req.body;
+            if (!link) return res.status(400).json({msg: "Missing redirect link parameters"})
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
             })
             const page = await browser.newPage();
-            await page.goto(url);
+            await page.goto(link);
             const description = await page.evaluate(() => 
                 Array.from(document.querySelectorAll('article p') as NodeListOf<HTMLParagraphElement>).map((descr) => (
                     `${descr.innerText}\n\n`

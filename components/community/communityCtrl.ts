@@ -191,7 +191,6 @@ const communityCtrl = {
             //     })
             //     return response;
             // }
-            // console.log(filters())
             res.json(communities)
         } catch (err) {
             if (err instanceof Error)

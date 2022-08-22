@@ -2,9 +2,10 @@ import type { Request, Response } from "express";
 import config from '../../../config/config';
 import fs from 'fs';
 import { UserRequest } from "../../../@types/express";
-import { getAccessToken } from "../../../lib/googleapis";
+import googleapis, { getAccessToken } from "../../../lib/googleapis";
+import { catchError } from "../../../lib/common";
 
-const {PUBLIC_PATH,YOUTUBE_CREDENTIALS, CLIENT_URL} = config;
+const {PUBLIC_PATH,YOUTUBE_CREDENTIALS, CLIENT_URL,YOUTUBE_CLIENT_ID} = config;
 const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`;
 const redirect_uri = `${CLIENT_URL}/governance`
 
@@ -35,7 +36,7 @@ const youtubeCtrl = {
     uploadYoutube: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const base_url = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet&part=status`;
+            const base_url = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet&part=status&key=${YOUTUBE_CLIENT_ID}`;
             const {origin} = req.headers;
             const {title,description,tags,categoryId,privacyStatus} = req.body;
             const videoFilePath = `${PUBLIC_PATH}/video1.mp4`;
@@ -60,7 +61,7 @@ const youtubeCtrl = {
                 }
             })
             const response = await fetch(base_url, {
-                method: 'post',
+                method: 'POST',
                 headers,
                 body
             })

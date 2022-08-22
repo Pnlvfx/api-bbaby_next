@@ -12,7 +12,7 @@ governanceRouter.post('/create-video', governanceCtrl.createVideo);
 
 governanceRouter.post('/translate-tweet', governanceCtrl.translateTweet)
 
-governanceRouter.get('/BBCnews', governanceCtrl.getArticles)
+governanceRouter.get('/BBCnews', governanceCtrl.getBBCnews)
 
 governanceRouter.post('/news/article', governanceCtrl.getArticle)
 

@@ -30,13 +30,18 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit: '50mb'}))
 app.use(compression());
 app.use(cors({origin: corsOrigin,credentials:true}));
-connect(MONGO_URI).catch(error => console.log(`Cannot connect to bbabystyle database: ${error}`))
+//const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
+connect(MONGO_URI).then((res) => {
+    
+}).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });
 
-app.get('/sitemaps', async(req,res) => {
+
+
+app.get('/sitemaps', async (req,res) => {
     try {
         const {type} = req.query;
         if (!type) {

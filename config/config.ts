@@ -113,7 +113,7 @@ const getConfig = ():ENV => {
 const getSanitzedConfig = (config:ENV): Config => {
     for (const [key,value] of Object.entries(config)) {
         if (value === undefined) {
-            console.log(`Missing key ${key}`)
+            throw new Error(`Missing key ${key}`)
         }
     }
     return config as Config;
