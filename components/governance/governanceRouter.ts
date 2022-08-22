@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import governanceCtrl from './governanceCtrl';
-import youtubeRouter from './youtubeRouter';
+import youtubeRouter from './youtube/youtubeRouter';
 
 const governanceRouter = Router()
 

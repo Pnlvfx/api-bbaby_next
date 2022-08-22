@@ -143,7 +143,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getArticles: async (expressRequest: Request, res: Response) => {
+    getArticles: async (expressRequest: Request, res: Response) => { 
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -166,7 +166,7 @@ const governanceCtrl = {
     },
     getArticle: async (expressRequest: Request, res: Response) => {
         try {
-            const req = expressRequest as UserRequest;
+            const req = expressRequest as UserRequest; 
             const {url} = req.body;
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']

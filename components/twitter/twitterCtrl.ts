@@ -3,7 +3,6 @@ import type { UserRequest } from '../../@types/express';
 import config from '../../config/config'
 import _oauth from '../../lib/twitter_oauth'
 import User from '../../models/User'
-import { isGoogleAPI } from '../../lib/APIaccess'
 
 const {COOKIE_DOMAIN,CLIENT_URL} = config;
 const oauthCallback = `${CLIENT_URL}/settings`; //redirect
@@ -83,9 +82,6 @@ const TwitterCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
-            const {origin} = req.headers;
-            if (!origin) return res.status(400).json({msg: "Please show the origin in your header request"})
-            isGoogleAPI(origin)
             const twitter = user.tokens?.find((provider) => provider.provider === 'twitter')
             if (!twitter) return res.status(401).json({msg: 'You need to connect your twitter account to access this page!'})
             const {oauth_access_token,oauth_access_token_secret} = twitter;

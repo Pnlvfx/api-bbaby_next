@@ -21,7 +21,7 @@ const newsCtrl = {
             if (err instanceof Error)
             res.status(500).json({msg: err.message});
         }
-    }
+    },
 }
 
 export default newsCtrl;
