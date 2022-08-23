@@ -1,6 +1,7 @@
 import type {Request,Response} from 'express';
 import type{ UserRequest } from "../../@types/express";
 import config from '../../config/config';
+import { colarine } from '../../database/colarine';
 import User from '../../models/User';
 
 const {CLIENT_URL} = config;
@@ -27,11 +28,7 @@ const redditCtrl = {
             });
             if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
             let body = await response.json()
-            const addHours = (numOfHours: number, date = new Date()) => {
-                date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
-                return date;
-            }
-            const access_token_expiration = addHours(1);
+            const access_token_expiration = colarine.addHours(1);
             const saveToken = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {access_token: body.access_token, refresh_token: body.refresh_token, provider: 'reddit', access_token_expiration}}})
             if (!saveToken) return res.status(500).json({msg: "Something went wrong, please try again"})
             response = await fetch(`https://oauth.reddit.com/api/v1/me`, {

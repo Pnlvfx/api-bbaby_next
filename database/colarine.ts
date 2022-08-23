@@ -1,44 +1,23 @@
 import fs from 'fs';
+import path from 'path';
+import { path_check } from './hooks/fs_commons';
+const fsPromises = fs.promises;
+const database_path = path.resolve(__dirname, '../database');
 
-const database_path = '/etc/bbaby/colarine';
-const path_check = async (path: string) => {
-    try {
-        return await fsPromises.mkdir(path, {recursive: true});   
-    } catch (err: any) {
-        if (err.code != 'EEXISTS') {
-            throw new Error(err.message)
+export const colarine = {
+    initialize: async () => {
+        try {
+            const check = await path_check(database_path);
+            console.log(check);
+        } catch (err) {
+            if (err instanceof Error) {
+                console.log(err.message);
+                throw new Error(err.message);
+            }
         }
+    },
+    addHours: (numOfHours: number, date = new Date()) => {
+        date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
+        return date;
     }
 }
-
-const fsPromises = fs.promises;
-const collectionsArray = ['BBC'];
-
-// export const colarine = {
-//     initialize: async () => {
-//         try {
-//             const check = await path_check(database_path);
-//             console.log(check);
-//             const readCollections = async () => {
-//                 try {
-//                     collectionsArray.map((collection) => {
-//                         path_check(`${database_path}/collections/${collection}`)
-//                     })
-//                 } catch (err) {
-//                     if (err instanceof Error) {
-//                         console.log(err.message);
-//                         throw new Error(err.message);
-//                     }
-//                 }
-//             }
-//             console.log('inizialized')
-//             const collections = await readCollections();
-//             return collections;
-//         } catch (err) {
-//             if (err instanceof Error) {
-//                 console.log(err.message);
-//                 throw new Error(err.message);
-//             }
-//         }
-//     },
-// }

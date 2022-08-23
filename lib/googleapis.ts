@@ -1,17 +1,7 @@
 import config from '../config/config';
 import fs from 'fs';
-interface getAccessTokenProps {
-    grant_type: 'authorization_code' | 'refresh_token',
-    code?: string,
-    redirect_uri?: string,
-    refresh_token?: string
-}
-
+import YoutubeToken from '../models/YoutubeToken';
 const fsPromises = fs.promises
-const { YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,YOUTUBE_CREDENTIALS } = config;
-const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`;
-const googleTokenUrl = 'https://oauth2.googleapis.com/token';
-const headers = {'Content-Type' : 'application/x-www-form-urlencoded' };
 
 const googleapis = {
     createGoogleOauth: async (origin: string) => {
@@ -28,10 +18,37 @@ const googleapis = {
                 throw new Error(`That's strange!`)
             }
         }
+    },
+    youtube: {
+        insert: async () => {
+            
+        }
+    },
+    checkTokenValidity: async () => {
+        try {
+            const token = await YoutubeToken.find({});
+            console.log(token);
+            if (!token) return false;
+            return true;
+        } catch (err) {
+            if (err instanceof Error) throw new Error(err.message)
+        }
     }
 }
 
 export default googleapis;
+
+interface getAccessTokenProps {
+    grant_type: 'authorization_code' | 'refresh_token',
+    code?: string,
+    redirect_uri?: string,
+    refresh_token?: string
+}
+
+const { YOUTUBE_CLIENT_ID,YOUTUBE_CLIENT_SECRET,YOUTUBE_CREDENTIALS } = config;
+const TOKEN_PATH = `${YOUTUBE_CREDENTIALS}/youtube_oauth_token.json`;
+const googleTokenUrl = 'https://oauth2.googleapis.com/token';
+const headers = {'Content-Type' : 'application/x-www-form-urlencoded' };
 
 export const getAccessToken = async ({
     grant_type,

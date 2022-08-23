@@ -3,9 +3,9 @@ import { IUser } from "../@types/user";
 
 const UserSchema = new Schema<IUser>({
     email: {
-        type:String,
-        unique:true,
-        required:[true, "Please enter your email!"],
+        type: String,
+        unique: true,
+        required: [true, "Please enter your email!"],
         trim: true,
     },
     username: {
@@ -51,7 +51,9 @@ const UserSchema = new Schema<IUser>({
         type: [Schema.Types.ObjectId],
     },
     tokens: {
-        type: []
+        type: [
+            
+        ]
     },
     hasExternalAccount: {
         type: Boolean,
