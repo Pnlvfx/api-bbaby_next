@@ -9,12 +9,10 @@ interface ENV {
     SERVER_URL: string | undefined
     TELEGRAM_TOKEN: string | undefined
     SECRET: string | undefined
-    PUBLIC_PATH: string | undefined
     CLOUD_NAME: string | undefined
     CLOUD_API_KEY: string | undefined
     CLOUD_API_SECRET: string | undefined
     GOOGLE_APPLICATION_CREDENTIALS: string | undefined
-    YOUTUBE_CREDENTIALS: string | undefined
     TWITTER_CONSUMER_KEY: string | undefined
     TWITTER_CONSUMER_SECRET: string | undefined
     ACTIVATION_TOKEN_SECRET: string | undefined
@@ -44,12 +42,10 @@ interface Config {
     SERVER_URL: string
     TELEGRAM_TOKEN: string
     SECRET: string
-    PUBLIC_PATH: string
     CLOUD_NAME: string
     CLOUD_API_KEY: string
     CLOUD_API_SECRET: string
     GOOGLE_APPLICATION_CREDENTIALS: string
-    YOUTUBE_CREDENTIALS: string
     TWITTER_CONSUMER_KEY: string
     TWITTER_CONSUMER_SECRET: string
     ACTIVATION_TOKEN_SECRET: string
@@ -80,12 +76,10 @@ const getConfig = ():ENV => {
         SERVER_URL: process.env.SERVER_URL,
         TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
         SECRET: process.env.SECRET,
-        PUBLIC_PATH: process.env.PUBLIC_PATH,
         CLOUD_NAME: process.env.CLOUD_NAME,
         CLOUD_API_KEY: process.env.CLOUD_API_KEY,
         CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
         GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-        YOUTUBE_CREDENTIALS: process.env.YOUTUBE_CREDENTIALS,
         TWITTER_CONSUMER_KEY: process.env.TWITTER_CONSUMER_KEY,
         TWITTER_CONSUMER_SECRET: process.env.TWITTER_CONSUMER_SECRET,
         ACTIVATION_TOKEN_SECRET: process.env.ACTIVATION_TOKEN_SECRET,

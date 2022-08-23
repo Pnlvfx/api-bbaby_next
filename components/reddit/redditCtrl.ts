@@ -1,7 +1,7 @@
 import type {Request,Response} from 'express';
 import type{ UserRequest } from "../../@types/express";
 import config from '../../config/config';
-import { colarine } from '../../database/colarine';
+import coraline from '../../database/coraline';
 import User from '../../models/User';
 
 const {CLIENT_URL} = config;
@@ -28,7 +28,7 @@ const redditCtrl = {
             });
             if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
             let body = await response.json()
-            const access_token_expiration = colarine.addHours(1);
+            const access_token_expiration = coraline.addHours(1);
             const saveToken = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {access_token: body.access_token, refresh_token: body.refresh_token, provider: 'reddit', access_token_expiration}}})
             if (!saveToken) return res.status(500).json({msg: "Something went wrong, please try again"})
             response = await fetch(`https://oauth.reddit.com/api/v1/me`, {
@@ -36,7 +36,6 @@ const redditCtrl = {
                 headers: {authorization: `bearer ${body.access_token}`, 'User-Agent': USER_AGENT}
             })
             let redditUser = await response.json()
-            //console.log(redditUser)
             const {verified,name,icon_img} = redditUser
             if(!verified) return res.status(400).json({msg: "You need to verify your Reddit account to continue!"})
             const updateUser = await User.findOneAndUpdate({username: user.username}, {$push: {externalAccounts: {username: name, provider: 'reddit'}}, hasExternalAccount: true})
@@ -97,7 +96,7 @@ const redditCtrl = {
             if (now <= registrationDate) {
 
             } else {
-                console.log('refresh')
+                console.log('reddit access token with refresh')
                 await getRefreshToken()
             }
             const posts = await getRedditPosts()

@@ -21,9 +21,10 @@ import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
-
 const {MONGO_URI} = config;
+
 const app = express();
+
 app.use(contentType)
 app.use(cookieParser());
 app.use(express.urlencoded({extended: true}))
@@ -32,14 +33,18 @@ app.use(compression());
 app.use(cors({origin: corsOrigin,credentials:true}));
 //const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 connect(MONGO_URI).then((res) => {
-    
+
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
+
+// app.use('/', async (req, res ) => { // use this for test
+//     const telegram = await telegramapis.getChatId()
+//     const sendMessage = await telegramapis.sendMessage('-1001649395850', 'ciaooo')
+//     console.log(sendMessage);
+// })
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });
-
-
 
 app.get('/sitemaps', async (req,res) => {
     try {
@@ -78,5 +83,7 @@ app.use('/twitter', auth,  twitterRouter)
 app.use('/reddit', auth,  redditRouter);
 
 app.use('/governance', auth, governance, governanceRouter);
+
+console.log('ok lets go')
 
 app.listen(4000)

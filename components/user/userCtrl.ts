@@ -12,12 +12,7 @@ const userCtrl = {
             if (!token) return res.status(200).json(null);
             const user = await getUserFromToken(token)
             if (!user) {
-                const deleteToken = res.clearCookie('token', {
-                    httpOnly: true,
-                    path: '/',
-                })
-                console.log(deleteToken);
-                res.json(null).send();
+                res.json(null)
             } else {
                 res.status(200).json({user: {username:user.username, avatar: user.avatar, role: user.role}})
             }

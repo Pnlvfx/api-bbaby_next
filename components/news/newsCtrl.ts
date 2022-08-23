@@ -4,7 +4,6 @@ import News from '../../models/News';
 const newsCtrl = {
     getNews: async (req: Request, res: Response) => {
         try {
-            console.log('here')
             const news = await News.find({}).sort({createdAt: -1})
             res.status(200).json(news);
         } catch (err) {

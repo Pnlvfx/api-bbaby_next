@@ -1,7 +1,7 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
-import {createAudio, makeDir,saveImageToDisk,_createImage} from './gov-functions/createImage';
+import {createAudio, saveImageToDisk, _createImage} from './gov-functions/createImage';
 import cloudinary from '../../lib/cloudinary';
 import videoshow from 'videoshow';
 import {TranslationServiceClient} from '@google-cloud/translate';
@@ -11,8 +11,7 @@ import { createClient, PhotosWithTotalResults } from 'pexels';
 import News from '../../models/News';
 import BBC from '../../models/BBC';
 import { linkPreview, LinkPreviewProps } from '../../externals/linkPreview';
-
-const {PUBLIC_PATH} = config;
+import  coraline  from '../../database/coraline';
 
 const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
@@ -31,24 +30,23 @@ const governanceCtrl = {
         const {width} = news.mediaInfo
         const {height} = news.mediaInfo
         const wait = (ms: number) => new Promise(resolve => setTimeout(resolve,ms))
+        const youtubePath = await coraline.use('youtube')
         ////START
-        await makeDir(PUBLIC_PATH, res)
         await Promise.all(
-            description.map(async (text:string,index:number) => {
-                //const delayIndex = index + 2
+            description.map(async (text: string,index: number) => {
                 const delay = parseInt(`${index}000`)
                 await wait(delay)
                 const loop = await createAudio(text, index, audio, res)
                 const finalImage = await _createImage(text,news,textColor,width,height,fontSize,format,res)
                 await saveImageToDisk(finalImage.toString(), index)
                 await wait(delay)
-                const imagePath = `${PUBLIC_PATH}/image${index}.webp`
+                const imagePath = `${youtubePath}/image${index}.webp`
                 localImages.push({path: imagePath, loop:loop})
                 images.push(finalImage) //CLIENT
             })
         )
             audioconcat(audio)
-            .concat(`${PUBLIC_PATH}/final.mp3`)
+            .concat(`${youtubePath}/final.mp3`)
             .on('start', function(command:string) {
                 //console.log('ffmpeg process started:', command)
             })
@@ -57,7 +55,7 @@ const governanceCtrl = {
                 console.error('ffmpeg stderr:', stderr)
             })
             .on('end', function(output:string) {
-                cloudinary.v2.uploader.upload(`${PUBLIC_PATH}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
+                cloudinary.v2.uploader.upload(`${youtubePath}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
                     res.json({
                         title: news.title,
                         description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi.
@@ -94,9 +92,10 @@ const governanceCtrl = {
                 format: 'mp4',
                 pixelFormat: 'yuv420p'
             }
+            const youtubePath = await coraline.use('youtube')
             videoshow(images,videoOptions)
-            .audio(`${PUBLIC_PATH}/final.mp3`)
-            .save(`${PUBLIC_PATH}/video1.mp4`)
+            .audio(`${youtubePath}/final.mp3`)
+            .save(`${youtubePath}/video1.mp4`)
             .on('error', function(err:string,stdout:string,stderr:string) {
                 return res.status(500).json({msg: `Some error occured ${err ? err : stdout ? stdout : stderr}`})
             })

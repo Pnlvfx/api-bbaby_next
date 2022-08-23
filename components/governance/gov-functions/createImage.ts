@@ -1,45 +1,34 @@
 import fs from "fs"
 import express from 'express'
 import puppeteer from "puppeteer"
-import config from "../../../config/config"
 import * as TextToImage from 'text-to-image'
 import cloudinary from "../../../lib/cloudinary"
 import textToSpeech from '@google-cloud/text-to-speech'
 import util from 'util'
 import {getAudioDurationInSeconds} from 'get-audio-duration'
+import  coraline  from "../../../database/coraline"
+import { NewsProps } from "../../../@types/news"
 
-const {PUBLIC_PATH} = config;
-
-export const makeDir = async(path:string,res:express.Response) => {
-    try {
-        fs.mkdirSync(path)
-    } catch (err:any) {
-        if (err.code != 'EEXIST') {
-            return res.status(500).json({msg: "Something went wrong when try to create the path"})
-        }
-    }
-}
-
-export const saveImageToDisk = async(imageUrl:string,index:number) => {
-    const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disabled-setupid-sandbox']
-    })
+export const saveImageToDisk = async(imageUrl: string, index: number) => {
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disabled-setupid-sandbox'] })
     const page = await browser.newPage()
+    const path = await coraline.use('youtube')
     page.on('response', async (response) => {
         const url = response.url()
-            if (response.request().resourceType() === 'document') {
+        const type = response.request().resourceType()
+            if (type === 'document') {
                 response.buffer().then((file) => {
-                    const imagePath = `${PUBLIC_PATH}/image${index}.webp`
+                    const imagePath = `${path}/image${index}.webp`
                     const writeStream = fs.createWriteStream(imagePath)
                     writeStream.write(file)
                 })
             }
         })
         await page.goto(imageUrl)
-        browser.close
+        browser.close;
 }
 
-export const _createImage = async(input:string,news:any,textColor:string,width:number,height:number,fontSize:number,format:string,res:express.Response) => {
+export const _createImage = async(input: string,news: NewsProps,textColor: string, width: number, height: number, fontSize: number, format: string,res: express.Response) => {
     const bgColor = 'rgba(0,0,0,0'
         const data = await TextToImage.generate(`${input}`, {
             maxWidth: width,
@@ -72,12 +61,13 @@ export const _createImage = async(input:string,news:any,textColor:string,width:n
 export const createAudio = async(input:string,index:number,audio:Array<any>,res:express.Response) => {
     const client = new textToSpeech.TextToSpeechClient()
     const [response] = await client.synthesizeSpeech({
-        input: {text:input},
+        input: {text: input},
         voice: {languageCode: 'it', ssmlGender: 'MALE'},
         audioConfig: {audioEncoding: 'MP3'}
     });
     if (!response.audioContent) return res.status(500).json({msg: "Something went wrong. Don't panic. Try again."})
-    const audioPath = `${PUBLIC_PATH}/audio${index}.mp3`
+    const youtubePath = await coraline.use('youtube')
+    const audioPath = `${youtubePath}/audio${index}.mp3`
     const writeFile = util.promisify(fs.writeFile)
     await writeFile(audioPath,response.audioContent, 'binary')
     const audioDuration = await getAudioDurationInSeconds(audioPath)

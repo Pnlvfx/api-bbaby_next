@@ -6,8 +6,9 @@ import User from '../../models/User';
 import { Types, isValidObjectId } from 'mongoose';
 import cloudinary from '../../lib/cloudinary';
 import Comment from '../../models/Comment';
-import { sharePostToTelegram, _sharePostToTwitter } from './post-functions/createPost';
+import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
+import telegramapis from '../../lib/telegramapis';
 
 
 const PostCtrl = {
@@ -112,13 +113,16 @@ const PostCtrl = {
             }
             const savedPost = await post.save()
             if (sharePostToTG) {
-                await sharePostToTelegram(savedPost,res)
+                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' ? '@bbabystyle1' : '@bbaby_style'
+                const my_text = `https://bbabystyle.com/b/${savedPost.community}/comments/${savedPost._id}`
+                await telegramapis.sendMessage(chat_id, my_text);
             }
             if (sharePostToTwitter) {
                 await _sharePostToTwitter(user,savedPost,res)
             }
             const updateComNumber = await Community.findOneAndUpdate({name: post.community}, {$inc: {number_of_posts: +1}})
             res.status(201).json(savedPost)
+            telegramapis.sendLog(`New post created from ${user.username}`)
          } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})

@@ -24,3 +24,8 @@ interface Credentials {
      */
     scope?: string;
 }
+
+interface MyCredentials extends Credentials {
+    expires: string
+    credentials: Credentials
+}
