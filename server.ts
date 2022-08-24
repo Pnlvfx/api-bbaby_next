@@ -22,6 +22,7 @@ import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
+import coraline from './database/coraline';
 const {MONGO_URI} = config;
 
 const app = express();
@@ -44,6 +45,11 @@ connect(MONGO_URI).then((res) => {
 //     console.log(sendMessage);
 // })
 
+app.use('/', async (req, res) => {
+    const path = await coraline.use('videos')
+    console.log(path);
+})
+
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });
@@ -62,7 +68,7 @@ app.get('/sitemaps', async (req,res) => {
         if (err instanceof Error)
         res.status(500).json({msg: err.message})
     }
-})
+});
 
 app.use('/', oauthRouter)
 

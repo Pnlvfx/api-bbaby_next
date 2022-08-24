@@ -9,7 +9,7 @@ import Comment from '../../models/Comment';
 import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
-import { catchError } from '../../lib/common';
+import { catchError, catchErrorCtrl } from '../../lib/common';
 import coraline from '../../database/coraline';
 
 
@@ -139,8 +139,7 @@ const PostCtrl = {
             res.status(201).json(savedPost)
             telegramapis.sendLog(`New post created from ${user.username}`)
          } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
          }
     },
     voting: async (expressRequest:Request,res:Response) => {
@@ -216,7 +215,7 @@ const PostCtrl = {
             if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
             let posts = await Post.find({})
         } catch (err) {
-            catchError(err, res);
+            catchErrorCtrl(err, res);
         }
     }
 }

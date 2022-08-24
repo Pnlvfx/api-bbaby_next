@@ -12,30 +12,30 @@ const stringify = (data: unknown) => {
     return JSON.stringify(data);
   }
 
-
 type path = '/home/simone/simone/coraline + your path';
 const base_path = '/home/simone/simone/coraline';
 
-const coraline = {
-    mkDir: async (extra_path: string) => {
-        try {
-            const isAbsolute = path.isAbsolute(extra_path);
-            const where = isAbsolute ? path.join(base_path, extra_path) : path.resolve(base_path, extra_path);
-            fs.mkdir(where, {recursive: true}, (err) => {
-                if (err) {
-                    if (err.code != 'EEXIST') {
-                        new Error(err.message);
-                    } else {
-                        return where as path
-                    }
+const mkDir = async (extra_path: string) => {
+    try {
+        const isAbsolute = path.isAbsolute(extra_path);
+        const where = isAbsolute ? path.join(base_path, extra_path) : path.resolve(base_path, extra_path);
+        fs.mkdir(where, {recursive: true}, (err) => {
+            if (err) {
+                if (err.code != 'EEXIST') {
+                    catchError(err);
+                } else {
+                    return where as path
                 }
-                return where as path;
-            })
+            }
             return where as path;
-        } catch (err) {
-            catchError(err);
-        }
-    },
+        })
+        return where as path;
+    } catch (err) {
+        catchError(err);
+    }
+}
+
+const coraline = {
     initialize: async () => {
         try {
             
@@ -49,12 +49,14 @@ const coraline = {
     },
     use : async (document: string) => {
         const final_path = path.join(base_path, 'gov', document);
+        const isStatic = document.match('images') ? true : document.match('videos')? true : false;
+        const subFolder = isStatic ? 'static' : 'gov';
         try {
-            coraline.mkDir(path.join('gov', document))   
+            await mkDir(path.join(subFolder, document))
+            return final_path;
         } catch (err) {
             catchError(err)
         }
-        return final_path;
     },
     saveJSON: async (filename: string, file: any) => {
         try {
@@ -80,7 +82,7 @@ const coraline = {
                     if (collection.length !== 2) throw new Error('Invalid public_id')
                     return {collection: collection[0], id: collection[1]}
                 } catch (error) {
-                    return catchError(error);
+                    catchError(error);
                 }
         },
         buildUrl: (collection: string, id: string) => {
@@ -92,7 +94,7 @@ const coraline = {
             try {
                 const data = coraline.videos.splitId(public_id);
                 if (!data) throw new Error(`No data found`)
-                const collection = await coraline.mkDir(`/static/videos/${data?.collection}`);
+                const collection = await mkDir(`/static/videos/${data.collection}`);
                 if (!collection) throw new Error(`No collection found`);
                 const name = `${collection}/${data.id}.mp4`;
                 let buffer = Buffer.from(file.split(',')[1],"base64");

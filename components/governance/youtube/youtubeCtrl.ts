@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { UserRequest } from "../../../@types/express";
 import googleapis, { getAccessToken } from "../../../lib/googleapis";
-import { catchError } from "../../../lib/common";
+import { catchError, catchErrorCtrl } from "../../../lib/common";
 import {google} from 'googleapis'
 import coraline  from "../../../database/coraline";
 import config from '../../../config/config';
@@ -25,7 +25,7 @@ const youtubeCtrl = {
             if (!credentials) return res.status(401).json({msg: "Your acces token is expired"});
             return res.status(200).json(true)
         } catch (err) {
-            catchError(err, res)
+            catchErrorCtrl(err, res)
         }
     },
     youtubeAccessToken: async (expressRequest: Request, res: Response) => {
@@ -38,7 +38,7 @@ const youtubeCtrl = {
             const credentials = await getAccessToken({grant_type: 'authorization_code', code: code.toString(), redirect_uri});
             res.status(200).json({msg: "Token stored successfully"})
         } catch (err) {
-            catchError(err, res)
+            catchErrorCtrl(err, res)
         }
     },
     uploadYoutube: async (expressRequest: Request, res: Response) => {
@@ -94,7 +94,7 @@ const youtubeCtrl = {
             // // remember to clean the folder
             // res.status(201).json({videoInfo: data, msg: `Video and thumbnail updated successfully`})
         } catch (err) {
-            catchError(err, res);
+            catchErrorCtrl(err, res);
         }
     },
 }
