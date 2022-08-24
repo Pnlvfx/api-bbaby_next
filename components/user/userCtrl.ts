@@ -10,11 +10,15 @@ const userCtrl = {
         try {
             const {token} = req.cookies;
             if (!token) return res.status(200).json(null);
-            const user = await getUserFromToken(token)
+            const user = await getUserFromToken(token);
             if (!user) {
                 res.json(null)
             } else {
-                res.status(200).json({user: {username:user.username, avatar: user.avatar, role: user.role}})
+                res.status(200).json({user: {
+                    username:user.username, 
+                    avatar: user.avatar, 
+                    role: user.role}
+                })
             }
         } catch (err) {
             if (err instanceof Error)

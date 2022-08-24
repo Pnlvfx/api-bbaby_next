@@ -9,6 +9,7 @@ import Comment from '../../models/Comment';
 import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
+import { catchError } from '../../lib/common';
 
 
 const PostCtrl = {
@@ -190,6 +191,18 @@ const PostCtrl = {
             res.json({msg: "Deleted success"})
         } catch (err) {
             res.status(500).json({msg: "Something went wrong"})
+        }
+    },
+    getSSRposts: async (expressRequest:Request,res:Response) => {
+        try {
+            const req = expressRequest as UserRequest;
+            const {token} = req.cookies;
+            const userLang = req.acceptsLanguages('en', 'it')
+            const {community,author,limit,skip} = req.query;
+            if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
+            let posts = await Post.find({})
+        } catch (err) {
+            catchError(err, res);
         }
     }
 }
