@@ -21,13 +21,11 @@ export const catchErrorCtrl = (err: unknown, res: Response) => {
     const {NODE_ENV} = config;
     if (err instanceof Error) {
         if (NODE_ENV === 'production') telegramapis.sendLog(err.message).then(() => {
-            throw new Error('API error');
+            res.status(500).json({msg: err.message});
         })
-        res.status(500).json({msg: err.message});
     } else {
         if (NODE_ENV === 'production') telegramapis.sendLog(`API error`).then(() => {
-            throw new Error('API error');
+            res.status(500).json({msg: 'API error'});
         })
-        res.status(500).json({msg: 'API error'});
     }
 }

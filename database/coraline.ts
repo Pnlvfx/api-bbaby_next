@@ -12,7 +12,7 @@ const stringify = (data: unknown) => {
     }
     return JSON.stringify(data);
   }
-const base_path = '/home/simone/simone/coraline';
+const base_path = '/etc';
 
 const mkDir = (extra_path: string) => {
     const isAbsolute = path.isAbsolute(extra_path);
@@ -44,7 +44,7 @@ const coraline = {
         return date;
     },
     use : async (document: string) => {
-        const isStatic = document.match('images') ? true : document.match('videos')? true : false;
+        const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
         const subFolder = isStatic ? 'static' : 'gov';
         try {
             const final_path = mkDir(path.join(subFolder, document))
