@@ -1,11 +1,10 @@
 import type { Request, Response } from "express";
 import { UserRequest } from "../../../@types/express";
 import googleapis, { getAccessToken } from "../../../lib/googleapis";
-import { catchError, catchErrorCtrl } from "../../../lib/common";
+import { catchErrorCtrl } from "../../../lib/common";
 import {google} from 'googleapis'
 import coraline  from "../../../database/coraline";
 import config from '../../../config/config';
-import fs from 'fs';
 
 const {YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET} = config;
 

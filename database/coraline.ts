@@ -12,7 +12,9 @@ const stringify = (data: unknown) => {
     }
     return JSON.stringify(data);
   }
-const base_path = '/etc';
+
+const {NODE_ENV} = config;
+const base_path =  NODE_ENV === 'production' ? '/home/simone/simone/coraline' : `/home/simonegauli/coraline`;
 
 const mkDir = (extra_path: string) => {
     const isAbsolute = path.isAbsolute(extra_path);
