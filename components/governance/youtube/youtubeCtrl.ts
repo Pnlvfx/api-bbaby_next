@@ -34,10 +34,8 @@ const youtubeCtrl = {
             const {code} = req.query;
             const origin = checkOrigin(req, res);
             const redirect_uri = `${origin}/governance`;
-            console.log(redirect_uri)
             if (!code) return res.status(400).json({msg: "No code find in your query."});
             const credentials = await getAccessToken({grant_type: 'authorization_code', code: code.toString(), redirect_uri});
-            console.log(credentials);
             res.status(200).json({msg: "Token stored successfully"})
         } catch (err) {
             catchError(err, res)

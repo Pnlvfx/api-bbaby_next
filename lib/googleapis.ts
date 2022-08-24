@@ -2,6 +2,7 @@ import { youtube_v3 } from 'googleapis';
 import config from '../config/config';
 import coraline from '../database/coraline';
 import { catchError } from './common';
+import telegramapis from './telegramapis';
 
 const { YOUTUBE_CLIENT_ID } = config;
 
@@ -108,7 +109,7 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
     try {
         let body = null;
         if (code && redirect_uri) {
-            console.log("google access token with code")
+            telegramapis.sendLog("google access token with code")
             body = new URLSearchParams({
                 client_id: YOUTUBE_CLIENT_ID,
                 client_secret: YOUTUBE_CLIENT_SECRET,

@@ -1,5 +1,6 @@
 import express from 'express';
 import config from './config/config';
+import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import compression from 'compression';
@@ -26,6 +27,7 @@ const {MONGO_URI} = config;
 const app = express();
 
 app.use(contentType)
+app.use(useragent.express())
 app.use(cookieParser());
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit: '50mb'}))

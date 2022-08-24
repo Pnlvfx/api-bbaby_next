@@ -1,6 +1,8 @@
 import fs from 'fs';
+import config from '../config/config';
 import path from 'path';
 import { catchError } from '../lib/common';
+import { VideoProps } from './@types/video';
 const fsPromises = fs.promises;
 
 const stringify = (data: unknown) => {
@@ -31,7 +33,6 @@ const coraline = {
             })
             return where as path;
         } catch (err) {
-            console.log('error from catch')
             catchError(err);
         }
     },
@@ -39,31 +40,19 @@ const coraline = {
         try {
             
         } catch (err) {
-            if (err instanceof Error) {
-                console.log(err.message);
-                throw new Error(err.message);
-            }
+            catchError(err)
         }
     },
     addHours: (numOfHours: number, date = new Date()) => {
         date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
         return date;
     },
-    saveImages: async (path: string,file: string) => {
-        try {
-            await fsPromises.mkdir(path, {recursive: true});
-        } catch (err: any) {
-            if (err.code != 'EEXISTS') {
-                throw new Error(err.message)
-            }
-        }
-    },
     use : async (document: string) => {
         const final_path = path.join(base_path, 'gov', document);
         try {
             coraline.mkDir(path.join('gov', document))   
-        } catch (error) {
-            
+        } catch (err) {
+            catchError(err)
         }
         return final_path;
     },
@@ -83,6 +72,48 @@ const coraline = {
         } catch (err) {
             catchError(err);
         }
+    },
+    videos: {
+        splitId: (public_id: string) => {
+                try {
+                    const collection = public_id.split('/');
+                    if (collection.length !== 2) throw new Error('Invalid public_id')
+                    return {collection: collection[0], id: collection[1]}
+                } catch (error) {
+                    return catchError(error);
+                }
+        },
+        buildUrl: (collection: string, id: string) => {
+            const {SERVER_URL} = config;
+            const url = `${SERVER_URL}/videos${collection}/${id}.mp4`;
+            return url;
+        },
+        saveVideo: async (public_id: string, file: string, width: number, height: number) => {
+            try {
+                const data = coraline.videos.splitId(public_id);
+                if (!data) throw new Error(`No data found`)
+                const collection = await coraline.mkDir(`/static/videos/${data?.collection}`);
+                if (!collection) throw new Error(`No collection found`);
+                const name = `${collection}/${data.id}.mp4`;
+                let buffer = Buffer.from(file.split(',')[1],"base64");
+                const save = await fsPromises.writeFile(name, buffer);
+                const url = coraline.videos.buildUrl(collection, data.id)
+                const video = {
+                    url,
+                    folder: data.collection,
+                    format: 'mp4',
+                    created_at: new Date().toISOString(),
+                    version: 1,
+                    public_id,
+                    resource_type: 'video',
+                    width,
+                    height,
+                }
+                return video as VideoProps;
+            } catch (err) {
+                return catchError(err);
+            }
+        },
     }
 }
 

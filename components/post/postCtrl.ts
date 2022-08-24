@@ -10,6 +10,7 @@ import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
 import { catchError } from '../../lib/common';
+import coraline from '../../database/coraline';
 
 
 const PostCtrl = {
@@ -84,7 +85,19 @@ const PostCtrl = {
          try {
             const req = expressRequest as UserRequest;
             const {user} = req;
-            const {title,body,community,communityIcon,selectedFile,isImage,isVideo,height,width,sharePostToTG,sharePostToTwitter} = req.body;
+            const {
+                title, 
+                body,
+                community,
+                communityIcon,
+                selectedFile,
+                isImage,
+                isVideo,
+                height,
+                width,
+                sharePostToTG,
+                sharePostToTwitter
+            } = req.body;
             if (!title) return res.status(500).json({msg: "Title is required."})
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
             const communityExist = await Community.exists({name: community})
@@ -105,6 +118,7 @@ const PostCtrl = {
                 post.$set({mediaInfo: {isImage,image:image.secure_url,dimension: [height,width]}})
             }
             if (isVideo) {
+                //const _video = await coraline.videos.saveVideo(post._id.toString(), selectedFile, width, height);
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),
