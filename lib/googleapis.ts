@@ -4,7 +4,7 @@ import coraline from '../database/coraline';
 import { catchError } from './common';
 import telegramapis from './telegramapis';
 
-const { YOUTUBE_CLIENT_ID } = config;
+const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;
 
 const googleapis = {
     createGoogleOauth: async (origin: string) => {
@@ -103,7 +103,7 @@ interface getAccessTokenProps {
 }
 
 export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_token }: getAccessTokenProps) => {
-    const { YOUTUBE_CLIENT_SECRET } = config;
+    telegramapis.sendLog(YOUTUBE_CLIENT_SECRET);
     const googleTokenUrl = 'https://oauth2.googleapis.com/token';
     const headers = {'Content-Type' : 'application/x-www-form-urlencoded' };
     try {
@@ -117,7 +117,6 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
                 redirect_uri,
             })
         } else if (refresh_token) {
-            console.log("google access token : with_refresh")
             body = new URLSearchParams({
                 client_id: YOUTUBE_CLIENT_ID,
                 client_secret: YOUTUBE_CLIENT_SECRET,
@@ -130,9 +129,15 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
             headers,
             body
         })
-        if (!response.ok) throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
+        if (!response.ok) {
+            telegramapis.sendLog(response.status + response.statusText + 'Error while trying to get a new token!');
+            throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
+        }
         const tokenPath = await coraline.use('token')
-        if (!tokenPath) throw new Error(`Error while trying to create a token path!`)
+        if (!tokenPath) {
+            telegramapis.sendLog('Not token path')
+            throw new Error(`Error while trying to create a token path!`)
+        }
         telegramapis.sendLog(tokenPath);
         const file = `${tokenPath}/youtube_access_token.json`;
         const credentials: Credentials = await response.json();
