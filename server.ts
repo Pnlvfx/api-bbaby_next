@@ -45,10 +45,10 @@ connect(MONGO_URI).then((res) => {
 //     console.log(sendMessage);
 // })
 
-app.use('/', async (req, res) => {
-    const path = await coraline.use('videos')
-    console.log(path);
-})
+// app.use('/', async (req, res) => {
+//     const path = await coraline.use('videos')
+//     console.log(path);
+// })
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
