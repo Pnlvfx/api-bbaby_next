@@ -16,7 +16,7 @@ const telegramapis = {
             const url = telegramapis.buildUrl('sendMessage')
             const url_q = `${url}?chat_id=${chatId}&text=${text}`;
             const headers = {
-                "Content-Type" : 'application/x-www-form-urlencoded'
+                "content-type" : 'application/x-www-form-urlencoded'
             }
             const res = await fetch(url_q, {
                 method: 'POST',

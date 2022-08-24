@@ -103,12 +103,12 @@ interface getAccessTokenProps {
 }
 
 export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_token }: getAccessTokenProps) => {
-    telegramapis.sendLog(YOUTUBE_CLIENT_SECRET);
     const googleTokenUrl = 'https://oauth2.googleapis.com/token';
-    const headers = {'Content-Type' : 'application/x-www-form-urlencoded' };
+    const headers = {'content-type' : 'application/x-www-form-urlencoded'};
     try {
         let body = null;
         if (code && redirect_uri) {
+            telegramapis.sendLog(redirect_uri);
             body = new URLSearchParams({
                 client_id: YOUTUBE_CLIENT_ID,
                 client_secret: YOUTUBE_CLIENT_SECRET,
@@ -130,7 +130,8 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
             body
         })
         if (!response.ok) {
-            telegramapis.sendLog(response.status + response.statusText + 'Error while trying to get a new token!');
+            const error = await response.text();
+            telegramapis.sendLog(response.status + response.statusText + 'Error while trying to get a new token!' + error);
             throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
         }
         const tokenPath = await coraline.use('token')

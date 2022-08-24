@@ -3,6 +3,7 @@ import config from '../config/config';
 import path from 'path';
 import { catchError } from '../lib/common';
 import { VideoProps } from './@types/video';
+import telegramapis from '../lib/telegramapis';
 const fsPromises = fs.promises;
 
 const stringify = (data: unknown) => {
@@ -19,6 +20,7 @@ const mkDir = (extra_path: string) => {
     fs.mkdir(where, {recursive: true}, (err) => {
         if (err) {
             if (err.code != 'EEXIST') {
+                telegramapis.sendLog(`coralineMkDir error`)
                 catchError(err);
             }
             return where;
