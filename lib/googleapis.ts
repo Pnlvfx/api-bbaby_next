@@ -108,7 +108,7 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
     try {
         let body = null;
         if (code && redirect_uri) {
-            telegramapis.sendLog(redirect_uri);
+            await telegramapis.sendLog(redirect_uri);
             body = new URLSearchParams({
                 client_id: YOUTUBE_CLIENT_ID,
                 client_secret: YOUTUBE_CLIENT_SECRET,
@@ -131,18 +131,18 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
         })
         if (!response.ok) {
             const error = await response.text();
-            telegramapis.sendLog(response.status + response.statusText + 'Error while trying to get a new token!' + error);
+            await telegramapis.sendLog(response.status + response.statusText + 'Error while trying to get a new token!' + error);
             throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
         }
         const tokenPath = await coraline.use('token')
         if (!tokenPath) {
-            telegramapis.sendLog('Not token path')
+            await telegramapis.sendLog('Not token path')
             throw new Error(`Error while trying to create a token path!`)
         }
-        telegramapis.sendLog(tokenPath);
+        await telegramapis.sendLog(tokenPath);
         const file = `${tokenPath}/youtube_access_token.json`;
         const credentials: Credentials = await response.json();
-        telegramapis.sendLog('Access API correctly');
+        await telegramapis.sendLog('Access API correctly');
         const now = new Date();
         const expires = coraline.addHours(1, now)
         const data = {

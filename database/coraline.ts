@@ -20,8 +20,9 @@ const mkDir = (extra_path: string) => {
     fs.mkdir(where, {recursive: true}, (err) => {
         if (err) {
             if (err.code != 'EEXIST') {
-                telegramapis.sendLog(`coralineMkDir error`)
-                catchError(err);
+                telegramapis.sendLog(`coralineMkDir error`).then(() => {
+                    catchError(err);
+                })
             }
             return where;
         }

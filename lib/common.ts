@@ -5,11 +5,14 @@ import telegramapis from "./telegramapis";
 export const catchError = (err : unknown) => {
     const {NODE_ENV} = config;
     if (err instanceof Error) {
-        if (NODE_ENV === 'production') telegramapis.sendLog(err.message);
-        throw new Error(err.message);
+        if (NODE_ENV === 'production') telegramapis.sendLog(err.message).then(() => {
+            throw new Error(err.message);
+        })
     } else {
-        if (NODE_ENV === 'production') telegramapis.sendLog(`API error`);
-        throw new Error('API error');
+        if (NODE_ENV === 'production') telegramapis.sendLog(`API error`).then(() => {
+            throw new Error('API error');
+        })
+        
     }
 }
 
@@ -17,10 +20,14 @@ export const catchError = (err : unknown) => {
 export const catchErrorCtrl = (err: unknown, res: Response) => {
     const {NODE_ENV} = config;
     if (err instanceof Error) {
-        if (NODE_ENV === 'production') telegramapis.sendLog(err.message);
+        if (NODE_ENV === 'production') telegramapis.sendLog(err.message).then(() => {
+            throw new Error('API error');
+        })
         res.status(500).json({msg: err.message});
     } else {
-        if (NODE_ENV === 'production') telegramapis.sendLog(`API error`);
+        if (NODE_ENV === 'production') telegramapis.sendLog(`API error`).then(() => {
+            throw new Error('API error');
+        })
         res.status(500).json({msg: 'API error'});
     }
 }
