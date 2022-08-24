@@ -39,11 +39,6 @@ connect(MONGO_URI).then((res) => {
 
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
 
-app.use('/', async () => {
-    const c = await coraline.use('static');
-    console.log(c)
-})
-
 // app.use('/', async (req, res ) => { // use this for test
 //     const telegram = await telegramapis.getChatId()
 //     const sendMessage = await telegramapis.sendMessage('-1001649395850', 'ciaooo')
