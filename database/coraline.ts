@@ -11,28 +11,21 @@ const stringify = (data: unknown) => {
     }
     return JSON.stringify(data);
   }
-
-type path = '/home/simone/simone/coraline + your path';
 const base_path = '/home/simone/simone/coraline';
 
-const mkDir = async (extra_path: string) => {
-    try {
-        const isAbsolute = path.isAbsolute(extra_path);
-        const where = isAbsolute ? path.join(base_path, extra_path) : path.resolve(base_path, extra_path);
-        fs.mkdir(where, {recursive: true}, (err) => {
-            if (err) {
-                if (err.code != 'EEXIST') {
-                    catchError(err);
-                } else {
-                    return where as path
-                }
+const mkDir = (extra_path: string) => {
+    const isAbsolute = path.isAbsolute(extra_path);
+    const where = isAbsolute ? path.join(base_path, extra_path) : path.resolve(base_path, extra_path);
+    fs.mkdir(where, {recursive: true}, (err) => {
+        if (err) {
+            if (err.code != 'EEXIST') {
+                catchError(err);
             }
-            return where as path;
-        })
-        return where as path;
-    } catch (err) {
-        catchError(err);
-    }
+            return where;
+        }
+        return where;
+    })
+    return where;
 }
 
 const coraline = {
@@ -48,14 +41,13 @@ const coraline = {
         return date;
     },
     use : async (document: string) => {
-        const final_path = path.join(base_path, 'gov', document);
         const isStatic = document.match('images') ? true : document.match('videos')? true : false;
         const subFolder = isStatic ? 'static' : 'gov';
         try {
-            await mkDir(path.join(subFolder, document))
+            const final_path = mkDir(path.join(subFolder, document))
             return final_path;
         } catch (err) {
-            catchError(err)
+            catchError(err);
         }
     },
     saveJSON: async (filename: string, file: any) => {

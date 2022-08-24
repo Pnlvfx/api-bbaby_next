@@ -109,7 +109,6 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
     try {
         let body = null;
         if (code && redirect_uri) {
-            telegramapis.sendLog("google access token with code")
             body = new URLSearchParams({
                 client_id: YOUTUBE_CLIENT_ID,
                 client_secret: YOUTUBE_CLIENT_SECRET,
@@ -126,15 +125,18 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
                 refresh_token
             })
         }
-        const getToken = await fetch(googleTokenUrl, {
+        const response = await fetch(googleTokenUrl, {
             method: 'post',
             headers,
             body
         })
-        if (!getToken.ok) throw new Error(getToken.status + getToken.statusText + 'Error while trying to get a new token!');
+        if (!response.ok) throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
         const tokenPath = await coraline.use('token')
+        if (!tokenPath) throw new Error(`Error while trying to create a token path!`)
+        telegramapis.sendLog(tokenPath);
         const file = `${tokenPath}/youtube_access_token.json`;
-        const credentials: Credentials = await getToken.json();
+        const credentials: Credentials = await response.json();
+        telegramapis.sendLog('Access API correctly');
         const now = new Date();
         const expires = coraline.addHours(1, now)
         const data = {
@@ -142,12 +144,8 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
             credentials
         }
         await coraline.saveJSON(file, data);
-        return credentials
+        return credentials;
     } catch (err) {
-        if (err instanceof Error) {
-            throw new Error(err.message)
-        } else {
-            throw new Error('Unknown error')
-        }
+        catchError(err);
     }
 }

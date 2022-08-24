@@ -22,7 +22,6 @@ import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
-import coraline from './database/coraline';
 const {MONGO_URI} = config;
 
 const app = express();
