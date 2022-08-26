@@ -1,6 +1,7 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
 import config from '../../config/config'
+import coraline from '../../database/coraline';
 import _oauth from '../../lib/twitter_oauth'
 import User from '../../models/User'
 
@@ -82,15 +83,23 @@ const TwitterCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
-            const twitter = user.tokens?.find((provider) => provider.provider === 'twitter')
+            const twitter = user.tokens?.find((provider) => provider.provider === 'twitter');
             if (!twitter) return res.status(401).json({msg: 'You need to connect your twitter account to access this page!'})
             const {oauth_access_token,oauth_access_token_secret} = twitter;
-            if (!oauth_access_token || !oauth_access_token_secret) return res.status(500).json({msg: "Please, try to login to twitter again!"})
+            if (!oauth_access_token || !oauth_access_token_secret) return res.status(400).json({msg: "Please, try to login to twitter again!"})
             const {slug,owner_screen_name} = req.query;
-            if (! slug || !owner_screen_name) return res.status(500).json({msg: 'This API require a slug parameter and an owner_screen_name.'})
-            const response = await oauth.getProtectedResource(`https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,'GET', oauth_access_token, oauth_access_token_secret)
-            res.json(JSON.parse(response.data))
+            if (! slug || !owner_screen_name) return res.status(400).json({msg: 'This API require a slug parameter and an owner_screen_name.'})
+            const response = await oauth.getProtectedResource(`https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,'GET', oauth_access_token, oauth_access_token_secret);
+            const collection = await coraline.use('twitter');
+            const data = JSON.parse(response.data);
+            if (!Array.isArray(data)) return res.status(500).json({msg: "Invalid response from twitter!"})
+            const saveTweet = async () => {
+                const local = await coraline.useDocument('tweets');
+            }
+
+            res.json(data);
         } catch (error) {
+            console.log(error);
             res.status(403).json({message: error});
         }
     },

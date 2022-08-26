@@ -13,4 +13,6 @@ oauthRouter.post('/logout', oauthCtrl.logout);
 
 oauthRouter.post('/google_login', oauthCtrl.googleLogin);
 
+oauthRouter.post('/eu_cookie', oauthCtrl.eu_cookie);
+
 export default oauthRouter;

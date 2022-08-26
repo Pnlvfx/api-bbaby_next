@@ -1,16 +1,14 @@
 import type { Response } from "express";
-import config from '../config/config';
 import telegramapis from "./telegramapis";
 
-export const catchError = (err : unknown) => {
-    const {NODE_ENV} = config;
+export const catchError = (err : unknown, from?: string) => {
     if (err instanceof Error) {
-        if (NODE_ENV === 'production') telegramapis.sendLog(err.message).then(() => {
-            throw new Error(err.message);
+        telegramapis.sendLog(`${err.message} ${from}`).then(() => {
+            throw new Error(`${err.message} ${from}`);
         })
     } else {
-        if (NODE_ENV === 'production') telegramapis.sendLog(`API error`).then(() => {
-            throw new Error('API error');
+        telegramapis.sendLog(`API error ${from}`).then(() => {
+            throw new Error(`API error ${from}`);
         })
         
     }
@@ -18,13 +16,12 @@ export const catchError = (err : unknown) => {
 
 
 export const catchErrorCtrl = (err: unknown, res: Response) => {
-    const {NODE_ENV} = config;
     if (err instanceof Error) {
-        if (NODE_ENV === 'production') telegramapis.sendLog(err.message).then(() => {
+        telegramapis.sendLog(err.message).then(() => {
             res.status(500).json({msg: err.message});
         })
     } else {
-        if (NODE_ENV === 'production') telegramapis.sendLog(`API error`).then(() => {
+        telegramapis.sendLog(`API error`).then(() => {
             res.status(500).json({msg: 'API error'});
         })
     }

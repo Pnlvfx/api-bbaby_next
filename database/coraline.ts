@@ -6,6 +6,12 @@ import { VideoProps } from './@types/video';
 import telegramapis from '../lib/telegramapis';
 const fsPromises = fs.promises;
 
+const baseDocument = (document: string) => {
+    const d = {
+        document : []
+    }
+}
+
 const stringify = (data: unknown) => {
     if (typeof data === 'string') {
       return data;
@@ -23,7 +29,7 @@ const mkDir = (extra_path: string) => {
         if (err) {
             if (err.code != 'EEXIST') {
                 telegramapis.sendLog(`coralineMkDir error`).then(() => {
-                    catchError(err);
+                    catchError(err, 'coraline.mkDir');
                 })
             }
             return where;
@@ -52,15 +58,26 @@ const coraline = {
             const final_path = mkDir(path.join(subFolder, document))
             return final_path;
         } catch (err) {
-            catchError(err);
+            catchError(err, 'coraline.use');
         }
     },
-    saveJSON: async (filename: string, file: any) => {
+    useDocument: async (document: string) => {
+        try {
+            const final_path = mkDir(path.join('gov', document));
+            const final_file = `${final_path}/${document}.json`
+            const jsonDocument = await coraline.saveJSON(final_file, baseDocument(document))
+            const file = await coraline.find(final_file);
+            return file;
+        } catch (err) {
+            catchError(err, 'coraline.useDocument');
+        }
+    },
+    saveJSON: async (filename: string, file: unknown) => {
         try {
             const json = stringify(file)
             await fsPromises.writeFile(filename, json);
         } catch (err) {
-            catchError(err)
+            catchError(err, 'coraline.saveJSON')
         }
     },
     find: async (file: string) => {

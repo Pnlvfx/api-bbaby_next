@@ -9,8 +9,7 @@ import Comment from '../../models/Comment';
 import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
-import { catchError, catchErrorCtrl } from '../../lib/common';
-import coraline from '../../database/coraline';
+import { catchErrorCtrl } from '../../lib/common';
 
 
 const PostCtrl = {

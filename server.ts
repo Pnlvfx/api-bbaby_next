@@ -22,7 +22,6 @@ import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
-import coraline from './database/coraline';
 const {MONGO_URI} = config;
 
 const app = express();
@@ -39,16 +38,6 @@ connect(MONGO_URI).then((res) => {
 
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
 
-// app.use('/', async (req, res ) => { // use this for test
-//     const telegram = await telegramapis.getChatId()
-//     const sendMessage = await telegramapis.sendMessage('-1001649395850', 'ciaooo')
-//     console.log(sendMessage);
-// })
-
-// app.use('/', async (req, res) => {
-//     const path = await coraline.use('videos')
-//     console.log(path);
-// })
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
