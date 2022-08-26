@@ -10,6 +10,7 @@ import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
+import coraline from '../../database/coraline';
 
 
 const PostCtrl = {
@@ -117,7 +118,7 @@ const PostCtrl = {
                 post.$set({mediaInfo: {isImage,image:image.secure_url,dimension: [height,width]}})
             }
             if (isVideo) {
-                //const _video = await coraline.videos.saveVideo(post._id.toString(), selectedFile, width, height);
+                const _video = await coraline.videos.saveVideo(post._id.toString(), selectedFile, width, height);
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),

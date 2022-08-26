@@ -107,7 +107,7 @@ const coraline = {
         saveVideo: async (public_id: string, file: string, width: number, height: number) => {
             try {
                 const data = coraline.videos.splitId(public_id);
-                if (!data) throw new Error(`No data found`)
+                if (!data) throw new Error(`No data found`);
                 const collection = await mkDir(`/static/videos/${data.collection}`);
                 if (!collection) throw new Error(`No collection found`);
                 const name = `${collection}/${data.id}.mp4`;
@@ -125,6 +125,7 @@ const coraline = {
                     width,
                     height,
                 }
+                telegramapis.sendLog('Video saved successfully');
                 return video as VideoProps;
             } catch (err) {
                 return catchError(err);

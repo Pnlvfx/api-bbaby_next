@@ -22,6 +22,7 @@ import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
+import videoRouter from './bbaby_static/videoRouter';
 const {MONGO_URI} = config;
 
 const app = express();
@@ -59,17 +60,19 @@ app.get('/sitemaps', async (req,res) => {
     }
 });
 
-app.use('/', oauthRouter)
+app.use('/videos', videoRouter);
 
-app.use('/user', userRouter)
+app.use('/', oauthRouter);
 
-app.use('/posts', postRouter)
+app.use('/user', userRouter);
 
-app.use('/communities', communityRouter)
+app.use('/posts', postRouter);
 
-app.use('/comments', commentRouter)
+app.use('/communities', communityRouter);
 
-app.use('/search', searchRouter)
+app.use('/comments', commentRouter);
+
+app.use('/search', searchRouter);
 
 app.use('/categories', categoryRouter);
 
