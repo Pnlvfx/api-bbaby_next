@@ -5,7 +5,6 @@ dotenv.config({path: path.resolve(__dirname, "../config/config.env")})
 
 interface ENV {
     MONGO_URI: string | undefined
-    SESSION_TRACKER: string | undefined
     CLIENT_URL: string | undefined
     SERVER_URL: string | undefined
     TELEGRAM_TOKEN: string | undefined
@@ -39,7 +38,6 @@ interface ENV {
 
 interface Config {
     MONGO_URI: string
-    SESSION_TRACKER: string
     CLIENT_URL: string
     SERVER_URL: string
     TELEGRAM_TOKEN: string
@@ -74,7 +72,6 @@ interface Config {
 const getConfig = ():ENV => {
     return {
         MONGO_URI: process.env.MONGO_URI,
-        SESSION_TRACKER: process.env.SESSION_TRACKER,
         CLIENT_URL: process.env.CLIENT_URL,
         SERVER_URL: process.env.SERVER_URL,
         TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
