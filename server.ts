@@ -40,9 +40,9 @@ connect(MONGO_URI).then((res) => {
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
 
 
-app.get('/', (req, res) => {
-    res.send('This is Bbabystyle API');
-});
+// app.get('/', (req, res) => {
+//     res.send('This is Bbabystyle API');
+// });
 
 app.get('/sitemaps', async (req,res) => {
     try {

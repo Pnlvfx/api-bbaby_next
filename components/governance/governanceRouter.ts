@@ -18,6 +18,8 @@ governanceRouter.post('/news/article', governanceCtrl.getArticle)
 
 governanceRouter.post('/news', governanceCtrl.postArticle)
 
-governanceRouter.get('/pexels', governanceCtrl.getPexelsImage)
+governanceRouter.get('/pexels', governanceCtrl.getPexelsImage);
+
+governanceRouter.get('/reddit', governanceCtrl.getRedditPosts);
 
 export default governanceRouter;
