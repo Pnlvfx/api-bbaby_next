@@ -10,7 +10,6 @@ export const catchError = (err : unknown, from?: string) => {
         telegramapis.sendLog(`API error ${from}`).then(() => {
             throw new Error(`API error ${from}`);
         })
-        
     }
 }
 
