@@ -3,50 +3,11 @@ import config from '../config/config';
 import path from 'path';
 import { catchError } from '../lib/common';
 import { VideoProps } from './@types/video';
-import telegramapis from '../lib/telegramapis';
+import { baseDocument, coralinemkDir, stringify } from './utils/coralineFunctions';
+import collections from './utils/route/collections';
 const fsPromises = fs.promises;
 
-const baseDocument = (document: string) => {
-    const d = {
-        document : []
-    }
-}
-
-const stringify = (data: unknown) => {
-    if (typeof data === 'string') {
-      return data;
-    }
-    return JSON.stringify(data);
-  }
-
-const {NODE_ENV} = config;
-const base_path =  NODE_ENV === 'production' ? `/home/simonegauli/coraline` : '/home/simone/simone/coraline';
-
-const mkDir = (extra_path: string) => {
-    const isAbsolute = path.isAbsolute(extra_path);
-    const where = isAbsolute ? path.join(base_path, extra_path) : path.resolve(base_path, extra_path);
-    fs.mkdir(where, {recursive: true}, (err) => {
-        if (err) {
-            if (err.code != 'EEXIST') {
-                telegramapis.sendLog(`coralineMkDir error`).then(() => {
-                    catchError(err, 'coraline.mkDir');
-                })
-            }
-            return where;
-        }
-        return where;
-    })
-    return where;
-}
-
 const coraline = {
-    initialize: async () => {
-        try {
-            
-        } catch (err) {
-            catchError(err)
-        }
-    },
     addHours: (numOfHours: number, date = new Date()) => {
         date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
         return date;
@@ -55,7 +16,7 @@ const coraline = {
         const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
         const subFolder = isStatic ? 'static' : 'gov';
         try {
-            const final_path = mkDir(path.join(subFolder, document))
+            const final_path = coralinemkDir(path.join(subFolder, document))
             return final_path;
         } catch (err) {
             catchError(err, 'coraline.use');
@@ -63,7 +24,7 @@ const coraline = {
     },
     useDocument: async (document: string) => {
         try {
-            const final_path = mkDir(path.join('gov', document));
+            const final_path = coralinemkDir(path.join('gov', document));
             const final_file = `${final_path}/${document}.json`
             const jsonDocument = await coraline.saveJSON(final_file, baseDocument(document))
             const file = await coraline.find(final_file);
@@ -73,6 +34,7 @@ const coraline = {
         }
     },
     saveJSON: async (filename: string, file: unknown) => {
+        const isArray = Array.isArray(file);
         try {
             const json = stringify(file)
             await fsPromises.writeFile(filename, json);
@@ -88,6 +50,12 @@ const coraline = {
         } catch (err) {
             catchError(err);
         }
+    },
+    collections : (collectionName: string) => {
+        const f_path = coralinemkDir(path.join('gov', collectionName));
+        coraline.find(`${f_path}/${collectionName}.json`).then((mainDocument) => {
+            return collections;
+        });
     },
     videos: {
         splitId: (public_id: string) => {
@@ -108,7 +76,7 @@ const coraline = {
             try {
                 const data = coraline.videos.splitId(public_id);
                 if (!data) throw new Error(`No data found`)
-                const collection = await mkDir(`/static/videos/${data.collection}`);
+                const collection = coralinemkDir(`/static/videos/${data.collection}`);
                 if (!collection) throw new Error(`No collection found`);
                 const name = `${collection}/${data.id}.mp4`;
                 let buffer = Buffer.from(file.split(',')[1],"base64");
