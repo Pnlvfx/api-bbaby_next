@@ -7,6 +7,8 @@ redditRouter.get('/login',  redditCtrl.redditLogin);
 
 redditRouter.get('/logout', redditCtrl.redditLogout);
 
-redditRouter.get('/posts', redditCtrl.redditPosts);
+redditRouter.get('/public_posts', redditCtrl.getRedditPosts);
+
+redditRouter.get('/posts', redditCtrl.redditPostsWithToken);
 
 export default redditRouter;

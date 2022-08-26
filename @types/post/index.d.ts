@@ -11,15 +11,15 @@ interface PostProps extends Document {
     ups: number
     liked: string
     numComments: number
-    _id: string
 }
 
 interface MediaInfoProps {
-    dimension?: Types.Array
+    dimension?: Types.Array<number>
     isImage?: boolean
     isVideo?: boolean
     image?:string
     video?: {
         url?: string
+        thumbnail: string
     }
 }

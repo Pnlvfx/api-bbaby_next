@@ -267,21 +267,6 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getRedditPosts: async (expressRequest: Request, res: Response) => {
-            try {
-                const response = await fetch('https://api.reddit.com', {
-                method: 'get'
-                })
-                if (!response.ok) {
-                    const text = await response.text();
-                    catchError(text);
-                }
-                const data = await response.json();
-                res.status(200).json(data);
-            } catch (err) {
-                catchErrorCtrl(err, res)
-            }
-        }
 }
 
 export default governanceCtrl;

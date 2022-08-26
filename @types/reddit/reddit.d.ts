@@ -15,12 +15,12 @@ interface RedditPosts {
         category: string | null
         is_robot_indexable: boolean
         url: string
-        media: null 
+        media: null | RedditMediaProps
         is_video: boolean
     }
 }
 
-type MediaPros = {
+type RedditMediaProps = {
     reddit_video: {
         height: number
         width: number

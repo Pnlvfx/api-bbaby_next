@@ -2,6 +2,7 @@ import type {Request,Response} from 'express';
 import type{ UserRequest } from "../../@types/express";
 import config from '../../config/config';
 import coraline from '../../database/coraline';
+import { catchError, catchErrorCtrl } from '../../lib/common';
 import User from '../../models/User';
 
 const {CLIENT_URL} = config;
@@ -58,7 +59,7 @@ const redditCtrl = {
             res.status(403).json({msg: err.message})
         }
     },
-    redditPosts: async (expressRequest:Request,res:Response) => {
+    redditPostsWithToken: async (expressRequest:Request,res:Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -104,6 +105,21 @@ const redditCtrl = {
         } catch (err) {
             if (err instanceof Error)
             res.status(403).json({msg: err.message})
+        }
+    },
+    getRedditPosts: async (expressRequest: Request, res: Response) => {
+        try {
+            const response = await fetch('https://api.reddit.com', {
+            method: 'get'
+            })
+            if (!response.ok) {
+                const text = await response.text();
+                catchError(text);
+            }
+            const data = await response.json();
+            res.status(200).json(data);
+        } catch (err) {
+            catchErrorCtrl(err, res)
         }
     }
 }
