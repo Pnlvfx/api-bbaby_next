@@ -5,6 +5,7 @@ import { catchError } from '../lib/common';
 import { VideoProps } from './@types/video';
 import { baseDocument, coralinemkDir, stringify } from './utils/coralineFunctions';
 import collections from './utils/route/collections';
+import telegramapis from '../lib/telegramapis';
 const fsPromises = fs.promises;
 
 const coraline = {
