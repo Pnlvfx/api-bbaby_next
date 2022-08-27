@@ -23,9 +23,9 @@ const telegramapis = {
                 headers,
 
             })
-            console.log(res.ok)
-            const response = await res.json()
-            console.log(response)
+            const data = await res.json()
+            if (!data) catchError(data?.msg);
+            return data;
         } catch (err) {
             catchError(err);
         }

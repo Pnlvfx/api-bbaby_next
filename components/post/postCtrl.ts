@@ -10,7 +10,6 @@ import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
-import coraline from '../../database/coraline';
 
 
 const PostCtrl = {
@@ -19,33 +18,27 @@ const PostCtrl = {
             const {token} = req.cookies;
             const userLang = req.acceptsLanguages('en', 'it')
             const {community,author,limit,skip} = req.query;
-            if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."})
-            const nullVote = await Post.find({}).updateMany({'liked' : null})
+            if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
+            const _skip = parseInt(skip.toString());
+            const user_agent = req.useragent;
+            console.log(_skip)
+            const _limit = user_agent?.isMobile && _skip < 15 ? 7 : parseInt(limit.toString())
+            const filters = 
+            community ? {community: new RegExp(`^${community}$`, 'i')} :
+            author ? {author: new RegExp(`^${author}$`, 'i')} :
+            userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato']}} :
+            {community: ['Italy', 'calciomercato']}
+            const posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip)
             if (token) {
-                const user = await getUserFromToken(token)
-                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-                const userUpVote = await Post.find({_id : {'$in': user?.upVotes}}).updateMany({"liked" : "true"})
-                const userDownVote = await Post.find({_id : {'$in': user?.downVotes}}).updateMany({"liked" : "false"})
+                const user = await getUserFromToken(token);
+                posts.map((post) => {
+                    if (user?.upVotes.find(upvote => upvote.toString() === post._id.toString())) post.liked = true;
+                    if (user?.downVotes.find(downvote => downvote.toString() === post._id.toString())) post.liked = false;
+                })
             }
-            let filters:any = {}
-
-            if (community) {
-                filters.community = new RegExp(`^${community}$`, 'i')
-            } else if (author) {
-                filters.author = new RegExp(`^${author}$`, 'i')
-            } else {
-                if (userLang !== 'it') {
-                    filters.community = {'$nin': ['Italy', 'calciomercato']}
-                } else {
-                    filters.community = ['Italy', 'calciomercato']
-                }
-            }
-            const posts = await Post.find(filters).sort({createdAt: -1}).limit(parseInt(limit.toString())).skip(parseInt(skip.toString()))
-            res.setHeader('Cache-Control', 'private, max-age=3600, must-revalidate')
-            res.json(posts)
+            res.status(200).json(posts);
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     getPost: async (req:Request,res:Response) => {
@@ -53,12 +46,12 @@ const PostCtrl = {
             const {token} = req.cookies;
             const {id} = req.params;
             const check = isValidObjectId(id);
-            if (!check) return res.status(500).json({msg: "This post not exists."})
-            let post = await Post.findByIdAndUpdate(id, {'liked': 'null'})
-            if (!post) return console.log('error')
+            if (!check) return res.status(400).json({msg: "This post not exists."})
+            let post = await Post.findById(id);
+            if (!post) return res.status(400).json({msg: "This post not exists."})
             if (token) {
-                const user = await getUserFromToken(token)
-                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
+                const user = await getUserFromToken(token);
+                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."});
                 const votedUp = {username: user?.username, upVotes: id}
                 const votedDown = {username: user?.username, downVotes: id}
                 const userUpVoted = await User.exists(votedUp)
@@ -67,19 +60,16 @@ const PostCtrl = {
                     if (!userDownVoted) {
                         
                     } else {
-                        post = await Post.findByIdAndUpdate(id, {liked: "false"})
+                        post.liked = false
                     }
                 } else {
-                    post = await Post.findByIdAndUpdate(id, {liked: "true"})
+                    post.liked = true
                 }
-                }
-                post = await Post.findById(id)
+            }
             res.json(post)
         } catch (err) {
-            if (err instanceof Error) {
-            console.log(err)
-            res.status(500).json({msg: err.message})
-        }}
+            catchErrorCtrl(err, res);
+        }
     },
     createPost: async (expressRequest:Request,res:Response) => {
          try {
@@ -115,10 +105,10 @@ const PostCtrl = {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString()
                 })
-                post.$set({mediaInfo: {isImage,image:image.secure_url,dimension: [height,width]}})
+                post.$set({mediaInfo: {isImage, image:image.secure_url, dimension: [height,width]}})
             }
             if (isVideo) {
-                const _video = await coraline.videos.saveVideo(post._id.toString(), selectedFile, width, height);
+                //const _video = await coraline.videos.saveVideo(post._id.toString(), selectedFile, width, height);
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),
@@ -133,7 +123,7 @@ const PostCtrl = {
                 await telegramapis.sendMessage(chat_id, my_text);
             }
             if (sharePostToTwitter) {
-                await _sharePostToTwitter(user,savedPost,res)
+                await _sharePostToTwitter(user, savedPost, res)
             }
             const updateComNumber = await Community.findOneAndUpdate({name: post.community}, {$inc: {number_of_posts: +1}})
             res.status(201).json(savedPost)
@@ -204,18 +194,6 @@ const PostCtrl = {
             res.json({msg: "Deleted success"})
         } catch (err) {
             res.status(500).json({msg: "Something went wrong"})
-        }
-    },
-    getSSRposts: async (expressRequest:Request,res:Response) => {
-        try {
-            const req = expressRequest as UserRequest;
-            const {token} = req.cookies;
-            const userLang = req.acceptsLanguages('en', 'it')
-            const {community,author,limit,skip} = req.query;
-            if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
-            let posts = await Post.find({})
-        } catch (err) {
-            catchErrorCtrl(err, res);
         }
     }
 }

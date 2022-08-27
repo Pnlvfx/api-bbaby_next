@@ -60,7 +60,7 @@ const communityCtrl = {
                 const user = await getUserFromToken(token);
                 if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."});
                 communities.map((community) => {
-                    if (community.name === user.subscribed?.toString())
+                    if (user.subscribed?.find(sub => sub === community.name))
                     community.user_is_subscriber = true
                 })
             }

@@ -47,8 +47,7 @@ const PostSchema = new Schema<PostProps>({
         default: 0
     },
     liked: {
-        type: String,
-        default: null
+        type: Boolean || null,
     },
     numComments: {
         type: Number,
