@@ -63,6 +63,7 @@ const redditCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
+            const {after, count} = req.query;
             const now = new Date();
             const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET} = config;
             const redditTokens = user?.tokens?.find(provider => provider.provider === 'reddit')
@@ -79,26 +80,26 @@ const redditCtrl = {
                 if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
                 let body = await response.json()
                 const date = new Date()
+                const expiration = coraline.addHours(1, date);
                 const deletePrevTokens = await User.findOneAndUpdate({username: user.username}, {$pull: {tokens: {provider: 'reddit'}}})
-                const saveNewToken = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {access_token: body.access_token, refresh_token: body.refresh_token, provider: 'reddit', access_token_expiration: date}}})
+                const saveNewToken = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {access_token: body.access_token, refresh_token: body.refresh_token, provider: 'reddit', access_token_expiration: expiration}}})
             }
             const getRedditPosts = async () => {
-
                 const url = `https://oauth.reddit.com/best`
-                const response = await fetch(url, {
+                const query = after ? `after=${after}&count=${count}` : null
+                const finalUrl = query ? `${url}?${query}` : url;
+                const response = await fetch(finalUrl, {
                     method: 'get',
                     headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}
                 })
                 if (!response.ok) return res.status(500).json({msg: await response.text()})
-                const posts = await response.json()
-                return posts
+                const posts = await response.json();
+                return posts;
             }
             const registrationDate = new Date(access_token_expiration);
-            if (now <= registrationDate) {
-
-            } else {
-                console.log('reddit access token with refresh')
-                await getRefreshToken()
+            if (now >= registrationDate) {
+                console.log('new token');
+                await getRefreshToken();
             }
             const posts = await getRedditPosts()
             res.status(200).json(posts)
@@ -110,6 +111,21 @@ const redditCtrl = {
     getRedditPosts: async (expressRequest: Request, res: Response) => {
         try {
             const response = await fetch('https://api.reddit.com', {
+            method: 'get'
+            })
+            if (!response.ok) {
+                const text = await response.text();
+                catchError(text);
+            }
+            const data = await response.json();
+            res.status(200).json(data);
+        } catch (err) {
+            catchErrorCtrl(err, res)
+        }
+    },
+    getRedditPostsFromCommunity: async (expressRequest: Request, res: Response) => {
+        try {
+            const response = await fetch('https://api.reddit.com/r/bbabystyle', {
             method: 'get'
             })
             if (!response.ok) {

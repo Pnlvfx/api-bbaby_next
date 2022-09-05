@@ -8,6 +8,9 @@ const BBCSchema = new Schema<LinkPreviewProps>({
     description: {
         type: String
     },
+    full_description: {
+        type: String
+    },
     image: {
         type: String
     },

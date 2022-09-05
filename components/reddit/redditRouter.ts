@@ -11,4 +11,6 @@ redditRouter.get('/public_posts', redditCtrl.getRedditPosts);
 
 redditRouter.get('/posts', redditCtrl.redditPostsWithToken);
 
+redditRouter.get('/community_posts', redditCtrl.getRedditPostsFromCommunity);
+
 export default redditRouter;

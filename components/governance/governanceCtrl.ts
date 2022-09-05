@@ -6,13 +6,15 @@ import cloudinary from '../../lib/cloudinary';
 import videoshow from 'videoshow';
 import {TranslationServiceClient} from '@google-cloud/translate';
 import audioconcat from 'audioconcat';
-import puppeteer from 'puppeteer';
 import { createClient, PhotosWithTotalResults } from 'pexels';
 import News from '../../models/News';
 import BBC from '../../models/BBC';
 import { linkPreview, LinkPreviewProps } from '../../externals/linkPreview';
 import  coraline  from '../../database/coraline';
-import { catchError, catchErrorCtrl } from '../../lib/common';
+import telegramapis from '../../lib/telegramapis';
+import bbcapis from '../../lib/bbcapis';
+import { catchErrorCtrl } from '../../lib/common';
+
 
 const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
@@ -115,7 +117,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    translateTweet: async (expressRequest: Request, res: Response) => {
+    translate: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {text} = req.body;
@@ -125,7 +127,7 @@ const governanceCtrl = {
             const projectId = 'bbabystyle';
             const location = 'us-central1';
             const translationClient = new TranslationServiceClient();
-            async function translateText() {
+            const translateText = async () => {
                 const request = {
                     parent: `projects/${projectId}/locations/${location}`,
                     contents: [text],
@@ -148,30 +150,20 @@ const governanceCtrl = {
     getBBCnews: async (expressRequest: Request, res: Response) => { 
         try {
             const req = expressRequest as UserRequest;
-            const {limit, skip, ssr} = req.query;
+            const {limit, skip} = req.query;
             if (!limit || !skip) return res.status(400).json({msg: "This API require a pagination query params!"})
             const _limit = parseInt(limit.toString());
-            const _skip = parseInt(limit.toString());
-            let response:Array<LinkPreviewProps | []> = [];
+            const _skip = parseInt(skip.toString());
+            let response: Array<LinkPreviewProps | []> = [];
+            let total = 0
             let scraped = 0;
-            const BBCconnect = async () => {
-                const browser = await puppeteer.launch()
-                const page = await browser.newPage()
-                const url = `https://www.bbc.com`
-                await page.goto(url);
-                const links = await page.evaluate(() => 
-                    Array.from(document.querySelectorAll("a.media__link") as NodeListOf<HTMLAnchorElement>).map((link) => (
-                        link.href
-                    )
-                ));
-                await browser.close();
-                return links            
-            }
-            if (ssr) {
-                const links = await BBCconnect();
+            if (_skip === 0) {
+                const links = await bbcapis.connect();
+                if (!links) return res.status(500).json({msg: "No links found on the website"})
                 await Promise.all(
-                    links.map(async (link:string,) => {
+                    links.map(async (link: string) => {
                         const metadata = await linkPreview(link);
+                        if (!metadata?.title || !metadata.image) return;
                         const exists = await BBC.exists({title: metadata.title})
                         if (exists) return;
                         const news = new BBC({
@@ -184,39 +176,37 @@ const governanceCtrl = {
                         scraped += 1
                     })
                 )
+                const allNews = await BBC.find({});
+                total = allNews.length;
             }
             response = await BBC.find({}).sort({createdAt: -1}).limit(_limit).skip(_skip)
-            if (response.length < 9) return res.status(500).json({msg : "Less than 9 posts retrieved."})
-            res.set('Cache-Control', 'private, max-age=3600');
-            console.log({totalNewsScraped : scraped});
-            res.status(200).json(response);
+            //res.set('Cache-Control', 'private, max-age=0');
+            res.status(200).json({
+                data: response,
+                total
+            });
+            telegramapis.sendLog(`totalNewsScraped : ${scraped}`);
+            // const all = await BBC.find({});
+            // await Promise.all(
+            //     all.map(async (newsmap) => {
+                    
+            //         const full_description = await bbcapis.getDescription(newsmap.link)
+            //         console.log(full_description);
+            //     })
+            // )
         } catch (err) {
-            if (err instanceof Error) 
-            res.status(500).json({msg : err.message})
+            catchErrorCtrl(err, res);
         }
     },
-    getArticle: async (expressRequest: Request, res: Response) => {
+    getArticleDescription: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest; 
             const {link} = req.body;
             if (!link) return res.status(400).json({msg: "Missing redirect link parameters"})
-            const browser = await puppeteer.launch({
-                args: ['--no-sandbox', '--disabled-setupid-sandbox']
-            })
-            const page = await browser.newPage();
-            await page.goto(link);
-            const description = await page.evaluate(() => 
-                Array.from(document.querySelectorAll('article p') as NodeListOf<HTMLParagraphElement>).map((descr) => (
-                    `${descr.innerText}\n\n`
-                ))
-            )
-            await browser.close()
+            const description = await bbcapis.getDescription(link);
             res.status(200).json(description)
         } catch (err) {
-            if (err instanceof Error) {
-                res.status(500).json({msg: err.message})
-            }
-            
+            catchErrorCtrl(err, res);
         }
     },
     postArticle: async (expressRequest: Request, res: Response) => {

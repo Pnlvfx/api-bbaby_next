@@ -2,16 +2,25 @@ import fs from 'fs';
 import config from '../config/config';
 import path from 'path';
 import { catchError } from '../lib/common';
-import { VideoProps } from './@types/video';
 import { baseDocument, coralinemkDir, stringify } from './utils/coralineFunctions';
 import collections from './utils/route/collections';
 import telegramapis from '../lib/telegramapis';
+import https from 'https';
+import { VideoProps } from './@types/video';
 const fsPromises = fs.promises;
 
 const coraline = {
     addHours: (numOfHours: number, date = new Date()) => {
         date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
         return date;
+    },
+    detectUrl: (text: string) => {
+        try {
+            var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+            return text.match(urlRegex) ? true : false;
+        } catch (err) {
+            catchError(err);
+        }
     },
     use : async (document: string) => {
         const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
@@ -64,25 +73,39 @@ const coraline = {
                     const collection = public_id.split('/');
                     if (collection.length !== 2) throw new Error('Invalid public_id')
                     return {collection: collection[0], id: collection[1]}
-                } catch (error) {
-                    catchError(error);
+                } catch (err) {
+                    catchError(err);
                 }
         },
         buildUrl: (collection: string, id: string) => {
             const {SERVER_URL} = config;
-            const url = `${SERVER_URL}/videos${collection}/${id}.mp4`;
+            const url = `${SERVER_URL}/videos/${collection}/${id}.mp4`;
             return url;
         },
         saveVideo: async (public_id: string, file: string, width: number, height: number) => {
             try {
                 const data = coraline.videos.splitId(public_id);
-                if (!data) throw new Error(`No data found`)
+                console.log(data);
+                if (!data) throw new Error(`No data found`);
                 const collection = coralinemkDir(`/static/videos/${data.collection}`);
-                if (!collection) throw new Error(`No collection found`);
-                const name = `${collection}/${data.id}.mp4`;
-                let buffer = Buffer.from(file.split(',')[1],"base64");
-                const save = await fsPromises.writeFile(name, buffer);
-                const url = coraline.videos.buildUrl(collection, data.id)
+                const filename = `${collection}/${data.id}.mp4`;
+                const isUrl = coraline.detectUrl(file);
+                if (isUrl) {
+                    https.get(file, (res) => {
+                        const fileStream = fs.createWriteStream(filename);
+                        res.pipe(fileStream);
+                        fileStream.on('error', (err) => {
+                            console.log(err)
+                        })
+                        fileStream.on('finish', () => {
+                            fileStream.close();
+                        })
+                    })
+                } else {
+                    const buffer = Buffer.from(file.split(',')[1],"base64");
+                    const save = await fsPromises.writeFile(filename, buffer);
+                }
+                const url = coraline.videos.buildUrl(data.collection, data.id)
                 const video = {
                     url,
                     folder: data.collection,
@@ -97,7 +120,7 @@ const coraline = {
                 telegramapis.sendLog('Video saved successfully');
                 return video as VideoProps;
             } catch (err) {
-                return catchError(err);
+                catchError(err);
             }
         },
     }

@@ -1,7 +1,7 @@
 {
   "name": "api-bbaby_next",
   "version": "1.0.0",
-  "description": "API of bbabystyle.com url: api.bbabystyle.com",
+  "description": "API of bbabystyle.com url: https://api.bbabystyle.com",
   "main": "server.js",
   "repository": "https://github.com/Pnlvfx/api-bbaby_next.git",
   "author": "PnlVFX <simone97_19@hotmail.it>",
@@ -15,22 +15,23 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@google-cloud/text-to-speech": "^4.0.0",
+    "@google-cloud/text-to-speech": "^4.0.2",
     "@google-cloud/translate": "^7.0.1",
     "audioconcat": "^0.1.4",
     "bcrypt": "^5.0.1",
-    "cloudinary": "^1.30.1",
+    "cloudinary": "^1.31.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "date-fns": "^2.29.2",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "express-rate-limit": "^6.5.2",
     "express-useragent": "^1.0.15",
     "get-audio-duration": "^3.1.0",
     "googleapis": "105.0.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.5.2",
+    "mongoose": "^6.5.3",
     "nodemailer": "^6.7.8",
     "oauth": "^0.9.15",
     "pexels": "^1.3.0",
@@ -46,12 +47,12 @@
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/express-useragent": "^1.0.2",
-    "@types/jsonwebtoken": "^8.5.8",
-    "@types/node": "^18.7.8",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/node": "^18.7.14",
     "@types/nodemailer": "^6.4.5",
     "@types/oauth": "^0.9.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.8.2"
   }
 }

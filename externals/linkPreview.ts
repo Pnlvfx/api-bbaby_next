@@ -1,10 +1,11 @@
 export interface LinkPreviewProps {
     title: string
     description: string
+    full_description: string,
     image: string
     hostname?: string
     siteName?: string
-    link?: string
+    link: string
 }
 
 export const linkPreview = async (url: string) => {
@@ -19,10 +20,6 @@ export const linkPreview = async (url: string) => {
             throw new Error("Failed to get metadata info for this url!");
         }
     } catch (error) {
-        if (error instanceof Error) {
-            throw new Error("Failed to get metadata info for this url!");
-        } else {
-            throw new Error("Failed to get metadata info for this url!");
-        }
+        console.log(`failed to get metadata info from this url: ${url}`)
     }
 };
