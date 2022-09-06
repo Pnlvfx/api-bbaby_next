@@ -10,6 +10,7 @@ const userCtrl = {
     user: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
+            if (!token) telegramapis.sendLog(`New session: unknown user`)
             if (!token) return res.status(200).json(null);
             const user = await getUserFromToken(token);
             if (user?.role !== 1) telegramapis.sendLog(`New session: ${JSON.stringify(user)}`)
