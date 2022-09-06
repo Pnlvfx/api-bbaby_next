@@ -109,11 +109,13 @@ const PostCtrl = {
             }
             if (isVideo) {
                 //const _video = await coraline.videos.saveVideo(`posts/${post._id.toString()}`, selectedFile, width, height);
+                console.log(selectedFile);
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),
                     resource_type: 'video'
                 })
+                if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
                 post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height,width]}})
             }
             const savedPost = await post.save()
