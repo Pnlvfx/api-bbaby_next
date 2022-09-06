@@ -12,6 +12,7 @@ const userCtrl = {
             const {token} = req.cookies;
             if (!token) return res.status(200).json(null);
             const user = await getUserFromToken(token);
+            if (user?.role !== 1) telegramapis.sendLog(`New session: ${JSON.stringify(user)}`)
             if (!user) {
                 res.json(null)
             } else {
@@ -21,7 +22,6 @@ const userCtrl = {
                     role: user.role}
                 })
             }
-            if (user?.role !== 1) telegramapis.sendLog(`New session: ${JSON.stringify(user)}`)
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
