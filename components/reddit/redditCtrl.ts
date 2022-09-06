@@ -1,4 +1,4 @@
-import type {Request,Response} from 'express';
+import type { Request,Response } from 'express';
 import type{ UserRequest } from "../../@types/express";
 import config from '../../config/config';
 import coraline from '../../database/coraline';
@@ -66,7 +66,7 @@ const redditCtrl = {
             const {after, count} = req.query;
             const now = new Date();
             const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET} = config;
-            const redditTokens = user?.tokens?.find(provider => provider.provider === 'reddit')
+            const redditTokens = user?.tokens?.find(provider => provider.provider === 'reddit');
             if (!redditTokens) return res.status(500).json({msg: 'You are not authorized to see this content.'})
             const {access_token_expiration} = redditTokens;
             if (!access_token_expiration) return res.status(500).json({msg: 'You are not authorized to see this content.'})
@@ -92,20 +92,22 @@ const redditCtrl = {
                     method: 'get',
                     headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}
                 })
-                if (!response.ok) return res.status(500).json({msg: await response.text()})
-                const posts = await response.json();
-                return posts;
+                if (!response.ok) {
+                    const error = await response.text();
+                    return res.status(500).json({msg: error})
+                } else {
+                    const posts = await response.json();
+                    return posts;
+                }
             }
             const registrationDate = new Date(access_token_expiration);
             if (now >= registrationDate) {
-                console.log('new token');
                 await getRefreshToken();
             }
-            const posts = await getRedditPosts()
+            const posts = await getRedditPosts();
             res.status(200).json(posts)
         } catch (err) {
-            if (err instanceof Error)
-            res.status(403).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     getRedditPosts: async (expressRequest: Request, res: Response) => {

@@ -1,15 +1,7 @@
 import {Router} from 'express';
-import rateLimit from 'express-rate-limit';
+import { limiter } from '../../lib/common';
 import governanceCtrl from './governanceCtrl';
 import youtubeRouter from './youtube/youtubeRouter';
-
-const limiter = rateLimit({
-    windowMs: 40, //seconds
-    max: 1,
-    message: 'Suck useEffect',
-    standardHeaders: true,
-    legacyHeaders: false
-})
 
 const governanceRouter = Router()
 

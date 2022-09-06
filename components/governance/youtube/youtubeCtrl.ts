@@ -5,6 +5,7 @@ import { catchErrorCtrl } from "../../../lib/common";
 import {google} from 'googleapis'
 import coraline  from "../../../database/coraline";
 import config from '../../../config/config';
+import fs from 'fs'
 
 const {YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET} = config;
 
@@ -46,6 +47,7 @@ const youtubeCtrl = {
             const origin = checkOrigin(req, res);
             const {title,description,tags,categoryId,privacyStatus} = req.body;
             const credentials = await googleapis.checkTokenValidity();
+            console.log(credentials)
             const youtubeFolder = await coraline.use('youtube');
             const videoFilePath =  `${youtubeFolder}/video1.mp4`;
             const thumbFilePath = `${youtubeFolder}/image0.webp`;
@@ -57,41 +59,41 @@ const youtubeCtrl = {
                 redirectUri: `${origin}/governance`
             })
             oauth2Client.credentials = credentials;
-            googleapis.youtube.insert(title, description, tags, categoryId, privacyStatus)
-            // const youtube = google.youtube('v3')
-            // const response = await youtube.videos.insert({
-            //     auth: oauth2Client,
-            //     part: ['snippet, status'],
-            //     requestBody: {
-            //         snippet: {
-            //             title,
-            //             description,
-            //             tags,
-            //             categoryId,
-            //             defaultAudioLanguage: 'it',
-            //             defaultLanguage: 'it'
-            //         },
-            //         status: {
-            //             privacyStatus
-            //         },
-            //     },
-            //     media: {
-            //         body: fs.createReadStream(videoFilePath)
-            //     }
-            // })
-            // const {data} = response;
-            // console.log({data})
-            // if (!data.id) return res.status(500).json({msg: "Missing videoId params."})
-            // const response2 = await youtube.thumbnails.set({
-            //     auth: credentials.access_token,
-            //     videoId: data.id,
-            //     media: {
-            //         body: fs.createReadStream(thumbFilePath)
-            //     }
-            // })
-            // if (!response2.data) return res.status(500).json({msg: "Video created, but received an error during the thumbnail upload's"})
-            // // remember to clean the folder
-            // res.status(201).json({videoInfo: data, msg: `Video and thumbnail updated successfully`})
+            //googleapis.youtube.insert(title, description, tags, categoryId, privacyStatus)
+            const youtube = google.youtube('v3')
+            const response = await youtube.videos.insert({
+                auth: oauth2Client,
+                part: ['snippet, status'],
+                requestBody: {
+                    snippet: {
+                        title,
+                        description,
+                        tags,
+                        categoryId,
+                        defaultAudioLanguage: 'it',
+                        defaultLanguage: 'it'
+                    },
+                    status: {
+                        privacyStatus
+                    },
+                },
+                media: {
+                    body: fs.createReadStream(videoFilePath)
+                }
+            })
+            const {data} = response;
+            console.log({data})
+            if (!data.id) return res.status(500).json({msg: "Missing videoId params."})
+            const response2 = await youtube.thumbnails.set({
+                auth: credentials.access_token,
+                videoId: data.id,
+                media: {
+                    body: fs.createReadStream(thumbFilePath)
+                }
+            })
+            if (!response2.data) return res.status(500).json({msg: "Video created, but received an error during the thumbnail upload's"})
+            // remember to clean the folder
+            res.status(201).json({videoInfo: data, msg: `Video and thumbnail updated successfully`})
         } catch (err) {
             catchErrorCtrl(err, res);
         }
