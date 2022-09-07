@@ -22,7 +22,7 @@ const coraline = {
             catchError(err);
         }
     },
-    use : async (document: string) => {
+    use : (document: string) => {
         const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
         const subFolder = isStatic ? 'static' : 'gov';
         try {

@@ -85,7 +85,7 @@ const youtubeCtrl = {
             console.log({data})
             if (!data.id) return res.status(500).json({msg: "Missing videoId params."})
             const response2 = await youtube.thumbnails.set({
-                auth: credentials.access_token,
+                auth: oauth2Client,
                 videoId: data.id,
                 media: {
                     body: fs.createReadStream(thumbFilePath)
