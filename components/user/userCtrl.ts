@@ -81,7 +81,7 @@ const userCtrl = {
             //     path: '/',
             // }).send();
             const {NODE_ENV} = config;
-            if (NODE_ENV !== 'production') {
+            if (NODE_ENV === 'production') {
                 telegramapis.sendLog(`New session: unknown user` + 'useragent:' + req.useragent?.source + 'ip:' + req.ip)
             }
             res.status(200).json('ok')
