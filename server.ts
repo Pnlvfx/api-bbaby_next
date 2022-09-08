@@ -36,7 +36,7 @@ app.use(express.json({limit: '50mb'}))
 app.use(compression());
 app.use(cors({origin: corsOrigin,credentials:true}));
 const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
-const imagePath = coraline.use('images');
+//const imagePath = coraline.use('images');
 connect(MONGO_URI).then((res) => {
 
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
@@ -62,7 +62,7 @@ app.get('/sitemaps', async (req,res) => {
     }
 });
 
-app.use('/images/favicon', express.static(`${imagePath}/favicon`));
+//app.use('/images/favicon', express.static(`${imagePath}/favicon`));
 
 app.use('/videos', videoRouter);
 
