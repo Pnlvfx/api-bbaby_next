@@ -71,19 +71,18 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    analytics: async (expressRequest:Request,res: Response) => {
+    analytics: async (req:Request,res: Response) => {
         try {
-            const req = expressRequest as UserRequest;
+            const {token} = req.cookies;
+            const user = token ? await getUserFromToken(token) : null
             // const req = expressRequest as UserRequest;
             // const {SESSION_TRACKER, COOKIE_DOMAIN} = config;
             // res.cookie('session_tracker', SESSION_TRACKER, {
             //     domain: COOKIE_DOMAIN,
             //     path: '/',
             // }).send();
-            const {NODE_ENV} = config;
-            if (NODE_ENV === 'production') {
-                telegramapis.sendLog(`New session: unknown user` + 'useragent:' + req.useragent?.source + 'ip:' + req.ip)
-            }
+            console.log(user);
+            telegramapis.sendLog(`New session: ${user ? user.username : 'unknown user'}` + ' ' + 'Useragent:' + req.useragent?.source + 'Ip:' + req.ips.toString())
             res.status(200).json('ok')
         } catch (err) {
             catchErrorCtrl(err, res);

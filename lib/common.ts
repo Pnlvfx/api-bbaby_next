@@ -18,11 +18,11 @@ export const catchError = (err : unknown, from?: string) => {
 export const catchErrorCtrl = (err: unknown, res: Response) => {
     if (err instanceof Error) {
         telegramapis.sendLog(err.message).then(() => {
-            return res.status(500).json({msg: err.message});
+            res.status(500).json({msg: err.message});
         })
     } else {
         telegramapis.sendLog(`API error`).then(() => {
-            return res.status(500).json({msg: 'API error'});
+            res.status(500).json({msg: 'API error'});
         })
     }
 }

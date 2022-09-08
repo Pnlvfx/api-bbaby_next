@@ -71,38 +71,58 @@ const redditCtrl = {
             const {access_token_expiration} = redditTokens;
             if (!access_token_expiration) return res.status(500).json({msg: 'You are not authorized to see this content.'})
             const getRefreshToken = async () => {
-                const encondedHeader = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString("base64")
-                let response = await fetch(`https://www.reddit.com/api/v1/access_token`, {
-                    method: 'POST',
-                    body: `grant_type=refresh_token&refresh_token=${redditTokens.refresh_token}`,
-                    headers: {authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded'}
-                });
-                if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
-                let body = await response.json()
-                const date = new Date()
-                const expiration = coraline.addHours(1, date);
-                const deletePrevTokens = await User.findOneAndUpdate({username: user.username}, {$pull: {tokens: {provider: 'reddit'}}})
-                const saveNewToken = await User.findOneAndUpdate({username: user.username}, {$push: {tokens: {access_token: body.access_token, refresh_token: body.refresh_token, provider: 'reddit', access_token_expiration: expiration}}})
+                try {
+                    const encondedHeader = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString("base64");
+                    const response = await fetch(`https://www.reddit.com/api/v1/access_token`, {
+                        method: 'POST',
+                        body: `grant_type=refresh_token&refresh_token=${redditTokens.refresh_token}`,
+                        headers: {authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded'}
+                    });
+                    if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
+                    const body = await response.json()
+                    const date = new Date()
+                    const expiration = coraline.addHours(1, date);
+                    const deletePrevTokens = await User.findOneAndUpdate({username: user.username}, {$pull: {tokens: {provider: 'reddit'}}})
+                    const saveNewToken = await User.findOneAndUpdate({
+                        username: user.username}, 
+                        {$push: 
+                            {
+                                tokens: 
+                                {
+                                    access_token: body.access_token, 
+                                    refresh_token: body.refresh_token, 
+                                    provider: 'reddit', 
+                                    access_token_expiration: expiration
+                                }
+                            }})
+                            return 'ok';
+                } catch (err) {
+                    catchError(err);
+                }
             }
             const getRedditPosts = async () => {
-                const url = `https://oauth.reddit.com/best`
-                const query = after ? `after=${after}&count=${count}` : null
-                const finalUrl = query ? `${url}?${query}` : url;
-                const response = await fetch(finalUrl, {
-                    method: 'get',
-                    headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}
-                })
-                if (!response.ok) {
-                    const error = await response.text();
-                    return res.status(500).json({msg: error})
-                } else {
-                    const posts = await response.json();
-                    return posts;
+                try {
+                    const url = `https://oauth.reddit.com/best`
+                    const query = after ? `after=${after}&count=${count}` : null
+                    const finalUrl = query ? `${url}?${query}` : url;
+                    const response = await fetch(finalUrl, {
+                        method: 'get',
+                        headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}
+                    })
+                    if (!response.ok) {
+                        const error = await response.text();
+                        return res.status(500).json({msg: error})
+                    } else {
+                        const posts = await response.json();
+                        return posts;
+                    }                    
+                } catch (err) {
+                    catchError(err);
                 }
             }
             const registrationDate = new Date(access_token_expiration);
             if (now >= registrationDate) {
-                await getRefreshToken();
+                const token = await getRefreshToken();
             }
             const posts = await getRedditPosts();
             res.status(200).json(posts)
