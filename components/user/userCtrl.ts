@@ -5,15 +5,15 @@ import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
 import telegramapis from '../../lib/telegramapis';
+import { catchErrorCtrl } from '../../lib/common';
+import config from '../../config/config';
 
 const userCtrl = {
     user: async (req:Request,res:Response) => {
         try {
             const {token} = req.cookies;
-            if (!token) telegramapis.sendLog(`New session: unknown user`)
             if (!token) return res.status(200).json(null);
             const user = await getUserFromToken(token);
-            if (user?.role !== 1) telegramapis.sendLog(`New session: ${JSON.stringify(user)}`)
             if (!user) {
                 res.json(null)
             } else {
@@ -71,6 +71,25 @@ const userCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
+    analytics: async (expressRequest:Request,res: Response) => {
+        try {
+            const req = expressRequest as UserRequest;
+            // const req = expressRequest as UserRequest;
+            // const {SESSION_TRACKER, COOKIE_DOMAIN} = config;
+            // res.cookie('session_tracker', SESSION_TRACKER, {
+            //     domain: COOKIE_DOMAIN,
+            //     path: '/',
+            // }).send();
+            const {NODE_ENV} = config;
+            if (NODE_ENV !== 'production') {
+                telegramapis.sendLog(`New session: unknown user` + 'useragent:' + req.useragent?.source + 'ip:' + req.ip)
+            }
+            res.status(200).json('ok')
+        } catch (err) {
+            catchErrorCtrl(err, res);
+        }
+    },
+
 }
 
 export default userCtrl;
