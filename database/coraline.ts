@@ -4,7 +4,6 @@ import path from 'path';
 import { catchError } from '../lib/common';
 import { baseDocument, coralinemkDir, stringify } from './utils/coralineFunctions';
 import collections from './utils/route/collections';
-import telegramapis from '../lib/telegramapis';
 import https from 'https';
 import { VideoProps } from './@types/video';
 const fsPromises = fs.promises;
@@ -13,6 +12,24 @@ const coraline = {
     addHours: (numOfHours: number, date = new Date()) => {
         date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
         return date;
+    },
+    getMediaFromUrl: (url: string, postId: string, type: 'video' | 'image') => {
+        return new Promise<string>((resolve, reject) => {
+            const path = type === 'video' ? `/static/videos/posts` : `/static/images/posts`
+            const collection = coralinemkDir(path);
+            const filename = type === 'video' ? `${collection}/${postId}.mp4` : `${collection}/${postId}.png`;
+            https.get(url, (res) => {
+                const fileStream = fs.createWriteStream(filename);
+                res.pipe(fileStream);
+                fileStream.on('error', (err) => {
+                    reject(err);
+                })
+                fileStream.on('finish', () => {
+                    fileStream.close();
+                    resolve(filename);
+                })
+            })
+        })
     },
     detectUrl: (text: string) => {
         try {
@@ -85,7 +102,6 @@ const coraline = {
         saveVideo: async (public_id: string, file: string, width: number, height: number) => {
             try {
                 const data = coraline.videos.splitId(public_id);
-                console.log(data);
                 if (!data) throw new Error(`No data found`);
                 const collection = coralinemkDir(`/static/videos/${data.collection}`);
                 const filename = `${collection}/${data.id}.mp4`;
@@ -117,7 +133,6 @@ const coraline = {
                     width,
                     height,
                 }
-                telegramapis.sendLog('Video saved successfully');
                 return video as VideoProps;
             } catch (err) {
                 catchError(err);

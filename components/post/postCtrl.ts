@@ -6,15 +6,15 @@ import User from '../../models/User';
 import { Types, isValidObjectId } from 'mongoose';
 import cloudinary from '../../lib/cloudinary';
 import Comment from '../../models/Comment';
-import { _sharePostToTwitter } from './post-functions/createPost';
 import Community from '../../models/Community';
 import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
 import coraline from '../../database/coraline';
+import twitterapis from '../../lib/twitterapis';
 
 
 const PostCtrl = {
-    getPosts: async (req:Request,res:Response) => {
+    getPosts: async (req: Request,res: Response) => {
         try {
             const {token} = req.cookies;
             const userLang = req.acceptsLanguages('en', 'it')
@@ -26,8 +26,8 @@ const PostCtrl = {
             const filters = 
             community ? {community: new RegExp(`^${community}$`, 'i')} :
             author ? {author: new RegExp(`^${author}$`, 'i')} :
-            userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato']}} :
-            {community: ['Italy', 'calciomercato']}
+            userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio']}} :
+            {community: ['Italy', 'calciomercato', 'Calcio']}
             const posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip)
             if (token) {
                 const user = await getUserFromToken(token);
@@ -90,8 +90,8 @@ const PostCtrl = {
             } = req.body;
             if (!title) return res.status(500).json({msg: "Title is required."})
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
-            const communityExist = await Community.exists({name: community})
-            if (!communityExist) return res.status(500).json({msg: "Please select a valid community."})
+            const communityExist = await Community.exists({name: community});
+            if (!communityExist) return res.status(500).json({msg: "Please select a valid community."});
             const post = new Post({
                 author: user?.username,
                 authorAvatar: user?.avatar,
@@ -105,27 +105,37 @@ const PostCtrl = {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString()
                 })
-                post.$set({mediaInfo: {isImage, image:image.secure_url, dimension: [height, width]}})
+                post.$set({mediaInfo: {isImage, image:image.secure_url, dimension: [height, width]}});
             }
             if (isVideo) {
                 //const _video = await coraline.videos.saveVideo(`posts/${post._id.toString()}`, selectedFile, width, height);
-                console.log(selectedFile);
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),
                     resource_type: 'video'
                 })
                 if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
-                post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height,width]}})
+                post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height, width]}})
             }
-            const savedPost = await post.save()
+            const savedPost = await post.save();
             if (sharePostToTG) {
-                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' ? '@bbabystyle1' : '@bbaby_style'
+                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' || 'calcio' ? '@bbabystyle1' : '@bbaby_style'
                 const my_text = `https://bbabystyle.com/b/${savedPost.community}/comments/${savedPost._id}`
                 await telegramapis.sendMessage(chat_id, my_text);
             }
             if (sharePostToTwitter) {
-                await _sharePostToTwitter(user, savedPost, res)
+                let mediaId = [];
+                if (isImage || isVideo) {
+                    const type = isImage ? 'image' : 'video';
+                    const filePath = await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type);
+                    if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
+                    const twimage = await twitterapis.uploadMedia(user, post, filePath);
+                    if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
+                    mediaId.push(twimage)
+                    await twitterapis.tweet(user, savedPost, mediaId);
+                } else {
+                    await twitterapis.tweet(user, savedPost);
+                }
             }
             const updateComNumber = await Community.findOneAndUpdate({name: post.community}, {$inc: {number_of_posts: +1}})
             res.status(201).json(savedPost)
@@ -197,7 +207,7 @@ const PostCtrl = {
         } catch (err) {
             res.status(500).json({msg: "Something went wrong"})
         }
-    }
+    },
 }
 
 export default PostCtrl;

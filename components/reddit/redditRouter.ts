@@ -1,4 +1,5 @@
 import {Router} from 'express';
+import { limiter } from '../../lib/common';
 import redditCtrl from './redditCtrl';
 
 const redditRouter = Router(); //used with governance Router
@@ -9,7 +10,7 @@ redditRouter.get('/logout', redditCtrl.redditLogout);
 
 redditRouter.get('/public_posts', redditCtrl.getRedditPosts);
 
-redditRouter.get('/posts', redditCtrl.redditPostsWithToken);
+redditRouter.get('/posts', limiter, redditCtrl.redditPostsWithToken);
 
 redditRouter.get('/community_posts', redditCtrl.getRedditPostsFromCommunity);
 

@@ -102,9 +102,10 @@ const redditCtrl = {
             }
             const getRedditPosts = async () => {
                 try {
-                    const url = `https://oauth.reddit.com/best`
+                    const url = `https://oauth.reddit.com/best?sr_detail=true`
                     const query = after ? `after=${after}&count=${count}` : null
-                    const finalUrl = query ? `${url}?${query}` : url;
+                    const finalUrl = query ? `${url}&${query}` : url;
+                    console.log(finalUrl);
                     const response = await fetch(finalUrl, {
                         method: 'get',
                         headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}

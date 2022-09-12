@@ -36,9 +36,9 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit: '50mb'}))
 app.use(compression());
 app.use(cors({origin: corsOrigin,credentials:true}));
-//const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
+const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 const imagePath = coraline.use('images');
-connect(MONGO_URI).then((res) => {
+connect(db).then((res) => {
 
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
 
