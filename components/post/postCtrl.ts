@@ -124,15 +124,13 @@ const PostCtrl = {
                 await telegramapis.sendMessage(chat_id, my_text);
             }
             if (sharePostToTwitter) {
-                let mediaId = [];
                 if (isImage || isVideo) {
                     const type = isImage ? 'image' : 'video';
                     const filePath = await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type);
                     if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
                     const twimage = await twitterapis.uploadMedia(user, post, filePath);
                     if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                    mediaId.push(twimage)
-                    await twitterapis.tweet(user, savedPost, mediaId);
+                    await twitterapis.tweet(user, savedPost, twimage);
                 } else {
                     await twitterapis.tweet(user, savedPost);
                 }

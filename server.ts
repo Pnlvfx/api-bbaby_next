@@ -38,7 +38,7 @@ app.use(compression());
 app.use(cors({origin: corsOrigin,credentials:true}));
 const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 const imagePath = coraline.use('images');
-connect(db).then((res) => {
+connect(MONGO_URI).then((res) => {
 
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
 

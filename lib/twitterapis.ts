@@ -30,13 +30,15 @@ const twitterapis = {
                 accessToken,
                 accessSecret
             });
+            const stats = fs.statSync(media);
+            const size = stats.size / (1024*1024)
             const mediaId = await twitterClient.v1.uploadMedia(media);
             return mediaId;
         } catch (err) {
             catchError(err);
         }
     },
-    tweet: async(user: IUser, savedPost: any, mediaId?: string[]) => {
+    tweet: async(user: IUser, savedPost: any, mediaId?: string) => {
         try {
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
             if (!twitter) throw new Error("You need to authorize the twitter API into the User Settings page.");
