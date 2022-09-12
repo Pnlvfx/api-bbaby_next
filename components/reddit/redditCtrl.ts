@@ -79,55 +79,44 @@ const redditCtrl = {
                         headers: {authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded'}
                     });
                     if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
-                    const body = await response.json()
-                    const date = new Date()
+                    const body = await response.json();
+                    const date = new Date();
                     const expiration = coraline.addHours(1, date);
-                    const deletePrevTokens = await User.findOneAndUpdate({username: user.username}, {$pull: {tokens: {provider: 'reddit'}}})
-                    const saveNewToken = await User.findOneAndUpdate({
-                        username: user.username}, 
-                        {$push: 
-                            {
-                                tokens: 
-                                {
-                                    access_token: body.access_token, 
-                                    refresh_token: body.refresh_token, 
-                                    provider: 'reddit', 
-                                    access_token_expiration: expiration
-                                }
-                            }})
-                            return 'ok';
+                    redditTokens.access_token = body.access_token
+                    redditTokens.access_token_expiration = expiration
+                    return 'ok';
                 } catch (err) {
                     catchError(err);
                 }
             }
             const getRedditPosts = async () => {
-                try {
+                return new Promise(async (resolve, reject) => {
                     const url = `https://oauth.reddit.com/best?sr_detail=true`
                     const query = after ? `after=${after}&count=${count}` : null
                     const finalUrl = query ? `${url}&${query}` : url;
-                    console.log(finalUrl);
                     const response = await fetch(finalUrl, {
-                        method: 'get',
+                        method: 'GET',
                         headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}
                     })
                     if (!response.ok) {
-                        const error = await response.text();
-                        return res.status(500).json({msg: error})
+                        const error = response.status + response.statusText;
+                        reject(new Error(error));
                     } else {
                         const posts = await response.json();
-                        return posts;
+                        resolve(posts);
                     }                    
-                } catch (err) {
-                    catchError(err);
-                }
+                })
             }
             const registrationDate = new Date(access_token_expiration);
             if (now >= registrationDate) {
                 const token = await getRefreshToken();
             }
             const posts = await getRedditPosts();
+            if (!posts) console.log('error')
+            console.log(posts);
             res.status(200).json(posts)
         } catch (err) {
+            console.log(err);
             catchErrorCtrl(err, res);
         }
     },

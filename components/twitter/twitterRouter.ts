@@ -14,4 +14,6 @@ twitterRouter.post('/logout', TwitterCtrl.twitterLogout);
 
 twitterRouter.get('/selected-tweets', TwitterCtrl.twitterGetUserPost);
 
+twitterRouter.get('/home', limiter, TwitterCtrl.getHome);
+
 export default twitterRouter;

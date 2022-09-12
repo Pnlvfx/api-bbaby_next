@@ -32,8 +32,8 @@ const governanceCtrl = {
         if (!news || !news.mediaInfo.width || !news.mediaInfo.height) return res.status(500).json({msg: "You need to select one news before."})
         const {width} = news.mediaInfo
         const {height} = news.mediaInfo
-        const wait = (ms: number) => new Promise(resolve => setTimeout(resolve,ms))
-        const youtubePath = await coraline.use('youtube')
+        const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+        const youtubePath = coraline.use('youtube')
         ////START
         await Promise.all(
             description.map(async (text: string,index: number) => {

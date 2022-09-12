@@ -3,6 +3,8 @@ import { catchError } from "./common";
 import {TwitterApi} from 'twitter-api-v2';
 import config from '../config/config';
 import fs from 'fs';
+import { Document, Types } from "mongoose";
+import { PostProps } from "../@types/post";
 
 const {
     TWITTER_CONSUMER_KEY,
@@ -16,7 +18,9 @@ const {
 } = config;
 
 const twitterapis = {
-    uploadMedia: async (user: IUser, savedPost: any, media: string) => {
+    uploadMedia: async (user: IUser, savedPost: Document<unknown, any, PostProps> & PostProps & {
+        _id: Types.ObjectId;
+    }, media: string) => {
         try {
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
             if (!twitter) throw new Error("You need to authorize the twitter API into the User Settings page.");
@@ -38,13 +42,25 @@ const twitterapis = {
             catchError(err);
         }
     },
-    tweet: async(user: IUser, savedPost: any, mediaId?: string) => {
+    tweet: async(
+        user: IUser,
+        savedPost: Document<unknown, any, PostProps> & PostProps & {
+        _id: Types.ObjectId;},
+        language: 'it' | 'en',
+        mediaId?: string,
+        ) => {
         try {
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
             if (!twitter) throw new Error("You need to authorize the twitter API into the User Settings page.");
             const {oauth_access_token, oauth_access_token_secret} = twitter
-            const accessToken = user.role === 0 ? oauth_access_token : savedPost.community === 'Italy' ? ANON_ACCESS_TOKEN : savedPost.community === 'calciomercato' ? BBABYITALIA_ACCESS_TOKEN : BBABY_ACCESS_TOKEN
-            const accessSecret = user.role === 0 ? oauth_access_token_secret : savedPost.community === 'Italy' ? ANON_ACCESS_TOKEN_SECRET : savedPost.community === 'calciomercato' ? BBABYITALIA_ACCESS_TOKEN_SECRET : BBABY_ACCESS_TOKEN_SECRET
+            const accessToken = user.role === 0
+            ? oauth_access_token : savedPost.community === 'Italy' 
+            ? ANON_ACCESS_TOKEN : language === 'it' 
+            ? BBABYITALIA_ACCESS_TOKEN : BBABY_ACCESS_TOKEN
+            const accessSecret = user.role === 0
+            ? oauth_access_token_secret : savedPost.community === 'Italy'
+            ? ANON_ACCESS_TOKEN_SECRET : language === 'it'
+            ? BBABYITALIA_ACCESS_TOKEN_SECRET : BBABY_ACCESS_TOKEN_SECRET
             if (!oauth_access_token) throw new Error('You need to access to your twitter account first')
             const twitterClient = new TwitterApi({
                 appKey: TWITTER_CONSUMER_KEY,

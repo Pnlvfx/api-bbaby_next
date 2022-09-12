@@ -70,7 +70,7 @@ const communityCtrl = {
                 res.status(500).json({msg: err.message})
             }
     },
-    createCommunity: async(expressRequest:Request,res:Response) => {
+    createCommunity: async(expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -80,7 +80,7 @@ const communityCtrl = {
             if (check) {
                 return res.status(401).json({msg: `Sorry, b/${name} is taken. Try another.`})
             } else {
-                const language = user.countryCode === 'IT' ? "Italian" : "English"
+                const language = user.countryCode === 'IT' ? "it" : "en"
                 const {region} = user
                 const community = new Community({
                     name,
@@ -88,8 +88,8 @@ const communityCtrl = {
                     language,
                     region
                 })
-                const savedCommunity = await community.save()
-                res.status(201).json({msg: "You have successfully created a new community"})
+                const savedCommunity = await community.save();
+                res.status(201).json({msg: "You have successfully created a new community"});
             }
         } catch (err) {
             if (err instanceof Error)

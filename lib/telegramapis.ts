@@ -21,7 +21,6 @@ const telegramapis = {
             const res = await fetch(url_q, {
                 method: 'POST',
                 headers,
-
             })
             const data = await res.json()
             if (!data) catchError(data?.msg);

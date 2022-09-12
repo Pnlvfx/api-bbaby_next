@@ -90,8 +90,8 @@ const PostCtrl = {
             } = req.body;
             if (!title) return res.status(500).json({msg: "Title is required."})
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
-            const communityExist = await Community.exists({name: community});
-            if (!communityExist) return res.status(500).json({msg: "Please select a valid community."});
+            const communityInfo = await Community.findOne({name: community});
+            if (!communityInfo) return res.status(500).json({msg: "Please select a valid community."});
             const post = new Post({
                 author: user?.username,
                 authorAvatar: user?.avatar,
@@ -130,9 +130,10 @@ const PostCtrl = {
                     if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
                     const twimage = await twitterapis.uploadMedia(user, post, filePath);
                     if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                    await twitterapis.tweet(user, savedPost, twimage);
+                    if (!community.language) return res.status(400).json({msg: "This community doesn't have any language"})
+                    await twitterapis.tweet(user, savedPost, community.language, twimage);
                 } else {
-                    await twitterapis.tweet(user, savedPost);
+                    await twitterapis.tweet(user, savedPost, community.language);
                 }
             }
             const updateComNumber = await Community.findOneAndUpdate({name: post.community}, {$inc: {number_of_posts: +1}})

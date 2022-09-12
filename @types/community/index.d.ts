@@ -13,7 +13,7 @@ interface CommunityProps extends Document {
     user_is_contributor: boolean
     user_is_subscriber: boolean
     number_of_posts: number
-    language: string
+    language: 'it' | 'en'
     region: string
     category?: string
     sub_categories?: string[]
