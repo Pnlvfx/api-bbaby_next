@@ -39,6 +39,9 @@ const coraline = {
             catchError(err);
         }
     },
+    urlisImage: (url: string) => {
+        return /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
+    },
     use : (document: string) => {
         const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
         const subFolder = isStatic ? 'static' : 'gov';

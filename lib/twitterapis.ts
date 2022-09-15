@@ -70,11 +70,13 @@ const twitterapis = {
             });
             const postUrl = `bbabystyle.com/b/${savedPost.community}/comments/${savedPost._id}`;
             const text = savedPost.title;
-            let response = null
+            let response = undefined
+            const finalText = user.role === 1  ? `${text} ${postUrl}` : `${postUrl}`
+            if (finalText.length > 300) throw new Error(`Twitter maximum accept maximum 300 words. Please consider making this tweet shorter!`)
             if (mediaId) {
-                response = await twitterClient.v1.tweet(`${text} ${postUrl}`, {media_ids: mediaId});
+                response = await twitterClient.v1.tweet(finalText, {media_ids: mediaId});
             } else {
-                response = await twitterClient.v1.tweet(`${text} ${postUrl}`);
+                response = await twitterClient.v1.tweet(finalText);
             }
             if (!response) throw new Error("Something went wrong during the upload on twitter");
             return 'ok';

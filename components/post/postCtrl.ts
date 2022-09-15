@@ -17,17 +17,17 @@ const PostCtrl = {
     getPosts: async (req: Request,res: Response) => {
         try {
             const {token} = req.cookies;
-            const userLang = req.acceptsLanguages('en', 'it')
-            const {community,author,limit,skip} = req.query;
+            const userLang = req.acceptsLanguages('it', 'en');
+            const {community: communityName, author, limit, skip} = req.query;
             if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
             const _skip = parseInt(skip.toString());
             const user_agent = req.useragent;
             const _limit = user_agent?.isMobile && _skip < 15 ? 7 : parseInt(limit.toString())
-            const filters = 
-            community ? {community: new RegExp(`^${community}$`, 'i')} :
-            author ? {author: new RegExp(`^${author}$`, 'i')} :
-            userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio']}} :
-            {community: ['Italy', 'calciomercato', 'Calcio']}
+            const filters = communityName?.toString()
+            ? {community: new RegExp(`^${communityName.toString()}$`, 'i')} 
+            : author ? {author: new RegExp(`^${author}$`, 'i')} 
+            : userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio']}}
+            : {community: ['Italy', 'calciomercato', 'Calcio']}
             const posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip)
             if (token) {
                 const user = await getUserFromToken(token);
@@ -124,19 +124,31 @@ const PostCtrl = {
                 await telegramapis.sendMessage(chat_id, my_text);
             }
             if (sharePostToTwitter) {
-                if (isImage || isVideo) {
-                    const type = isImage ? 'image' : 'video';
-                    const filePath = await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type);
-                    if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
-                    const twimage = await twitterapis.uploadMedia(user, post, filePath);
-                    if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                    if (!community.language) return res.status(400).json({msg: "This community doesn't have any language"})
-                    await twitterapis.tweet(user, savedPost, community.language, twimage);
+                if (user.role === 1) {
+                    if (isImage || isVideo) {
+                        const type = isImage ? 'image' : 'video';
+                        const isUrl = coraline.urlisImage(selectedFile)
+                        if (isUrl) {
+                            const filePath = await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type);
+                            if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
+                            const twimage = await twitterapis.uploadMedia(user, post, filePath);
+                            if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
+                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have any language"})
+                            await twitterapis.tweet(user, savedPost, communityInfo.language, twimage);
+                        } else {
+                            const twimage = await twitterapis.uploadMedia(user, post, selectedFile);
+                            if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
+                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have any language"})
+                            await twitterapis.tweet(user, savedPost, communityInfo.language, twimage);
+                        }
+                    } else {
+                        await twitterapis.tweet(user, savedPost, communityInfo.language);
+                    }
                 } else {
-                    await twitterapis.tweet(user, savedPost, community.language);
+                    await twitterapis.tweet(user, savedPost, communityInfo.language);
                 }
             }
-            const updateComNumber = await Community.findOneAndUpdate({name: post.community}, {$inc: {number_of_posts: +1}})
+            const updateComNumber = communityInfo.$inc('number_of_posts', 1);
             res.status(201).json(savedPost)
             telegramapis.sendLog(`New post created from ${user.username}`)
          } catch (err) {
@@ -150,10 +162,9 @@ const PostCtrl = {
             const {id} = req.params
             const _id = new Types.ObjectId(id)
             const {dir} = req.body
-
-            const hasVotedUp = await User.findOne({username: user.username, upVotes: _id})
-            const hasVotedDown = await User.findOne({username: user.username, downVotes: _id})
-
+            
+            const hasVotedUp = user.upVotes.find((vote => vote.toString() === id))
+            const hasVotedDown = user.downVotes.find((vote => vote.toString() === id))
             if (hasVotedUp) {
                 if (dir === 1) {
                     const deletePrevVote = await User.findOneAndUpdate({upVotes: _id}, {$pull: {upVotes: _id}})
