@@ -12,6 +12,17 @@ import { catchErrorCtrl } from '../../lib/common';
 import coraline from '../../database/coraline';
 import twitterapis from '../../lib/twitterapis';
 
+  // useEffect(() => {
+  //   if (!comment.body) return;
+  //   const urlify = () => {
+  //     var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+  //     return comment.body.replace(urlRegex, (url) => {
+  //       return `<a href="${url}" target="_blank">${url}</a>`
+  //     })
+  //   }
+  //   urlify()
+  // }, [comment.body])
+
 
 const PostCtrl = {
     getPosts: async (req: Request,res: Response) => {
@@ -88,8 +99,8 @@ const PostCtrl = {
                 sharePostToTG,
                 sharePostToTwitter
             } = req.body;
-            if (!title) return res.status(500).json({msg: "Title is required."})
-            if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."})
+            if (!title) return res.status(500).json({msg: "Title is required."});
+            if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."});
             const communityInfo = await Community.findOne({name: community});
             if (!communityInfo) return res.status(500).json({msg: "Please select a valid community."});
             const post = new Post({
@@ -127,7 +138,10 @@ const PostCtrl = {
                 if (user.role === 1) {
                     if (isImage || isVideo) {
                         const type = isImage ? 'image' : 'video';
-                        const isUrl = coraline.urlisImage(selectedFile)
+                        const video = isVideo ? selectedFile.toString().split('?')[0] : null
+                        const isUrl = type === 'image' 
+                        ? coraline.urlisImage(selectedFile) 
+                        : coraline.urlisVideo(video)
                         if (isUrl) {
                             const filePath = await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type);
                             if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});

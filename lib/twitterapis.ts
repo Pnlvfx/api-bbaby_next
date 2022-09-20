@@ -34,8 +34,8 @@ const twitterapis = {
                 accessToken,
                 accessSecret
             });
-            const stats = fs.statSync(media);
-            const size = stats.size / (1024*1024)
+            // const stats = fs.statSync(media);
+            // const size = stats.size / (1024*1024)
             const mediaId = await twitterClient.v1.uploadMedia(media);
             return mediaId;
         } catch (err) {

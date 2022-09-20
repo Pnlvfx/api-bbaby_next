@@ -1,4 +1,5 @@
 import type {Request, Response} from 'express';
+import coraline from '../../database/coraline';
 import Comment from '../../models/Comment';
 import Post from '../../models/Post';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
