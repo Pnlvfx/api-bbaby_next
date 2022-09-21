@@ -6,7 +6,6 @@ import cloudinary from '../../lib/cloudinary';
 import { _googleLogin } from './user-functions/google';
 import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
-import config from '../../config/config';
 
 const userCtrl = {
     user: async (req:Request,res:Response) => {

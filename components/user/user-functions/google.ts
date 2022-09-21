@@ -19,7 +19,7 @@ export const _googleLogin = async(tokenId: string,req:express.Request,res:expres
         if (user) {
             const match = bcrypt.compareSync(password, user.password)
             if(!match) return res.status(400).json({msg: "Password is incorrect."})
-            login(user,res)
+            login(user._id.toString() , res)
         } else {
             const {country,countryCode,city,region,lat,lon} = req.body.data
             const username = await name.replace(/\s/g,'')
@@ -27,6 +27,6 @@ export const _googleLogin = async(tokenId: string,req:express.Request,res:expres
                 username:username,email,password:passwordHash,avatar:picture,country,countryCode,city,region,lat,lon
             })
             await _user.save()
-            login(_user,res)
+            login(_user._id.toString() , res)
         }
 }

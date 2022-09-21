@@ -29,7 +29,7 @@ const oauthCtrl = {
             const url = `${CLIENT_URL}/activation/${activation_token}`
             sendEMail(email,url,"Verify your email address")
             const savedUser = await user.save()
-            login(savedUser,res)
+            login(user._id.toString(), res)
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
@@ -57,7 +57,7 @@ const oauthCtrl = {
             if (user && user.username) {
                 const passOk = bcrypt.compareSync(password,user.password)
                 if (passOk) {
-                    login(user,res)
+                    login(user._id.toString() , res)
                 } else {
                     return res.status(422).json({msg:'Invalid username or password'});
                 }
