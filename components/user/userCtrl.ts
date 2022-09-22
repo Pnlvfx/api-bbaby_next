@@ -3,7 +3,6 @@ import type { UserRequest } from '../../@types/express';
 import User from '../../models/User';
 import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../lib/cloudinary';
-import { _googleLogin } from './user-functions/google';
 import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
 
@@ -80,8 +79,8 @@ const userCtrl = {
             //     domain: COOKIE_DOMAIN,
             //     path: '/',
             // }).send();
-            console.log(user);
-            telegramapis.sendLog(`New session: ${user ? user.username : 'unknown user'}` + ' ' + 'Useragent:' + req.useragent?.source + 'Ip:' + req.ips.toString())
+            telegramapis.sendLog(
+                `New session: ${user ? user.username : 'unknown user'}` + ' ' + 'Useragent:' + req.useragent?.source);
             res.status(200).json('ok')
         } catch (err) {
             catchErrorCtrl(err, res);

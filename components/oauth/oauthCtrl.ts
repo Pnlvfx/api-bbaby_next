@@ -5,10 +5,10 @@ import { createActivationToken, login, validateEmail } from "../user/user-functi
 import bcrypt from 'bcrypt';
 import sendEMail from "../user/user-functions/sendMail";
 import jwt from 'jsonwebtoken';
-import { _googleLogin } from "../user/user-functions/google";
 import { catchErrorCtrl } from "../../lib/common";
+import {google} from 'googleapis'
 
-const {CLIENT_URL,NODE_ENV, COOKIE_DOMAIN} = config;
+const {CLIENT_URL, NODE_ENV, COOKIE_DOMAIN} = config;
 
 const oauthCtrl = {
     register: async (req: Request,res: Response) => {
@@ -24,7 +24,17 @@ const oauthCtrl = {
             const existingUser = await User.findOne({username})
             if (existingUser) return res.status(400).json( {msg: "This username already exist!"})
 
-            const user = new User({email,username,password:passwordHash,country,countryCode,city,region,lat,lon})
+            const user = new User({
+                email,
+                username,
+                password: passwordHash,
+                country,
+                countryCode,
+                city,
+                region,
+                lat,
+                lon
+            })
             const activation_token = createActivationToken(user)
             const url = `${CLIENT_URL}/activation/${activation_token}`
             sendEMail(email,url,"Verify your email address")
@@ -91,7 +101,28 @@ const oauthCtrl = {
     googleLogin: async (req: Request,res: Response) => {
         try {
             const {tokenId} = req.body;
-             _googleLogin(tokenId,req,res)
+            const {OAuth2} = google.auth
+            const {MAILING_SERVICE_CLIENT_ID,GOOGLE_SECRET} = config
+            const client = new OAuth2()
+            const verify: any = await client.verifyIdToken({idToken: tokenId, audience: MAILING_SERVICE_CLIENT_ID});
+            const {email_verified, email, name, picture} = verify.payload
+            const password = email + GOOGLE_SECRET;
+            const passwordHash = bcrypt.hashSync(password, 10);
+            if (!email_verified) return res.status(400).json({msg: "Email verification failed."})
+            const user = await User.findOne({email})
+            if (user) {
+                const match = bcrypt.compareSync(password, user.password)
+                if(!match) return res.status(400).json({msg: "Password is incorrect."})
+                login(user._id.toString() , res)
+            } else {
+                const {country, countryCode, city, region, lat, lon} = req.body.data
+                const username = await name.replace(/\s/g,'')
+                const _user = new User({
+                    username:username,email,password:passwordHash,avatar:picture,country,countryCode,city,region,lat,lon
+                })
+                await _user.save()
+                login(_user._id.toString() , res)
+            }
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})

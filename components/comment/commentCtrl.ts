@@ -5,15 +5,15 @@ import Post from '../../models/Post';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 
 const commentCtrl = {
-    createComment: async (req:Request,res:Response) => {
+    createComment: async (req: Request,res: Response) => {
         try {
-            const {token} = req.cookies
+            const {token} = req.cookies;
             if(!token) {
                 return res.status(401).json({msg: "You need to login first"})
             }
             const user = await getUserFromToken(token)
             if (!user) return res.status(401).json({msg: "You need to login first"})
-            const {body,parentId,rootId} = req.body;
+            const {body, parentId, rootId} = req.body;
             const comment = new Comment({
                 author:user.username,
                 authorAvatar:user.avatar,

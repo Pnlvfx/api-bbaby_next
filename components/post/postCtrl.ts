@@ -119,11 +119,12 @@ const PostCtrl = {
                 post.$set({mediaInfo: {isImage, image:image.secure_url, dimension: [height, width]}});
             }
             if (isVideo) {
-                //const _video = await coraline.videos.saveVideo(`posts/${post._id.toString()}`, selectedFile, width, height);
+                //const _video = await coraline.videos.saveVideo(`posts/${post._id.toString()}`, selectedFile, width, height); 
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),
-                    resource_type: 'video'
+                    resource_type: 'video',
+                    quality: 'auto'
                 })
                 if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
                 post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height, width]}})

@@ -1,6 +1,6 @@
-import {Response} from 'express'
-import jwt from 'jsonwebtoken'
-import config from '../../../config/config'
+import {Response} from 'express';
+import jwt from 'jsonwebtoken';
+import config from '../../../config/config';
 import User from '../../../models/User';
 
 const {SECRET, COOKIE_DOMAIN, ACTIVATION_TOKEN_SECRET, NODE_ENV} = config;
@@ -27,14 +27,14 @@ export const login = (id: string, res: Response) => {
             res.cookie('token', token, {
                 httpOnly: true,
                 maxAge: 63072000000
-            }).json({msg: 'Congratulation! You are now a new Bbabystyle user'})
+            }).json({msg: 'Successfully logged in!'})
         } else {
             res.cookie('token', token, {
                 httpOnly: true,
                 domain: COOKIE_DOMAIN,
                 secure: true,
                 maxAge: 63072000000
-            }).json({msg: 'Congratulation! You are now a new Bbabystyle user'})
+            }).json({msg: 'Successfully logged in!'})
         }
     });
 }
