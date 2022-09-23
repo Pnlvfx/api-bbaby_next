@@ -4,7 +4,7 @@ import communityCtrl from './communityCtrl';
 
 const communityRouter = Router();
 
-communityRouter.get('/best-communities', communityCtrl.getBestCommunities);
+communityRouter.get('/', communityCtrl.getCommunities);
 
 communityRouter.get('/:name', communityCtrl.getCommunity);
 

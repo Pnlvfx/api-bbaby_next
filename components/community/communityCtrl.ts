@@ -36,12 +36,11 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    updateDescription: async(expressRequest:Request,res:Response) => {
+    updateDescription: async(expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const {user} = req;
-            const {name,descr:description} = req.body;
-            const c = await Community.findOneAndUpdate({name}, {description})
+            const {name, descr: description} = req.body;
+            const c = await Community.findOneAndUpdate({ name }, { description })
             if (!c) return res.status(500).json({msg: 'Something went wrong, please try again'})
             res.status(200).json('Description update successfully');
         } catch (err) {
@@ -49,10 +48,10 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getBestCommunities: async(req:Request,res:Response) => {
+    getCommunities: async(req:Request,res:Response) => {
         try {
-            const {token} = req.cookies;
-            const {limit} = req.query;
+            const { token } = req.cookies;
+            const { limit } = req.query;
             if (!limit) return res.status(400).json({msg: 'Please add a limit field into your query request.'})
             const communities = await Community.find({}).sort({number_of_posts: -1}).limit(parseInt(limit.toString()))
             if (!communities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
@@ -174,12 +173,19 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
+    getCommunitiesByCategory: async (expressRequest: Request, res: Response) => {
+        try {
+            
+        } catch (err) {
+            
+        }
+    },
     searchCommunity: async(expressRequest:Request,res:Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
             const {phrase} = req.query;
-            const name = {$regex: '.*'+ phrase +'.*', $options: 'i'}
+            const name = {$regex: '.*'+ phrase + '.*', $options: 'i'}
             if (!phrase) return res.status(500).json({msg: "Please insert the name of the communities that you want to find"})
             const communities = await Community.find({name: name}).sort({subscribers: -1})
             // const filters = () => {
