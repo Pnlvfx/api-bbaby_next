@@ -50,14 +50,14 @@ const governanceCtrl = {
         )
             audioconcat(audio)
             .concat(`${youtubePath}/final.mp3`)
-            .on('start', function(command:string) {
+            .on('start', function(command: string) {
                 //console.log('ffmpeg process started:', command)
             })
-            .on('error', function (err:string, stdout:string, stderr:string) {
+            .on('error', function (err: string, stdout: string, stderr: string) {
                 console.error('Error:', err)
                 console.error('ffmpeg stderr:', stderr)
             })
-            .on('end', function(output:string) {
+            .on('end', function(output: string) {
                 cloudinary.v2.uploader.upload(`${youtubePath}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
                     res.json({
                         title: news.title,
@@ -218,22 +218,20 @@ const governanceCtrl = {
             if (!title || !description || !mediaInfo.image) return res.status(500).json({msg: 'Missing required input!'})
             const width = mediaInfo.width >= 1920 ? 1920 : parseInt(mediaInfo.width);
             const height = mediaInfo.height >= 1080 ? 1080 : parseInt(mediaInfo.height);
-            let savedNews:any = {}
             const news = new News({
                 author: user.username,
                 title,
                 description,
                 mediaInfo
-            })
-            savedNews = await news.save()
+            });
+            let savedNews = await news.save();
             const newImage = await cloudinary.v2.uploader.upload(mediaInfo.image, {
                 upload_preset: 'bbaby_news',
                 public_id: savedNews._id.toString(),
                 transformation: {width, height, crop: 'fill'}
-            })
+            });
             if (!newImage) return res.status(500).json({msg: "This image cannot be uploaded."})
-            savedNews = await News.findByIdAndUpdate({_id: savedNews._id}, {$set: {'mediaInfo.image': newImage.secure_url}})
-            savedNews = await News.findById(savedNews._id);
+            savedNews.$set({mediaInfo: {image: newImage.secure_url}})
             res.status(201).json(savedNews);
         } catch (err) {
             if (err instanceof Error) {

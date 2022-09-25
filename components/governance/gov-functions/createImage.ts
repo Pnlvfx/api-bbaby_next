@@ -12,7 +12,7 @@ import { NewsProps } from "../../../@types/news"
 export const saveImageToDisk = async(imageUrl: string, index: number) => {
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disabled-setupid-sandbox'] })
     const page = await browser.newPage()
-    const path = await coraline.use('youtube')
+    const path = coraline.use('youtube')
     page.on('response', async (response) => {
         const url = response.url()
         const type = response.request().resourceType()

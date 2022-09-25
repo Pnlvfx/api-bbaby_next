@@ -15,10 +15,12 @@ const userCtrl = {
             if (!user) {
                 res.json(null)
             } else {
-                res.status(200).json({user: {
-                    username:user.username, 
-                    avatar: user.avatar, 
-                    role: user.role}
+                res.status(200).json({
+                    user: {
+                        username:user.username, 
+                        avatar: user.avatar, 
+                        role: user.role
+                    }
                 })
             }
         } catch (err) {

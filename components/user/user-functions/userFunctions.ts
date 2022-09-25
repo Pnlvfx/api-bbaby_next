@@ -1,14 +1,22 @@
-import {Response} from 'express';
+import {CookieOptions, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../../../config/config';
 import User from '../../../models/User';
 
 const {SECRET, COOKIE_DOMAIN, ACTIVATION_TOKEN_SECRET, NODE_ENV} = config;
 
-export const getUserFromToken = async(token: string) => {
-    const verify:any = jwt.verify(token, SECRET);
-    const user = await User.findById(verify.id);
-    return user
+interface JwtPayload {
+    id: string
+}
+
+export const getUserFromToken = async (token: string) => {
+    try {
+        const verify = jwt.verify(token, SECRET) as JwtPayload;
+        const user = await User.findById(verify.id);
+        return user
+    } catch (err) {
+
+    }
 }
 
 export const createActivationToken = ({...payload}) => {
@@ -21,20 +29,15 @@ export const validateEmail = (email: string) => {
 }
 
 export const login = (id: string, res: Response) => {
-    jwt.sign({id} , SECRET, (err: any, token: any) => {
-        if (err) throw new Error('For some reason you are able to login. Please retry.');
-        if (NODE_ENV === 'development') {
-            res.cookie('token', token, {
-                httpOnly: true,
-                maxAge: 63072000000
-            }).json({msg: 'Successfully logged in!'})
-        } else {
-            res.cookie('token', token, {
-                httpOnly: true,
-                domain: COOKIE_DOMAIN,
-                secure: true,
-                maxAge: 63072000000
-            }).json({msg: 'Successfully logged in!'})
-        }
-    });
+    const token = jwt.sign({id}, SECRET);
+    const maxAge = 63072000000
+    let cookieOptions: CookieOptions = {
+        httpOnly: true,
+        maxAge,
+    }
+    if (NODE_ENV === 'production') {
+        cookieOptions.domain = COOKIE_DOMAIN
+        cookieOptions.secure = true
+    }
+    res.cookie('token', token, cookieOptions).json({msg: 'Successfully logged in!'});
 }

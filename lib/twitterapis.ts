@@ -2,7 +2,6 @@ import { IUser } from "../@types/user";
 import { catchError } from "./common";
 import {TwitterApi} from 'twitter-api-v2';
 import config from '../config/config';
-import fs from 'fs';
 import { Document, Types } from "mongoose";
 import { PostProps } from "../@types/post";
 

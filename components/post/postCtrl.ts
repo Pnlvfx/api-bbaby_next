@@ -148,12 +148,12 @@ const PostCtrl = {
                             if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
                             const twimage = await twitterapis.uploadMedia(user, post, filePath);
                             if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have any language"})
+                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"})
                             await twitterapis.tweet(user, savedPost, communityInfo.language, twimage);
                         } else {
                             const twimage = await twitterapis.uploadMedia(user, post, selectedFile);
                             if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have any language"})
+                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"})
                             await twitterapis.tweet(user, savedPost, communityInfo.language, twimage);
                         }
                     } else {

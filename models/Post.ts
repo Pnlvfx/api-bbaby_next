@@ -1,4 +1,4 @@
-import {Schema,model} from "mongoose";
+import {Schema, model} from "mongoose";
 import { PostProps } from "../@types/post";
 
 const PostSchema = new Schema<PostProps>({

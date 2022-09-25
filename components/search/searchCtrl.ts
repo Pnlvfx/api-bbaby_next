@@ -1,10 +1,10 @@
-import express from 'express'
 import Post from '../../models/Post';
 import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
+import { Request, Response } from 'express';
 
 const searchCtrl = {
-    search: async (req:express.Request, res: express.Response) => {
+    search: async (req: Request, res: Response) => {
         try {
             const {phrase} = req.query;
             const posts = await Post.find({title: {$regex: '.*'+ phrase +'.*', $options: 'i'}}).sort({createdAt: -1})
@@ -16,7 +16,7 @@ const searchCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    searchTrend: async (req:express.Request, res: express.Response) => {
+    searchTrend: async (req: Request, res: Response) => {
         try {
             const posts = await Post.find({createdAt: {$gte: startOfDay(new Date()),$lt: endOfDay(new Date())}}).sort({ups: -1})
             res.set('Cache-control', 'public,max-age=3600')

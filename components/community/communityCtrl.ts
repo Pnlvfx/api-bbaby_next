@@ -1,6 +1,7 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
 import cloudinary from '../../lib/cloudinary';
+import { catchErrorCtrl } from '../../lib/common';
 import Community from '../../models/Community';
 import Post from '../../models/Post';
 import User from '../../models/User';
@@ -36,7 +37,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    updateDescription: async(expressRequest: Request,res: Response) => {
+    updateDescription: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {name, descr: description} = req.body;
@@ -48,7 +49,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getCommunities: async(req:Request,res:Response) => {
+    getCommunities: async (req:Request,res:Response) => {
         try {
             const { token } = req.cookies;
             const { limit } = req.query;
@@ -69,7 +70,7 @@ const communityCtrl = {
                 res.status(500).json({msg: err.message})
             }
     },
-    createCommunity: async(expressRequest: Request,res: Response) => {
+    createCommunity: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -133,28 +134,22 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getUserPreferredCommunities: async(req:Request,res:Response) => {
+    getUserPreferredCommunities: async (expressRequest: Request,res: Response) => {
         try {
-            const {token} = req.cookies;
+            const req = expressRequest as UserRequest;
+            const {user} = req;
             const {limit} = req.query;
-            if (!limit) return res.status(400).json({msg: 'Please add a limit field into your query request.'})
-            let communities = [];
-            if (token) {
-                const user = await getUserFromToken(token)
-                if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
-                const subscribedCommunities = await Community.find({name: user?.subscribed}).limit(parseInt(limit.toString()))
-                if (!subscribedCommunities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
-                if (subscribedCommunities.length <= parseInt(limit.toString())) {
-                    
-                }
+            if (!limit) return res.status(400).json({msg: 'Please add a limit field into your query request.'});
+            const subscribedCommunities = await Community.find({name: user?.subscribed}).limit(parseInt(limit.toString()))
+            if (!subscribedCommunities) return res.status(500).json({msg: "Something went wrong when trying to get the communities"})
+            if (subscribedCommunities.length <= parseInt(limit.toString())) {
                 res.json(subscribedCommunities)
             }
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
-    chooseCategory : async(expressRequest:Request,res:Response) => {
+    chooseCategory : async (expressRequest:Request,res:Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -180,7 +175,7 @@ const communityCtrl = {
             
         }
     },
-    searchCommunity: async(expressRequest:Request,res:Response) => {
+    searchCommunity: async (expressRequest:Request,res:Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;

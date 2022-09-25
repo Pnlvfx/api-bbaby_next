@@ -6,4 +6,6 @@ interface CommentProps extends Document {
     body: string
     parentId?: Types.ObjectId
     rootId: Types.ObjectId
+    ups: number,
+    liked: boolean | null
 }

@@ -50,9 +50,8 @@ const oauthCtrl = {
             const {activation_token} = req.body;
             const {ACTIVATION_TOKEN_SECRET} = config;
             const user:any = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET);
-
-            const {email} = user
-            const check = await User.findOne({email})
+            
+            const check = await User.findOne({email: user.email})
             if (check) return res.status(400).json({msg: "This email already exists"})
             res.json({msg: "Success"})
         } catch (err) {
@@ -118,7 +117,16 @@ const oauthCtrl = {
                 const {country, countryCode, city, region, lat, lon} = req.body.data
                 const username = await name.replace(/\s/g,'')
                 const _user = new User({
-                    username:username,email,password:passwordHash,avatar:picture,country,countryCode,city,region,lat,lon
+                    username:username,
+                    email,
+                    password:passwordHash,
+                    avatar:picture,
+                    country,
+                    countryCode,
+                    city,
+                    region,
+                    lat,
+                    lon
                 })
                 await _user.save()
                 login(_user._id.toString() , res)

@@ -1,22 +1,22 @@
-import type {Request, Response} from 'express';
+import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
-import config from '../../config/config'
+import config from '../../config/config';
 import { catchErrorCtrl } from '../../lib/common';
-import _oauth from '../../lib/twitter_oauth'
-import User from '../../models/User'
+import _oauth from '../../lib/twitter_oauth';
+import User from '../../models/User';
 
-const {COOKIE_DOMAIN,CLIENT_URL, ANON_ACCESS_TOKEN, ANON_ACCESS_TOKEN_SECRET} = config;
+const {COOKIE_DOMAIN, CLIENT_URL, ANON_ACCESS_TOKEN, ANON_ACCESS_TOKEN_SECRET} = config;
 const oauthCallback = `${CLIENT_URL}/settings`; //redirect
 const oauth = _oauth(oauthCallback)
 const COOKIE_NAME = 'oauth_token'
 let tokens:any = {}
 
 const TwitterCtrl = {
-    twitterReqToken: async (expressRequest:Request,res:Response) => {
+    twitterReqToken: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const {user} = req;
-            const {oauth_token,oauth_token_secret} = await oauth.getOAuthRequestToken();
+            console.log('ok');
+            const {oauth_token, oauth_token_secret} = await oauth.getOAuthRequestToken();
             if (!oauth_token) return res.status(500).json({msg: 'Twitter error.'})
             res.cookie(COOKIE_NAME, oauth_token, {
                 maxAge: 15 * 60 * 1000, // 15 minutes
@@ -31,7 +31,7 @@ const TwitterCtrl = {
             res.status(403).json({msg: err})
         }
     },
-    twitterAccessToken: async (expressRequest:Request,res:Response) => {
+    twitterAccessToken: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req
@@ -50,7 +50,7 @@ const TwitterCtrl = {
             res.status(403).json({message: err.message});
         }
     },
-    twitterUserInfo: async (expressRequest:Request,res:Response) => {
+    twitterUserInfo: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const internalUser = req.user
@@ -67,7 +67,7 @@ const TwitterCtrl = {
             res.status(403).json({message: error});
         }
     },
-    twitterLogout: async (expressRequest:Request,res:Response) => {
+    twitterLogout: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -79,7 +79,7 @@ const TwitterCtrl = {
             res.status(403).json({msg: err.message})
         }
     },
-    twitterGetUserPost: async (expressRequest:Request,res:Response) => {
+    twitterGetUserPost: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -98,7 +98,7 @@ const TwitterCtrl = {
             res.status(403).json({message: error});
         }
     },
-    getHome: async (expressRequest:Request,res:Response) => {
+    getHome: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
