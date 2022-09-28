@@ -41,41 +41,47 @@ const twitterapis = {
             catchError(err);
         }
     },
-    tweet: async(
+    chooseUser: (
         user: IUser,
-        savedPost: Document<unknown, any, PostProps> & PostProps & {
-        _id: Types.ObjectId;},
-        language: 'it' | 'en',
-        mediaId?: string,
-        ) => {
+        post: Document<unknown, any, PostProps> & PostProps & {_id: Types.ObjectId;},
+        language: 'it' | 'en'
+    ) => {
         try {
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
             if (!twitter) throw new Error("You need to authorize the twitter API into the User Settings page.");
             const {oauth_access_token, oauth_access_token_secret} = twitter
             const accessToken = user.role === 0
-            ? oauth_access_token : savedPost.community === 'Italy' 
+            ? oauth_access_token : post.community === 'Italy'
             ? ANON_ACCESS_TOKEN : language === 'it' 
             ? BBABYITALIA_ACCESS_TOKEN : BBABY_ACCESS_TOKEN
             const accessSecret = user.role === 0
-            ? oauth_access_token_secret : savedPost.community === 'Italy'
+            ? oauth_access_token_secret : post.community === 'Italy'
             ? ANON_ACCESS_TOKEN_SECRET : language === 'it'
             ? BBABYITALIA_ACCESS_TOKEN_SECRET : BBABY_ACCESS_TOKEN_SECRET
-            if (!oauth_access_token) throw new Error('You need to access to your twitter account first')
+            if (!oauth_access_token) throw new Error('You need to access to your twitter account first');
             const twitterClient = new TwitterApi({
                 appKey: TWITTER_CONSUMER_KEY,
                 appSecret: TWITTER_CONSUMER_SECRET,
                 accessToken,
                 accessSecret
             });
-            const postUrl = `bbabystyle.com/b/${savedPost.community}/comments/${savedPost._id}`;
-            const text = savedPost.title;
-            let response = undefined
-            const finalText = user.role === 1  ? `${text} ${postUrl}` : `${postUrl}`
-            if (finalText.length > 300) throw new Error(`Twitter maximum accept maximum 300 words. Please consider making this tweet shorter!`)
+            return twitterClient;
+        } catch (err) {
+            catchError(err);
+        }
+    },
+    tweet: async (
+        client: TwitterApi,
+        text: string,
+        mediaId?: string,
+        ) => {
+        try {
+            let response = undefined;
+            if (text.length > 300) throw new Error(`Twitter maximum accept maximum 300 words. Please consider making this tweet shorter!`)
             if (mediaId) {
-                response = await twitterClient.v1.tweet(finalText, {media_ids: mediaId});
+                response = await client.v1.tweet(text, {media_ids: mediaId});
             } else {
-                response = await twitterClient.v1.tweet(finalText);
+                response = await client.v1.tweet(text);
             }
             if (!response) throw new Error("Something went wrong during the upload on twitter");
             return 'ok';

@@ -11,6 +11,7 @@ interface PostProps {
     ups: number
     liked: null | boolean
     numComments: number
+    url: string
 }
 
 interface MediaInfoProps {

@@ -12,18 +12,6 @@ import { catchErrorCtrl } from '../../lib/common';
 import coraline from '../../database/coraline';
 import twitterapis from '../../lib/twitterapis';
 
-  // useEffect(() => {
-  //   if (!comment.body) return;
-  //   const urlify = () => {
-  //     var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
-  //     return comment.body.replace(urlRegex, (url) => {
-  //       return `<a href="${url}" target="_blank">${url}</a>`
-  //     })
-  //   }
-  //   urlify()
-  // }, [comment.body])
-
-
 const PostCtrl = {
     getPosts: async (req: Request,res: Response) => {
         try {
@@ -52,14 +40,14 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    getPost: async (req:Request,res:Response) => {
+    getPost: async (req: Request,res: Response) => {
         try {
             const {token} = req.cookies;
             const {id} = req.params;
             const check = isValidObjectId(id);
-            if (!check) return res.status(400).json({msg: "This post not exists."})
+            if (!check) return res.status(400).json({msg: "This post not exists."});
             let post = await Post.findById(id);
-            if (!post) return res.status(400).json({msg: "This post not exists."})
+            if (!post) return res.status(400).json({msg: "This post not exists."});
             if (token) {
                 const user = await getUserFromToken(token);
                 if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."});
@@ -100,6 +88,7 @@ const PostCtrl = {
                 sharePostToTwitter
             } = req.body;
             if (!title) return res.status(500).json({msg: "Title is required."});
+            if (user.role !== 1 && title.toString().length > 300) return res.status(400).json({msg: 'Title needs to be 300 words maximum.'});
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."});
             const communityInfo = await Community.findOne({name: community});
             if (!communityInfo) return res.status(500).json({msg: "Please select a valid community."});
@@ -110,13 +99,13 @@ const PostCtrl = {
                 body,
                 community,
                 communityIcon,
-            })
+            });
             if (isImage) {
                 const image = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString()
                 })
-                post.$set({mediaInfo: {isImage, image:image.secure_url, dimension: [height, width]}});
+                post.$set({mediaInfo: {isImage, image: image.secure_url, dimension: [height, width]}});
             }
             if (isVideo) {
                 //const _video = await coraline.videos.saveVideo(`posts/${post._id.toString()}`, selectedFile, width, height); 
@@ -129,39 +118,39 @@ const PostCtrl = {
                 if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
                 post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height, width]}})
             }
+            const url = `https://www.bbabystyle.com/b/${post.community}/comments/${post._id}`;
+            post.url = url;
             const savedPost = await post.save();
-            if (sharePostToTG) {
-                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' || 'calcio' ? '@bbabystyle1' : '@bbaby_style'
-                const my_text = `https://bbabystyle.com/b/${savedPost.community}/comments/${savedPost._id}`
-                await telegramapis.sendMessage(chat_id, my_text);
-            }
             if (sharePostToTwitter) {
+                const twitterUser = twitterapis.chooseUser(user, savedPost, communityInfo.language);
+                if (!twitterUser) return res.status(500).json({msg: 'No twitter user found with this credentials..'});
+                const govText = savedPost.title + ' ' + url;
+                const twitterText = savedPost.title.length > 300 
+                ? savedPost.title.substring(0, 300) 
+                : govText.length > 300 ? savedPost.title
+                : govText
                 if (user.role === 1) {
+                    if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"})
                     if (isImage || isVideo) {
                         const type = isImage ? 'image' : 'video';
-                        const video = isVideo ? selectedFile.toString().split('?')[0] : null
-                        const isUrl = type === 'image' 
+                        const video = isVideo ? selectedFile.toString().split('?')[0] : null;
+                        const isUrl = type === 'image'
                         ? coraline.urlisImage(selectedFile) 
-                        : coraline.urlisVideo(video)
-                        if (isUrl) {
-                            const filePath = await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type);
-                            if (!filePath) return res.status(500).json({msg: "Cannot save this file!"});
-                            const twimage = await twitterapis.uploadMedia(user, post, filePath);
-                            if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"})
-                            await twitterapis.tweet(user, savedPost, communityInfo.language, twimage);
-                        } else {
-                            const twimage = await twitterapis.uploadMedia(user, post, selectedFile);
-                            if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
-                            if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"})
-                            await twitterapis.tweet(user, savedPost, communityInfo.language, twimage);
-                        }
+                        : coraline.urlisVideo(video);
+                        const media = isUrl ? await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type) : selectedFile;
+                        const twimage = await twitterapis.uploadMedia(user, post, media);
+                        if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
+                        await twitterapis.tweet(twitterUser, twitterText, twimage);
                     } else {
-                        await twitterapis.tweet(user, savedPost, communityInfo.language);
+                        await twitterapis.tweet(twitterUser, twitterText);
                     }
                 } else {
-                    await twitterapis.tweet(user, savedPost, communityInfo.language);
+                    await twitterapis.tweet(twitterUser, twitterText);
                 }
+            }
+            if (sharePostToTG) {
+                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' || 'calcio' ? '@bbabystyle1' : '@bbaby_style';
+                await telegramapis.sendMessage(chat_id, url);
             }
             const updateComNumber = communityInfo.$inc('number_of_posts', 1);
             res.status(201).json(savedPost)

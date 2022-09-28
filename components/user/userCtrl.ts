@@ -7,20 +7,38 @@ import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
 
 const userCtrl = {
-    user: async (req:Request,res:Response) => {
+    user: async (req: Request, res: Response) => {
         try {
-            const {token} = req.cookies;
-            if (!token) return res.status(200).json(null);
+            const { token, eu_cookie } = req.cookies;
+            const { useragent } = req
+            const mobile = useragent?.isMobile;
+            if (!token) return res.status(200).json({
+                user: null,
+                device: {
+                    mobile
+                },
+                eu_cookie
+            });
             const user = await getUserFromToken(token);
             if (!user) {
-                res.json(null)
+                res.status(601).json({
+                    user: null,
+                    device: {
+                        mobile
+                    },
+                    eu_cookie
+                })
             } else {
                 res.status(200).json({
                     user: {
                         username:user.username, 
                         avatar: user.avatar, 
                         role: user.role
-                    }
+                    },
+                    device: {
+                        mobile
+                    },
+                    eu_cookie
                 })
             }
         } catch (err) {

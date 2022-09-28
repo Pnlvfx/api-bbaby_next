@@ -53,6 +53,9 @@ const PostSchema = new Schema<PostProps>({
         type: Number,
         default: 0
     },
+    url: {
+        type: String
+    }
 },
 {
     timestamps:true

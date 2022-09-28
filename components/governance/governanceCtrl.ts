@@ -62,8 +62,8 @@ const governanceCtrl = {
                     res.json({
                         title: news.title,
                         description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi.
-                        Questo è il link all'articolo completo: https://bbabystyle.com/news/${newsId} .
-                        Contribuisci a far crescere bbabystyle https://bbabystyle.com`,
+                        Questo è il link all'articolo completo: https://www.bbabystyle.com/news/${newsId} .
+                        Contribuisci a far crescere bbabystyle https://www.bbabystyle.com`,
                         keywords: `Ucraina, News, Notizie`,
                         category: `25`,
                         privacyStatus: `public`,

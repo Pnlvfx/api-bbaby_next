@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { CookieOptions, Request, Response } from "express";
 import config from '../../config/config';
 import User from "../../models/User";
 import { createActivationToken, login, validateEmail } from "../user/user-functions/userFunctions";
@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import sendEMail from "../user/user-functions/sendMail";
 import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from "../../lib/common";
-import {google} from 'googleapis'
+import {google} from 'googleapis';
 
 const {CLIENT_URL, NODE_ENV, COOKIE_DOMAIN} = config;
 
@@ -138,13 +138,22 @@ const oauthCtrl = {
     },
     eu_cookie : async (req: Request, res: Response) => {
         try {
-            res.cookie('eu_cookie', '', {
-                maxAge: 15 * 60 * 1000, // 15 minutes
-                secure: true,
+            if (!req.headers.origin) return res.status(400).json({msg: 'API enabled only for valid client!'})
+            const {eu_cookie} = req.cookies;
+            if (eu_cookie) return res.status(200).json(null);
+            const maxAge = 63072000000 / 2
+            const cookieOptions: CookieOptions = {
+                maxAge, // 1 years, to check
                 httpOnly: true,
                 sameSite: true,
-                domain: COOKIE_DOMAIN
-            })
+            }
+            if (!req.headers.origin.includes('192.168.1.22')) {
+                cookieOptions.domain = COOKIE_DOMAIN
+                cookieOptions.secure = true
+            }
+            const {status} = req.body;
+            const value = `{%22nonessential:${status}%2C%22opted:true}`;
+            res.status(201).cookie('eu_cookie', value, cookieOptions).json(value);
         } catch (err) {
             catchErrorCtrl(err, res);
         }
