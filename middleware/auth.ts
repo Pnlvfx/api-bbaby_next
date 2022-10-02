@@ -2,7 +2,7 @@ import type {Response, NextFunction, Request} from 'express';
 import type { UserRequest } from '../@types/express';
 import { getUserFromToken } from '../components/user/user-functions/userFunctions';
 
-const auth = async (expressRequest:Request,res:Response,next:NextFunction) => {
+const auth = async (expressRequest: Request, res: Response, next: NextFunction) => {
     try {
         const req = expressRequest as UserRequest;
         const {token} = req.cookies;

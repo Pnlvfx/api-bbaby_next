@@ -1,4 +1,4 @@
-import { Types, Document } from "mongoose";
+import { Types } from "mongoose";
 
 interface PostProps {
     author: string

@@ -2,28 +2,28 @@ import {Schema, model} from "mongoose";
 import { PostProps } from "../@types/post";
 
 const PostSchema = new Schema<PostProps>({
-    author: 
-        {type:String,
-        required:true
+    author: {
+        type: String,
+        required: true
     },
-    authorAvatar: 
-        {type:String,
-        required:true
+    authorAvatar: {
+        type: String,
+        required: true
     },
-    title: 
-        {type:String,
-        required:true
+    title: {
+        type: String,
+        required: true
     },
     body: {
-        type:String
+        type: String
     },
     community: {
-        type:String,
-        required:true
+        type: String,
+        required: true
     },
     communityIcon: {
-        type:String,
-        required:true
+        type: String,
+        required: true
     },
     mediaInfo: {
             dimension: {
@@ -43,7 +43,7 @@ const PostSchema = new Schema<PostProps>({
             }
     },
     ups: {
-        type:Number,
+        type: Number,
         default: 0
     },
     liked: {
@@ -58,7 +58,7 @@ const PostSchema = new Schema<PostProps>({
     }
 },
 {
-    timestamps:true
+    timestamps: true
 }
 );
 const Post = model('Post', PostSchema);

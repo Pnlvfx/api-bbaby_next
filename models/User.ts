@@ -20,7 +20,7 @@ const UserSchema = new Schema<IUser>({
     },
     role: {
         type: Number,
-        default: 0 // 0 = user, 1 = admin
+        default: 0
     },
     avatar: {
         type: String,

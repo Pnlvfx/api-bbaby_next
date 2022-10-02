@@ -130,7 +130,6 @@ const PostCtrl = {
                 if (user.role === 1) {
                     if (isImage || isVideo) {
                         const type = isImage ? 'image' : 'video';
-                        console.log({selectedFile});
                         const video = isVideo ? selectedFile.toString().split('?')[0] : null;
                         const isUrl = type === 'image'
                         ? coraline.urlisImage(selectedFile) 
@@ -157,52 +156,48 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
          }
     },
-    voting: async (expressRequest:Request,res:Response) => {
+    voting: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
             const {id} = req.params
             const _id = new Types.ObjectId(id)
             const {dir} = req.body
-            
-            const hasVotedUp = user.upVotes.find((vote => vote.toString() === id))
-            const hasVotedDown = user.downVotes.find((vote => vote.toString() === id))
+            const hasVotedUp = user.upVotes.find((vote => vote.toString() === id));
+            const hasVotedDown = user.downVotes.find((vote => vote.toString() === id));
+            const post = await Post.findById(id);
+            if (!post) return res.status(400).json({msg: "This post doesn't exist!"});
             if (hasVotedUp) {
                 if (dir === 1) {
                     const deletePrevVote = await User.findOneAndUpdate({upVotes: _id}, {$pull: {upVotes: _id}})
-                    const post = await Post.findByIdAndUpdate(_id, {$inc: {ups: -1}})
-                    res.status(200).json({vote: post ? post.ups -1 : 0})
+                    post.ups -= 1
                 } else {
                     const deletePrevVote = await User.findOneAndUpdate({upVotes: _id}, {$pull: {upVotes: _id}})
                     const userVote = await User.findOneAndUpdate({username: user.username},{$push: {downVotes: _id}})
-                    const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : -2}})
-                    res.status(200).json({vote: post ? post.ups -2 : 0})
+                    post.ups -= 2
                 }
             } else if (hasVotedDown) {
                 if (dir === 1) {
                     const deletePrevVote = await User.findOneAndUpdate({downVotes: _id}, {$pull: {downVotes: _id}})
                     const userVote = await User.findOneAndUpdate({username: user.username},{$push: {upVotes : _id}})
-                    const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : +2}})
-                    res.status(200).json({vote: post ? post.ups +2 : 0})
+                    post.ups += 2
                 } else {
                     const deletePrevVote = await User.findOneAndUpdate({downVotes: _id}, {$pull: {downVotes: _id}})
-                    const post = await Post.findByIdAndUpdate(id, {$inc : {ups : +1}})
-                    res.status(200).json({vote: post ? post.ups +1 : 0})
+                    post.ups += 1
                 }
             } else {
                 if(dir === 1) {
                     const userVote = await User.findOneAndUpdate({username: user.username},{$push: {upVotes : _id}})
-                    const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : +1}})
-                    res.status(200).json({vote: post ? post.ups + 1: 0})
+                    post.ups += 1
                 } else {
-                    const post = await Post.findByIdAndUpdate(_id, {$inc : {ups : -1}})
                     const userVote = await User.findOneAndUpdate({username: user.username},{$push: {downVotes: _id}})
-                    res.status(200).json({vote: post ? post.ups -1 : 0})
+                    post.ups -= 1
                 }
             }
+            await post.save();
+            res.status(200).json({vote: post.ups});
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     deletePost: async (expressRequest:Request,res:Response) => {
@@ -210,12 +205,12 @@ const PostCtrl = {
             const req = expressRequest as UserRequest;
             const {user} = req;
             const {id} = req.params;
-            const findPost = await Post.findByIdAndDelete(id)
-            if (findPost && findPost.mediaInfo) {
+            const post = await Post.findByIdAndDelete(id)
+            if (post?.mediaInfo) {
                 //const deleteImage = await cloudinary.v2.uploader.destroy(findPost.imageId)
             }
-            const findChildComments = await Comment.deleteMany({rootId: id})
-            res.json({msg: "Deleted success"})
+            const childComments = await Comment.deleteMany({rootId: id})
+            res.json({msg: "Deleted success"});
         } catch (err) {
             res.status(500).json({msg: "Something went wrong"})
         }

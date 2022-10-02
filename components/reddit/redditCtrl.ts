@@ -5,8 +5,7 @@ import coraline from '../../database/coraline';
 import { catchError, catchErrorCtrl } from '../../lib/common';
 import User from '../../models/User';
 
-const {CLIENT_URL} = config;
-const USER_AGENT = `bbabysyle/1.0.0 (${CLIENT_URL})`;
+const USER_AGENT = `bbabysyle/1.0.0 (www.bbabytyle.com)`;
 
 const redditCtrl = {
     redditLogin: async (expressRequest:Request,res:Response) => {
@@ -14,12 +13,15 @@ const redditCtrl = {
             const req = expressRequest as UserRequest;
             const {user} = req;
             const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET} = config;
-            const {code} = req.query;
+            const { origin } = req.headers;
+            if (!origin) return res.status(400).json({msg: "Make sure to access this API from www.bbabystyle.com"})
+            if (!origin.includes('www.bbabystyle.com')) return res.status(400).json({msg: "Make sure to access this API from www.bbabystyle.com"})
+            const { code } = req.query;
             if (!code) return res.status(500).json({msg: 'No code find!'});
             const encondedHeader = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString("base64")
             let response = await fetch(`https://www.reddit.com/api/v1/access_token`, {
                 method: 'POST',
-                body: `grant_type=authorization_code&code=${code}&redirect_uri=${CLIENT_URL}/settings`,
+                body: `grant_type=authorization_code&code=${code}&redirect_uri=${origin}/settings`,
                 headers: {
                     authorization: 
                     `Basic ${encondedHeader}`,
@@ -113,10 +115,8 @@ const redditCtrl = {
             }
             const posts = await getRedditPosts();
             if (!posts) console.log('error')
-            console.log(posts);
             res.status(200).json(posts)
         } catch (err) {
-            console.log(err);
             catchErrorCtrl(err, res);
         }
     },

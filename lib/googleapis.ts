@@ -79,8 +79,6 @@ const googleapis = {
                 const isJson = response.headers.get('content-type')?.includes('application/json')
                 const data = isJson ? await response.json() : null;
                 if (!response.ok) {
-                    console.log(response.status, response.statusText)
-                    console.log(data);
                     const error = data.error.message;
                     throw new Error(error);
                 } else {

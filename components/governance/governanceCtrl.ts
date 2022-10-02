@@ -58,7 +58,9 @@ const governanceCtrl = {
                 console.error('ffmpeg stderr:', stderr)
             })
             .on('end', function(output: string) {
-                cloudinary.v2.uploader.upload(`${youtubePath}/final.mp3`, {upload_preset: 'bbaby_gov_video', resource_type: 'video'}).then(finalAudio => {
+                cloudinary.v2.uploader.upload(`${youtubePath}/final.mp3`, {
+                    upload_preset: 'bbaby_gov_video', resource_type: 'video'
+                }).then(finalAudio => {
                     res.json({
                         title: news.title,
                         description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi.
