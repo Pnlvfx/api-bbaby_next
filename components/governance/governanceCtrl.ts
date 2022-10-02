@@ -204,7 +204,6 @@ const governanceCtrl = {
             const {link} = req.body;
             if (!link) return res.status(400).json({msg: "Missing redirect link parameters"})
             const description = await bbcapis.getDescription(link);
-            console.log(description);
             res.status(200).json(description)
         } catch (err) {
             catchErrorCtrl(err, res);

@@ -1,6 +1,8 @@
-import config from '../config/config';
+import config from '../../config/config';
 import OAuth from 'oauth';
 import crypto from 'crypto';
+import http from 'http';
+import https from 'https';
 
 interface RequestToken {
     oauth_token: string
@@ -23,7 +25,6 @@ export default (oauthCallback: string) => {
     const oauth = {
         getOAuthRequestToken: () => {
             return new Promise<RequestToken>((resolve, reject) => {
-                console.log(_oauth);
                 _oauth.getOAuthRequestToken((error,oauth_token,oauth_token_secret,results) => {
                     if (error) reject(error)
                     resolve({oauth_token,oauth_token_secret, results})
@@ -31,35 +32,38 @@ export default (oauthCallback: string) => {
             });
         },
         getOAuthRequestToken2: () => {
-            return new Promise<RequestToken>(async (resolve, reject) => {
+            return new Promise<any>(async (resolve, reject) => {
                 try {
-                    const reqTokenUrl = `https://api.twitter.com/oauth/request_token?oauth_callback=${oauthCallback}`;
                     const timestamp = Math.floor((new Date().getTime() / 1000));
-                    const oauth_nonce = crypto.randomBytes(48).toString('hex');
-                    const authorization = `OAuth oauth_consumer_key="${TWITTER_CONSUMER_KEY}", oauth_nonce="${oauth_nonce}", oauth_signature="bbabystyle", oauth_signature_method="HMAC-SHA1", oauth_timestamp="${timestamp}", oauth_version="1.0"`
-                    console.log(authorization)
-                        
+                    const oauth_nonce = crypto.randomBytes(25).toString('hex');
+                    const oauth_signature = crypto.randomBytes(20).toString('hex');
+                    const callback = encodeURIComponent(oauthCallback)
+                    const Authorization = `OAuth oauth_callback="${callback}",oauth_consumer_key="${TWITTER_CONSUMER_KEY}",oauth_nonce="${oauth_nonce}",oauth_signature="${oauth_signature}",oauth_signature_method="HMAC-SHA1",oauth_timestamp="${timestamp}",oauth_version="1.0"`
                     const headers = {
-                        "Accept": '*/*',
-                        "Content-Type": 'application/x-www-form-urlencoded',
-                        "Authorization": authorization,
-                        'User-Agent': 'Node authentication'
+                        Authorization,
+                        "Accept": "*/*",
+                        "Connection" : "close",
+                        "User-Agent": "Node authentication",
+                        "Content-length": "0",
+                        "Content-Type": "application/x-www-form-urlencoded",
                     }
-                    const res = await fetch(reqTokenUrl, {
+                    const options = {
+                        host: 'api.twitter.com',
+                        port: 443,
+                        path: '/oauth/request_token',
                         method: 'POST',
-                        headers,
-                    })
-                    console.log(res);
-                    const data = await res.json();
-                    console.log(res.ok);
-                    if (!res.ok) {
-                        const errors = res.status + res.statusText + data?.errors[0]?.message
-                        console.log(errors);
-                        reject(errors);
-                    } else {
-                        console.log(data);
-                        resolve(data);
+                        headers
                     }
+                    const request = http.request(options);
+                    console.log(request);
+                    request.on('response', (response) => {
+                        response.on('data', (data) => {
+                            console.log(data);
+                        })
+                        response.on('error', (err) => {
+                            console.log(err);
+                        })
+                    })
                 } catch (err) {
                     console.log(err);
                 }

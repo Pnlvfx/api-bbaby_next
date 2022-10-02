@@ -134,7 +134,7 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
             await telegramapis.sendLog(response.status + response.statusText + 'Error while trying to get a new token!' + error);
             throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
         }
-        const tokenPath = await coraline.use('token')
+        const tokenPath = coraline.use('token')
         if (!tokenPath) {
             await telegramapis.sendLog('Not token path')
             throw new Error(`Error while trying to create a token path!`)

@@ -2,15 +2,11 @@ import type { Response } from "express";
 import telegramapis from "./telegramapis";
 import rateLimit from 'express-rate-limit';
 
-export const catchError = (err : unknown, from?: string) => {
+export const catchError = (err : unknown) => {
     if (err instanceof Error) {
-        telegramapis.sendLog(`${err.message} ${from}`).then(() => {
-            throw new Error(`${err.message} ${from}`);
-        })
+        throw new Error(`${err.message}`);
     } else {
-        telegramapis.sendLog(`API error ${from}`).then(() => {
-            throw new Error(`API error ${from}`);
-        })
+        throw new Error(`API error`);
     }
 }
 

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
 import { catchErrorCtrl } from '../../lib/common';
-import _oauth from '../../lib/twitter_oauth';
+import _oauth from '../../lib/twitter-oauth/twitter_oauth';
 import User from '../../models/User';
 
 const {COOKIE_DOMAIN, CLIENT_URL, ANON_ACCESS_TOKEN, ANON_ACCESS_TOKEN_SECRET} = config;
@@ -15,7 +15,6 @@ const TwitterCtrl = {
     twitterReqToken: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            console.log('ok');
             const {oauth_token, oauth_token_secret} = await oauth.getOAuthRequestToken();
             if (!oauth_token) return res.status(500).json({msg: 'Twitter error.'})
             res.cookie(COOKIE_NAME, oauth_token, {
@@ -94,7 +93,6 @@ const TwitterCtrl = {
             if (!Array.isArray(data)) return res.status(500).json({msg: "Invalid response from twitter!"})
             res.json(data);
         } catch (error) {
-            console.log(error);
             res.status(403).json({message: error});
         }
     },
@@ -107,7 +105,7 @@ const TwitterCtrl = {
             const {oauth_access_token,oauth_access_token_secret} = twitter;
             if (!oauth_access_token || !oauth_access_token_secret) return res.status(400).json({msg: "Please, try to login to twitter again!"});
             const url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended&count=100'
-            const response = await oauth.getProtectedResource(url,'GET', ANON_ACCESS_TOKEN, ANON_ACCESS_TOKEN_SECRET);
+            const response = await oauth.getProtectedResource(url, 'GET', ANON_ACCESS_TOKEN, ANON_ACCESS_TOKEN_SECRET);
             const data = JSON.parse(response.data)
             if (!Array.isArray(data)) return res.status(500).json({msg: "Invalid response from twitter!"})
             res.json(data);

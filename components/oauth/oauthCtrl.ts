@@ -6,9 +6,8 @@ import bcrypt from 'bcrypt';
 import sendEMail from "../user/user-functions/sendMail";
 import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from "../../lib/common";
-import {google} from 'googleapis';
 
-const {CLIENT_URL, NODE_ENV, COOKIE_DOMAIN} = config;
+const {COOKIE_DOMAIN} = config;
 
 const oauthCtrl = {
     register: async (req: Request,res: Response) => {
@@ -36,7 +35,7 @@ const oauthCtrl = {
                 lon
             })
             const activation_token = createActivationToken(user)
-            const url = `${CLIENT_URL}/activation/${activation_token}`
+            const url = `${req.headers.origin}/activation/${activation_token}`
             sendEMail(email,url,"Verify your email address")
             const savedUser = await user.save()
             login(user._id.toString(), res)
@@ -80,7 +79,7 @@ const oauthCtrl = {
     },
     logout: async (req: Request,res: Response) => {
         try {
-            const {COOKIE_DOMAIN} = config
+            const {NODE_ENV} = config
             if (NODE_ENV === 'development') {
                 res.clearCookie('token',{
                     httpOnly: true,
@@ -100,11 +99,14 @@ const oauthCtrl = {
     googleLogin: async (req: Request,res: Response) => {
         try {
             const {tokenId} = req.body;
-            const {OAuth2} = google.auth
-            const {MAILING_SERVICE_CLIENT_ID,GOOGLE_SECRET} = config
-            const client = new OAuth2()
-            const verify: any = await client.verifyIdToken({idToken: tokenId, audience: MAILING_SERVICE_CLIENT_ID});
-            const {email_verified, email, name, picture} = verify.payload
+            const { GOOGLE_SECRET } = config
+            const url = `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${tokenId}`;
+            const response = await fetch(url, {
+                method: 'GET'
+            });
+            if (!response.ok) return res.status(401).json({msg: 'Invalid Google Token, please retry.'});
+            const data = await response.json();
+            const {email_verified, email, name, picture} = data;
             const password = email + GOOGLE_SECRET;
             const passwordHash = bcrypt.hashSync(password, 10);
             if (!email_verified) return res.status(400).json({msg: "Email verification failed."})
@@ -117,10 +119,10 @@ const oauthCtrl = {
                 const {country, countryCode, city, region, lat, lon} = req.body.data
                 const username = await name.replace(/\s/g,'')
                 const _user = new User({
-                    username:username,
+                    username,
                     email,
-                    password:passwordHash,
-                    avatar:picture,
+                    password: passwordHash,
+                    avatar: picture,
                     country,
                     countryCode,
                     city,

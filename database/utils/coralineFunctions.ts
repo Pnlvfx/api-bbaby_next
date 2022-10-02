@@ -29,7 +29,7 @@ export const coralinemkDir = (extra_path: string) => {
         if (err) {
             if (err.code != 'EEXIST') {
                 telegramapis.sendLog(`coralineMkDir error`).then(() => {
-                    catchError(err, 'coraline.mkDir');
+                    catchError(err);
                 })
             }
             return where;

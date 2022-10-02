@@ -52,7 +52,7 @@ const coraline = {
             const final_path = coralinemkDir(path.join(subFolder, document))
             return final_path;
         } catch (err) {
-            catchError(err, 'coraline.use');
+            catchError(err);
         }
     },
     useDocument: async (document: string) => {
@@ -63,7 +63,7 @@ const coraline = {
             const file = await coraline.find(final_file);
             return file;
         } catch (err) {
-            catchError(err, 'coraline.useDocument');
+            catchError(err);
         }
     },
     saveJSON: async (filename: string, file: unknown) => {
@@ -72,7 +72,7 @@ const coraline = {
             const json = stringify(file)
             await fsPromises.writeFile(filename, json);
         } catch (err) {
-            catchError(err, 'coraline.saveJSON')
+            catchError(err)
         }
     },
     find: async (file: string) => {

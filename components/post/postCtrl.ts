@@ -7,10 +7,10 @@ import { Types, isValidObjectId } from 'mongoose';
 import cloudinary from '../../lib/cloudinary';
 import Comment from '../../models/Comment';
 import Community from '../../models/Community';
-import telegramapis from '../../lib/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
 import coraline from '../../database/coraline';
 import twitterapis from '../../lib/twitterapis';
+import telegramapis from '../../lib/telegramapis';
 
 const PostCtrl = {
     getPosts: async (req: Request,res: Response) => {
@@ -70,7 +70,7 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    createPost: async (expressRequest:Request,res:Response) => {
+    createPost: async (expressRequest: Request,res: Response) => {
          try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -122,24 +122,21 @@ const PostCtrl = {
             post.url = url;
             const savedPost = await post.save();
             if (sharePostToTwitter) {
+                const govText = savedPost.title.substring(0, 280) + ' ' + url;
+                const twitterText = user.role === 0 ? url
+                : govText;
+                if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"});
                 const twitterUser = twitterapis.chooseUser(user, savedPost, communityInfo.language);
-                if (!twitterUser) return res.status(500).json({msg: 'No twitter user found with this credentials..'});
-                const govText = savedPost.title + ' ' + url;
-                const twitterText = savedPost.title.length > 300 
-                ? savedPost.title.substring(0, 300) 
-                : govText.length > 300 ? savedPost.title
-                : govText
                 if (user.role === 1) {
-                    if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"})
                     if (isImage || isVideo) {
                         const type = isImage ? 'image' : 'video';
+                        console.log({selectedFile});
                         const video = isVideo ? selectedFile.toString().split('?')[0] : null;
                         const isUrl = type === 'image'
                         ? coraline.urlisImage(selectedFile) 
                         : coraline.urlisVideo(video);
                         const media = isUrl ? await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type) : selectedFile;
                         const twimage = await twitterapis.uploadMedia(user, post, media);
-                        if (!twimage) return res.status(500).json({msg: "Twitter error: Upload image"})
                         await twitterapis.tweet(twitterUser, twitterText, twimage);
                     } else {
                         await twitterapis.tweet(twitterUser, twitterText);
@@ -154,7 +151,8 @@ const PostCtrl = {
             }
             const updateComNumber = communityInfo.$inc('number_of_posts', 1);
             res.status(201).json(savedPost)
-            telegramapis.sendLog(`New post created from ${user.username}`)
+            telegramapis.sendLog(`New post created from ${user.username}`);
+            res.end();
          } catch (err) {
             catchErrorCtrl(err, res);
          }

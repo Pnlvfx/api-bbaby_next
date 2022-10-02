@@ -38,7 +38,7 @@ const twitterapis = {
             const mediaId = await twitterClient.v1.uploadMedia(media);
             return mediaId;
         } catch (err) {
-            catchError(err);
+            throw catchError(err);
         }
     },
     chooseUser: (
@@ -48,7 +48,7 @@ const twitterapis = {
     ) => {
         try {
             const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
-            if (!twitter) throw new Error("You need to authorize the twitter API into the User Settings page.");
+            if (!twitter) throw new Error("You need to authorize the twitter API in the User Settings page.");
             const {oauth_access_token, oauth_access_token_secret} = twitter
             const accessToken = user.role === 0
             ? oauth_access_token : post.community === 'Italy'
@@ -67,7 +67,7 @@ const twitterapis = {
             });
             return twitterClient;
         } catch (err) {
-            catchError(err);
+            throw catchError(err);
         }
     },
     tweet: async (

@@ -47,7 +47,6 @@ const youtubeCtrl = {
             const origin = checkOrigin(req, res);
             const {title,description,tags,categoryId,privacyStatus} = req.body;
             const credentials = await googleapis.checkTokenValidity();
-            console.log(credentials)
             const youtubeFolder = await coraline.use('youtube');
             const videoFilePath =  `${youtubeFolder}/video1.mp4`;
             const thumbFilePath = `${youtubeFolder}/image0.webp`;
@@ -82,7 +81,6 @@ const youtubeCtrl = {
                 }
             })
             const {data} = response;
-            console.log({data})
             if (!data.id) return res.status(500).json({msg: "Missing videoId params."})
             const response2 = await youtube.thumbnails.set({
                 auth: oauth2Client,
