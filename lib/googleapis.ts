@@ -25,7 +25,7 @@ const googleapis = {
     },
     checkTokenValidity: async () => {
         try {
-            const tokenPath = await coraline.use('token');
+            const tokenPath = coraline.use('token');
             const file = `${tokenPath}/youtube_access_token.json`;
             const data: MyCredentials = await coraline.find(file);
             const now = new Date()
@@ -45,7 +45,7 @@ const googleapis = {
                 const base_url = `https://youtube.googleapis.com/youtube/v3/videos`;
                 const query = `part=snippet&part=status&key=${YOUTUBE_CLIENT_ID}`
                 const url = `${base_url}?${query}`;
-                const youtubeFolder = await coraline.use('youtube');
+                const youtubeFolder = coraline.use('youtube');
                 const videoFilePath =  `${youtubeFolder}/video1.mp4`;
                 const thumbFilePath = `${youtubeFolder}/image0.webp`;
                 const credentials = await googleapis.checkTokenValidity();

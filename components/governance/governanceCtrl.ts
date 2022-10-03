@@ -14,6 +14,7 @@ import  coraline  from '../../database/coraline';
 import telegramapis from '../../lib/telegramapis';
 import bbcapis from '../../lib/bbcapis';
 import { catchErrorCtrl } from '../../lib/common';
+import {google} from 'googleapis';
 
 
 const governanceCtrl = {
@@ -119,7 +120,7 @@ const governanceCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    translate: async (expressRequest: Request, res: Response) => {
+    translate2: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {text} = req.body;
@@ -147,6 +148,48 @@ const governanceCtrl = {
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
+        }
+    },
+    translate: async (expressRequest: Request, res: Response) => {
+        try {
+            const req = expressRequest as UserRequest;
+            const { text } = req.body;
+            if (!text) return res.status(400).json({msg: "You need to send one text with in your request body."})
+            const {lang} = req.query;
+            if (!lang) return res.status(400).json({msg: "Add the source language in your query url."})
+            const projectId = 'bbabystyle';
+            const location = 'us-central1';
+            const parent = `projects/${projectId}/locations/${location}`
+            const path = '/home/simone/simone/api-bbaby_next/bbabystyle_googleCredentials.json';
+            const credentials = await coraline.find(path);
+            const mimeType = 'text/plain';
+            const sourceLanguageCode = lang === 'en' ? lang : 'it'
+            const targetLanguageCode = lang === 'en' ? 'it' : 'en'
+            const di = google.auth.fromJSON(credentials);
+            const token = await di.getAccessToken()
+            console.log(token.token)
+            if (!token) return
+            const url = `https://translate.googleapis.com/v3beta1/projects/bbabystyle/locations/us-central1:translateText`;
+            const body = JSON.stringify({
+                contents: [text],
+                targetLanguageCode,
+                sourceLanguageCode,
+                mimeType
+            })
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Accept": "application/json",
+                    "Authorization": token.token as any
+                },
+                body
+            })
+            const data = await response.json();
+            console.log(data);
+
+        } catch (err) {
+            catchErrorCtrl(err, res);
         }
     },
     getBBCnews: async (expressRequest: Request, res: Response) => { 

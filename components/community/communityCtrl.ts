@@ -8,7 +8,7 @@ import User from '../../models/User';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 
 const communityCtrl = {
-    getCommunity: async (req:Request,res:Response) => {
+    getCommunity: async (req: Request, res: Response) => {
         try {
             const {token} = req.cookies;
             const {name} = req.params;
@@ -24,8 +24,7 @@ const communityCtrl = {
                 const user = await getUserFromToken(token)
                 if (!user) return res.status(401).json({msg: "Your token is no more valid, please try to logout and login again."})
                 const moderator = user.username === community.communityAuthor ? true : user.role === 1 ? true : false;
-                const subscriber = await User.findOne({username: user.username, subscribed: name})
-                const isSubscriber = subscriber ? true : false
+                const isSubscriber = user.subscribed?.find((sub) => sub === name) ? true : false
                 community.user_is_banned = false;
                 community.user_is_contributor = false;
                 community.user_is_moderator = moderator;
@@ -33,8 +32,7 @@ const communityCtrl = {
             }
             res.json(community);
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     updateDescription: async (expressRequest: Request,res: Response) => {
@@ -49,7 +47,7 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    getCommunities: async (req:Request,res:Response) => {
+    getCommunities: async (req: Request,res: Response) => {
         try {
             const { token } = req.cookies;
             const { limit } = req.query;
@@ -86,17 +84,18 @@ const communityCtrl = {
                     name,
                     communityAuthor: user.username,
                     language,
-                    region
-                })
+                    region,
+                });
+                const sub = user.subscribed?.push(community.name);
+                await user.save();
                 const savedCommunity = await community.save();
                 res.status(201).json({msg: "You have successfully created a new community"});
             }
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
-    changeAvatar: async(expressRequest:Request,res:Response) => {
+    changeAvatar: async(expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req
@@ -116,24 +115,26 @@ const communityCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    subscribe: async (expressRequest:Request,res:Response) => {
+    subscribe: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {community} = req.body;
             const {user} = req;
-            const check = await User.findOne({username: user?.username, subscribed: community})
+            const check = user.subscribed?.find((sub) => sub === community);
+            const communityInfo = await Community.findOne({name: community});
+            if (!communityInfo) return res.status(400).json({msg: "Invalid community! This community doesn't exist or has been deleted!"})
+            const block = user.username === communityInfo?.communityAuthor ? true : false;
+            if (block) return res.status(400).json({msg: "You cannot unsubscribe from your own communities!"})
             if (check) {
-                const unsubscribe = await User.findOneAndUpdate({username: user.username}, {$pull: {subscribed: community}})
-                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscribers: -1}})
-                res.json({msg: `You have unfollowed ${community}`})
+                const unsubscribe = await User.findOneAndUpdate({username: user.username}, {$pull: {subscribed: community}});
+                communityInfo.subscribers -= 1
             } else {
                 const subscribe = await User.findOneAndUpdate({username: user.username}, {$push: {subscribed: community}})
-                const subscribedCount = await Community.findOneAndUpdate({name: community}, {$inc: {subscribers: +1}})
-                res.json({msg: `You now follow ${community}`})
+                communityInfo.subscribers += 1
             }
+            res.status(200).json({msg: true})
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     getUserPreferredCommunities: async (expressRequest: Request,res: Response) => {

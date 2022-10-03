@@ -28,7 +28,7 @@ const schema = new Schema<CommunityProps>({
     },
     subscribers: {
         type: Number,
-        default: 0,
+        default: 1,
     },
     user_is_moderator: {
         type: Boolean,
