@@ -2,14 +2,14 @@ import coraline from "../database/coraline";
 import fs from 'fs';
 import { Request, Response } from "express";
 import { catchErrorCtrl } from "../lib/common";
-const fsPromises = fs.promises;
 
 const videoCtrl = {
     sendVideo : async (req: Request, res: Response) => {
         try {
+            const fsPromises = fs.promises;
             const {range} = req.headers;
             if (!range) res.status(400).json("Requires range header");
-            const path = await coraline.use('videos');
+            const path = coraline.use('videos');
             const video = `${path}/checco.mp4`;
             const videoStat = await fsPromises.stat(video);
             const videoSize = videoStat.size;

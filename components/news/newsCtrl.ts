@@ -13,8 +13,9 @@ const newsCtrl = {
     },
     getOneNews: async (req: Request, res: Response) => {
         try {
-            const {id} = req.params;
-            const news = await News.findById(id);
+            const {title} = req.params;
+            const regex = new RegExp(`^${title}$`, 'i')
+            const news = await News.findOne({title: regex});
             res.status(200).json(news);
         } catch (err) {
             if (err instanceof Error)

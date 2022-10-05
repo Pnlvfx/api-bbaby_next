@@ -25,6 +25,7 @@ import contentType from './middleware/contentType';
 import videoRouter from './bbaby_static/videoRouter';
 import coraline from './database/coraline';
 import analyticsRouter from './components/analytics/analyticsRouter';
+import imageRouter from './bbaby_static/images/imageRouter';
 const {MONGO_URI} = config;
 
 const app = express();
@@ -35,9 +36,10 @@ app.use(cookieParser());
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit: '50mb'}))
 app.use(compression());
-app.use(cors({origin: corsOrigin,credentials:true}));
+app.use(cors({origin: corsOrigin, credentials: true}));
 const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 const imagePath = coraline.use('images');
+const youtubePath = coraline.use('youtube');
 connect(db).then((res) => {
     console.log("Successfully connected to bbabystyle database!")
 }).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
@@ -68,6 +70,10 @@ app.use('/analytics', analyticsRouter);
 app.use('/images/favicon', express.static(`${imagePath}/favicon`));
 
 app.use('/images/icons', express.static(`${imagePath}/icons`));
+
+app.use('/gov/youtube', express.static(youtubePath))
+
+app.use('/images', imageRouter);
 
 app.use('/videos', videoRouter);
 

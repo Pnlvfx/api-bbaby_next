@@ -122,20 +122,20 @@ const PostCtrl = {
             post.url = url;
             const savedPost = await post.save();
             if (sharePostToTwitter) {
-                const govText = savedPost.title.substring(0, 280) + ' ' + url;
-                const twitterText = user.role === 0 ? url
-                : govText;
+                const govText = savedPost.title.substring(0, 200) + ' ' + url;
+                const twitterText = user.role === 0 ? url : govText;
                 if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"});
                 const twitterUser = twitterapis.chooseUser(user, savedPost, communityInfo.language);
                 if (user.role === 1) {
                     if (isImage || isVideo) {
-                        const type = isImage ? 'image' : 'video';
+                        const type = isImage ? 'images' : 'videos';
                         const video = isVideo ? selectedFile.toString().split('?')[0] : null;
-                        const isUrl = type === 'image'
+                        const isUrl = type === 'images'
                         ? coraline.urlisImage(selectedFile) 
                         : coraline.urlisVideo(video);
-                        const media = isUrl ? await coraline.getMediaFromUrl(selectedFile, post._id.toString(), type) : selectedFile;
-                        const twimage = await twitterapis.uploadMedia(user, post, media);
+                        const public_id = `posts/${post._id.toString()}`;
+                        const media = isUrl ? await coraline.getMediaFromUrl(selectedFile, public_id, type) : selectedFile;
+                        const twimage = await twitterapis.uploadMedia(twitterUser, media?.filename ? media.filename : media);
                         await twitterapis.tweet(twitterUser, twitterText, twimage);
                     } else {
                         await twitterapis.tweet(twitterUser, twitterText);

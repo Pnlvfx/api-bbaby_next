@@ -1,12 +1,9 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
-import {createAudio, saveImageToDisk, _createImage} from './gov-functions/createImage';
-import cloudinary from '../../lib/cloudinary';
+import {createAudio, _createImage} from './gov-functions/createImage';
 import videoshow from 'videoshow';
-import {TranslationServiceClient} from '@google-cloud/translate';
 import audioconcat from 'audioconcat';
-import { createClient, PhotosWithTotalResults } from 'pexels';
 import News from '../../models/News';
 import BBC from '../../models/BBC';
 import { linkPreview, LinkPreviewProps } from '../../externals/linkPreview';
@@ -14,41 +11,36 @@ import  coraline  from '../../database/coraline';
 import telegramapis from '../../lib/telegramapis';
 import bbcapis from '../../lib/bbcapis';
 import { catchErrorCtrl } from '../../lib/common';
-import {google} from 'googleapis';
+import googleapis from '../../lib/googleapis/googleapis';
+import { coralinemkDir } from '../../database/utils/coralineFunctions';
 
 
 const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
-        const req = expressRequest as UserRequest;
-        const {textColor,fontSize,description,newsId,format} = req.body;
-        if (description.length <= 1) return res.status(400).json({msg: "Please select at least 2 paragraph."})
-        const news = await News.findById(newsId);
-        if (!news) return res.status(400).json({msg: "Invalid request, this article does not exist."})
-        description.reverse()
-        description.push(news.title)
-        description.reverse()
-        let images:any = []
-        let localImages:any = []
-        let audio:any = []
-        if (!news || !news.mediaInfo.width || !news.mediaInfo.height) return res.status(500).json({msg: "You need to select one news before."})
-        const {width} = news.mediaInfo
-        const {height} = news.mediaInfo
-        const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-        const youtubePath = coraline.use('youtube')
-        ////START
-        await Promise.all(
-            description.map(async (text: string,index: number) => {
-                const delay = parseInt(`${index}000`)
-                await wait(delay)
-                const loop = await createAudio(text, index, audio, res)
-                const finalImage = await _createImage(text,news,textColor,width,height,fontSize,format,res)
-                await saveImageToDisk(finalImage.toString(), index)
-                await wait(delay)
-                const imagePath = `${youtubePath}/image${index}.webp`
-                localImages.push({path: imagePath, loop:loop})
-                images.push(finalImage) //CLIENT
-            })
-        )
+        try {
+            const req = expressRequest as UserRequest;
+            const {textColor, fontSize, description, title, format} = req.body;
+            if (description.length <= 1) return res.status(400).json({msg: "Please select at least 2 paragraph."});
+            const news = await News.findOne({title});
+            if (!news) {return res.status(400).json({msg: "Invalid request, this article does not exist."})}
+            description.reverse().push(news.title)
+            description.reverse();
+            let images: string[] = []
+            let localImages: any = []
+            let audio: string[] = []
+            const {width, height} = news.mediaInfo;
+            const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+            const youtubePath = coraline.use('youtube');
+            await Promise.all(
+                description.map(async (text: string, index: number) => {
+                    const delay = parseInt(`${index}000`)
+                    await wait(delay)
+                    const loop = await createAudio(text, index, audio);
+                    const finalImage = await _createImage(text, news, textColor, width, height, parseInt(fontSize), format, index);
+                    localImages.push({path: finalImage.filename, loop})
+                    images.push(finalImage.url) //CLIENT
+                })
+            )
             audioconcat(audio)
             .concat(`${youtubePath}/final.mp3`)
             .on('start', function(command: string) {
@@ -59,27 +51,26 @@ const governanceCtrl = {
                 console.error('ffmpeg stderr:', stderr)
             })
             .on('end', function(output: string) {
-                cloudinary.v2.uploader.upload(`${youtubePath}/final.mp3`, {
-                    upload_preset: 'bbaby_gov_video', resource_type: 'video'
-                }).then(finalAudio => {
-                    res.json({
-                        title: news.title,
-                        description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi.
-                        Questo è il link all'articolo completo: https://www.bbabystyle.com/news/${newsId} .
-                        Contribuisci a far crescere bbabystyle https://www.bbabystyle.com`,
-                        keywords: `Ucraina, News, Notizie`,
-                        category: `25`,
-                        privacyStatus: `public`,
-                        images,
-                        localImages,
-                        audio,
-                        finalAudio: finalAudio.secure_url,
-                        width,
-                        height,
-                        msg:'Image created successfully'
-                    })
+                const base_url = config.SERVER_URL;
+                const url = `${base_url}/gov/youtube/final.mp3`;
+                res.json({
+                    title: news.title,
+                    description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Questo è il link all'articolo completo: https://www.bbabystyle.com/news/${news.title.toLowerCase()}. Contribuisci a far crescere bbabystyle https://www.bbabystyle.com`,
+                    keywords: `Ucraina, News, Notizie`,
+                    category: `25`,
+                    privacyStatus: `public`,
+                    images,
+                    localImages,
+                    audio,
+                    finalAudio: url,
+                    width,
+                    height,
+                    msg:'Image created successfully'
                 })
             })
+        } catch (err) {
+            catchErrorCtrl(err, res);
+        }
     },
     createVideo: async (expressRequest: Request, res: Response) => {
         try {
@@ -92,13 +83,13 @@ const governanceCtrl = {
                 transitionDuration: _videoOptions.transitionDuration, // seconds
                 videoBitrate: 1024,
                 videoCodec: 'libx264',
-                size: '640x?',
+                size: '1920x?',
                 audioBitrate: '128k',
                 audioChannels: 2,
                 format: 'mp4',
                 pixelFormat: 'yuv420p'
             }
-            const youtubePath = await coraline.use('youtube')
+            const youtubePath = coraline.use('youtube')
             videoshow(images,videoOptions)
             .audio(`${youtubePath}/final.mp3`)
             .save(`${youtubePath}/video1.mp4`)
@@ -106,88 +97,33 @@ const governanceCtrl = {
                 return res.status(500).json({msg: `Some error occured ${err ? err : stdout ? stdout : stderr}`})
             })
             .on('end', (output:string) => {
-                cloudinary.v2.uploader.upload(output, {
-                    upload_preset: 'bbaby_gov_video',
-                    resource_type: 'video'},
-                    (err,response) => {
-                    if (err) return res.status(500).json({msg: err.message})
-                    if (!response) return res.status(500).json({msg: "Cloudinary error"})
-                    return res.status(201).json({msg: "Video created successfully",video: response.secure_url})
-                })
+                const base_url = config.SERVER_URL;
+                const url = `${base_url}/gov/youtube/video1.mp4`;
+                return res.status(201).json({msg: "Video created successfully",video: url});
             })
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
-        }
-    },
-    translate2: async (expressRequest: Request, res: Response) => {
-        try {
-            const req = expressRequest as UserRequest;
-            const {text} = req.body;
-            if (!text) return res.status(400).json({msg: "You need to send one text with in your request body."})
-            const {lang} = req.query;
-            if (!lang) return res.status(400).json({msg: "Add the source language in your query url."})
-            const projectId = 'bbabystyle';
-            const location = 'us-central1';
-            const translationClient = new TranslationServiceClient();
-            const translateText = async () => {
-                const request = {
-                    parent: `projects/${projectId}/locations/${location}`,
-                    contents: [text],
-                    mimeType: 'text/plain',
-                    sourceLanguageCode: lang === 'en' ? lang : 'it',
-                    targetLanguageCode: lang === 'en' ? 'it' : 'en'
-                }
-                const [response] = await translationClient.translateText(request)
-                if (!response.translations) return res.status(500).json({msg: "Cannot translate!"})
-                for (const translation of response.translations) {
-                    res.json(translation.translatedText)
-                }
-            }
-            translateText()   
-        } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     translate: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const { text } = req.body;
-            if (!text) return res.status(400).json({msg: "You need to send one text with in your request body."})
+            if (!text) return res.status(400).json({msg: "You need to send one text with in your request body."});
             const {lang} = req.query;
-            if (!lang) return res.status(400).json({msg: "Add the source language in your query url."})
-            const projectId = 'bbabystyle';
-            const location = 'us-central1';
-            const parent = `projects/${projectId}/locations/${location}`
-            const path = '/home/simone/simone/api-bbaby_next/bbabystyle_googleCredentials.json';
-            const credentials = await coraline.find(path);
-            const mimeType = 'text/plain';
-            const sourceLanguageCode = lang === 'en' ? lang : 'it'
-            const targetLanguageCode = lang === 'en' ? 'it' : 'en'
-            const di = google.auth.fromJSON(credentials);
-            const token = await di.getAccessToken()
-            console.log(token.token)
-            if (!token) return
-            const url = `https://translate.googleapis.com/v3beta1/projects/bbabystyle/locations/us-central1:translateText`;
-            const body = JSON.stringify({
-                contents: [text],
-                targetLanguageCode,
-                sourceLanguageCode,
-                mimeType
-            })
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Accept": "application/json",
-                    "Authorization": token.token as any
-                },
-                body
-            })
-            const data = await response.json();
-            console.log(data);
-
+            if (!lang) return res.status(400).json({msg: "Add the source language in your query url."});
+            const path = coraline.use('token');
+            const filename = `${path}/translate_token.json`;
+            let tokens = await coraline.readJSON(filename);
+            if (!tokens) {
+                tokens = await googleapis.serviceAccount.getAccessToken(filename);
+            }
+            let translation = await googleapis.translate(text, lang.toString(), tokens);
+            if (!translation) {
+                tokens = await googleapis.serviceAccount.getAccessToken(filename);
+                translation = await googleapis.translate(text, lang.toString(), tokens);
+            }
+            res.status(200).json(translation);
         } catch (err) {
             catchErrorCtrl(err, res);
         }
@@ -204,17 +140,16 @@ const governanceCtrl = {
             let scraped = 0;
             if (_skip === 0) {
                 const links = await bbcapis.connect();
-                if (!links) return res.status(500).json({msg: "No links found on the website"})
                 await Promise.all(
-                    links.map(async (link: string) => {
-                        const metadata = await linkPreview(link);
-                        if (!metadata?.title || !metadata.image) return;
-                        const exists = await BBC.exists({title: metadata.title})
+                    links.map(async (link) => {
+                        const {title, image, description} = await linkPreview(link); //metadata
+                        if (!title || !image) return;
+                        const exists = await BBC.exists({title});
                         if (exists) return;
                         const news = new BBC({
-                            title: metadata.title,
-                            description: metadata.description,
-                            image: metadata.image,
+                            title,
+                            description,
+                            image,
                             link
                         })
                         const save = await news.save()
@@ -224,32 +159,27 @@ const governanceCtrl = {
                 const allNews = await BBC.find({});
                 total = allNews.length;
             }
-            response = await BBC.find({}).sort({createdAt: -1}).limit(_limit).skip(_skip)
-            //res.set('Cache-Control', 'private, max-age=0');
+            response = await BBC.find({}).sort({createdAt: -1}).limit(_limit).skip(_skip);
+            telegramapis.sendLog(`totalNewsScraped : ${scraped}`);
             res.status(200).json({
                 data: response,
                 total
             });
-            telegramapis.sendLog(`totalNewsScraped : ${scraped}`);
-            // const all = await BBC.find({});
-            // await Promise.all(
-            //     all.map(async (newsmap) => {
-                    
-            //         const full_description = await bbcapis.getDescription(newsmap.link)
-            //         console.log(full_description);
-            //     })
-            // )
         } catch (err) {
             catchErrorCtrl(err, res);
         }
     },
     getArticleDescription: async (expressRequest: Request, res: Response) => {
         try {
-            const req = expressRequest as UserRequest; 
-            const {link} = req.body;
-            if (!link) return res.status(400).json({msg: "Missing redirect link parameters"})
-            const description = await bbcapis.getDescription(link);
-            res.status(200).json(description)
+            const req = expressRequest as UserRequest;
+            const {title} = req.body;
+            if (!title) return res.status(400).json({msg: "Missing redirect link parameters"});
+            const regex = new RegExp(`^${title}$`, 'i')
+            const BBCnews = await BBC.findOne({title: regex});
+            if (!BBCnews) return res.status(400).json({msg: "This news doesn't exist!"});
+            const full_description = await bbcapis.getDescription(BBCnews.link);
+            BBCnews.full_description = full_description.join('');
+            res.status(200).json(BBCnews);
         } catch (err) {
             catchErrorCtrl(err, res);
         }
@@ -258,46 +188,47 @@ const governanceCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
-            const {title,description,mediaInfo} = req.body;
-            if (!title || !description || !mediaInfo.image) return res.status(500).json({msg: 'Missing required input!'})
-            const width = mediaInfo.width >= 1920 ? 1920 : parseInt(mediaInfo.width);
-            const height = mediaInfo.height >= 1080 ? 1080 : parseInt(mediaInfo.height);
+            const {title, description, mediaInfo} = req.body;
+            if (!title || !description || !mediaInfo.image) return res.status(400).json({msg: 'Missing required input!'});
+            const exists = await News.exists({title});
+            if (exists) return res.status(400).json({msg: "This news has already been shared!"})
             const news = new News({
                 author: user.username,
                 title,
                 description,
                 mediaInfo
             });
-            let savedNews = await news.save();
-            const newImage = await cloudinary.v2.uploader.upload(mediaInfo.image, {
-                upload_preset: 'bbaby_news',
-                public_id: savedNews._id.toString(),
-                transformation: {width, height, crop: 'fill'}
-            });
-            if (!newImage) return res.status(500).json({msg: "This image cannot be uploaded."})
-            savedNews.$set({mediaInfo: {image: newImage.secure_url}})
+            const public_id = `news/${news._id}`;
+            coralinemkDir('static/images/news');
+            const bigImage = await coraline.getMediaFromUrl(mediaInfo.image, public_id, 'images');
+            const newImage = await coraline.resize(bigImage);
+            news.$set({'mediaInfo.image': newImage.url, 'mediaInfo.width': 1920, 'mediaInfo.height': 1080});
+            const savedNews = await news.save();
             res.status(201).json(savedNews);
         } catch (err) {
-            if (err instanceof Error) {
-                res.status(500).json({msg: err.message})
-            }
+            catchErrorCtrl(err, res);
         }
     },
     getPexelsImage: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {PEXELS_API_KEY} = config;
-            const {text, page} = req.query;
-            const client = await createClient(PEXELS_API_KEY);
+            const { text } = req.query;
             if (!text) return res.status(400).json({msg: "Please add a search text in your query params."})
-            if (!page) return res.status(500).json({msg: "Please add a pageNumber in your query params."})
-            const pexelsData = await client.photos.search({query: text.toString(),orientation: 'landscape', per_page: 15, page: parseInt(page.toString())})
-            if (!pexelsData) return res.status(400).json({msg: "No photos on pexels with this phrase."});
-            const response = pexelsData as PhotosWithTotalResults;
-            res.status(200).json(response.photos);
+            const orientation = 'landscape'  //landscape / portrait
+            const base_url = `https://api.pexels.com/v1/search?query=${text}&orientation=${orientation}`;
+            const headers = {
+                Authorization: PEXELS_API_KEY
+            }
+            const response = await fetch(base_url, {
+                method: 'GET',
+                headers
+            });
+            const data = await response.json();
+            if (!response.ok) return res.status(500).json({msg: "Pexels API error."});
+            res.status(200).json(data.photos);
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
 }

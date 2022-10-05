@@ -1,8 +1,9 @@
 import { youtube_v3 } from 'googleapis';
-import config from '../config/config';
-import coraline from '../database/coraline';
-import { catchError } from './common';
-import telegramapis from './telegramapis';
+import config from '../../config/config';
+import coraline from '../../database/coraline';
+import { catchError } from '../common';
+import telegramapis from '../telegramapis';
+import serviceAccounts from './service-account';
 
 const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;
 
@@ -27,7 +28,7 @@ const googleapis = {
         try {
             const tokenPath = coraline.use('token');
             const file = `${tokenPath}/youtube_access_token.json`;
-            const data: MyCredentials = await coraline.find(file);
+            const data: MyCredentials = await coraline.readJSON(file);
             const now = new Date()
             const expires = new Date(data.expires);
             if (now > expires) throw new Error(`Token is expired!`)
@@ -35,8 +36,7 @@ const googleapis = {
             if (!credentials.access_token) throw new Error(`Token not found!`)
             return credentials;
         } catch (err) {
-            if (err instanceof Error) throw new Error(err.message)
-            throw new Error(`Something strange is happening!`)
+            throw catchError(err);
         }
     },
     youtube: {
@@ -89,6 +89,47 @@ const googleapis = {
             }
         }
     },
+    serviceAccount: serviceAccounts,
+    translate: async (text: string, lang: string, tokens: Credentials) => {
+        try {
+            const projectId = 'bbabystyle';
+            const location = 'us-central1';
+            const parent = `projects/${projectId}/locations/${location}`;
+            const mimeType = 'text/plain';
+            const sourceLanguageCode = lang === 'en' ? lang : 'it'
+            const targetLanguageCode = lang === 'en' ? 'it' : 'en'
+            const url = `https://translate.googleapis.com/v3beta1/${parent}:translateText`;
+            const body = JSON.stringify({
+                contents: [text],
+                targetLanguageCode,
+                sourceLanguageCode,
+                mimeType
+            })
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Accept": "application/json",
+                    Authorization: `Bearer ${tokens.access_token}`
+                },
+                body
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    return undefined; //if undefined token is expired
+                } else {
+                    throw new Error(`${response.status, response.statusText}`)
+                }
+            } else {
+                const data = await response.json();
+                for (const translation of data.translations) {
+                    return translation.translatedText as string
+                }
+            }
+        } catch (err) {
+            throw catchError(err);
+        }
+    }
 }
 
 export default googleapis;

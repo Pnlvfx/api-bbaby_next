@@ -20,6 +20,6 @@ export const linkPreview = async (url: string) => {
             throw new Error("Failed to get metadata info for this url!");
         }
     } catch (error) {
-        console.log(`failed to get metadata info from this url: ${url}`)
+        throw new Error(`failed to get metadata info from this url: ${url}`)
     }
 };

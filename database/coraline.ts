@@ -2,10 +2,10 @@ import fs from 'fs';
 import config from '../config/config';
 import path from 'path';
 import { catchError } from '../lib/common';
-import { baseDocument, coralinemkDir, stringify } from './utils/coralineFunctions';
-import collections from './utils/route/collections';
+import { baseDocument, buildMediaPath, buildMediaUrl, coralinemkDir, stringify } from './utils/coralineFunctions';
 import https from 'https';
 import { VideoProps } from './@types/video';
+import sharp from 'sharp';
 const fsPromises = fs.promises;
 
 const coraline = {
@@ -13,12 +13,16 @@ const coraline = {
         date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
         return date;
     },
-    getMediaFromUrl: (url: string, postId: string, type: 'video' | 'image') => {
-        return new Promise<string>((resolve, reject) => {
-            const path = type === 'video' ? `/static/videos/posts` : `/static/images/posts`
-            const collection = coralinemkDir(path);
-            const filename = type === 'video' ? `${collection}/${postId}.mp4` : `${collection}/${postId}.png`;
+    getMediaFromUrl: (url: string, public_id: string, type: 'videos' | 'images') => {
+        return new Promise<{
+            filename: string
+            url: string
+        }>((resolve, reject) => {
             https.get(url, (res) => {
+                const format = res.headers['content-type']?.split('/')[1];
+                if (!format) throw new Error('This URL does not contain any images!');
+                const filename = buildMediaPath(public_id, type, format);
+                const  url = buildMediaUrl(public_id, type, format);
                 const fileStream = fs.createWriteStream(filename);
                 res.pipe(fileStream);
                 fileStream.on('error', (err) => {
@@ -26,10 +30,26 @@ const coraline = {
                 })
                 fileStream.on('finish', () => {
                     fileStream.close();
-                    resolve(filename);
+                    const res = {filename, url};
+                    resolve(res);
                 })
             })
         })
+    },
+    resize: async (image: {filename: string, url: string}) => {
+        try {
+            const arr = image.filename.split('.');
+            const newFile = `${arr[0]}_1920x1080.${arr[1]}`;
+            const newUrl = image.url + '?w=1920&h=1080';
+            await sharp(image.filename).resize(1920, 1080).toFile(newFile);
+            const res = {
+                filename: newFile,
+                url: newUrl
+            }
+            return res;
+        } catch (err) {
+            throw catchError(err);
+        }
     },
     detectUrl: (text: string) => {
         try {
@@ -46,13 +66,13 @@ const coraline = {
         return /\.(mp4)$/.test(url);
     },
     use : (document: string) => {
-        const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
-        const subFolder = isStatic ? 'static' : 'gov';
         try {
+            const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
+            const subFolder = isStatic ? 'static' : 'gov';
             const final_path = coralinemkDir(path.join(subFolder, document))
             return final_path;
         } catch (err) {
-            catchError(err);
+            throw catchError(err);
         }
     },
     useDocument: async (document: string) => {
@@ -60,7 +80,7 @@ const coraline = {
             const final_path = coralinemkDir(path.join('gov', document));
             const final_file = `${final_path}/${document}.json`
             const jsonDocument = await coraline.saveJSON(final_file, baseDocument(document))
-            const file = await coraline.find(final_file);
+            const file = await coraline.readJSON(final_file);
             return file;
         } catch (err) {
             catchError(err);
@@ -75,20 +95,14 @@ const coraline = {
             catchError(err)
         }
     },
-    find: async (file: string) => {
+    readJSON: async (file: string) => {
         try {
             const _find = await fsPromises.readFile(file);
             if (!_find) throw new Error(`File not found!`);
             return JSON.parse(_find.toString());
         } catch (err) {
-            catchError(err);
+            
         }
-    },
-    collections : (collectionName: string) => {
-        const f_path = coralinemkDir(path.join('gov', collectionName));
-        coraline.find(`${f_path}/${collectionName}.json`).then((mainDocument) => {
-            return collections;
-        });
     },
     videos: {
         splitId: (public_id: string) => {
@@ -144,7 +158,7 @@ const coraline = {
                 catchError(err);
             }
         },
-    }
+    },
 }
 
 export default coraline;

@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
 import { UserRequest } from "../../../@types/express";
-import googleapis, { getAccessToken } from "../../../lib/googleapis";
+import googleapis, { getAccessToken } from "../../../lib/googleapis/googleapis";
 import { catchErrorCtrl } from "../../../lib/common";
 import {google} from 'googleapis'
 import coraline  from "../../../database/coraline";
 import config from '../../../config/config';
-import fs from 'fs'
+import fs from 'fs';
 
-const {YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET} = config;
+const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;
 
 const checkOrigin = (req: Request, res: Response) => {
     const {origin} = req.headers;
@@ -47,10 +47,10 @@ const youtubeCtrl = {
             const origin = checkOrigin(req, res);
             const {title,description,tags,categoryId,privacyStatus} = req.body;
             const credentials = await googleapis.checkTokenValidity();
-            const youtubeFolder = await coraline.use('youtube');
+            if (!credentials.access_token) return res.status(401).json({msg: "Youtube token is expired."})
+            const youtubeFolder = coraline.use('youtube');
             const videoFilePath =  `${youtubeFolder}/video1.mp4`;
             const thumbFilePath = `${youtubeFolder}/image0.webp`;
-            if (!credentials.access_token) return;
             const {OAuth2} = google.auth;
             const oauth2Client = new OAuth2({
                 clientId: YOUTUBE_CLIENT_ID,

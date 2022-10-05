@@ -1,8 +1,8 @@
 import path from 'path';
 import config from '../../config/config';
 import fs from 'fs';
-import telegramapis from '../../lib/telegramapis';
 import { catchError } from '../../lib/common';
+import coraline from '../coraline';
 
 export const baseDocument = (document: string) => {
     try {
@@ -28,13 +28,27 @@ export const coralinemkDir = (extra_path: string) => {
     fs.mkdir(where, {recursive: true}, (err) => {
         if (err) {
             if (err.code != 'EEXIST') {
-                telegramapis.sendLog(`coralineMkDir error`).then(() => {
-                    catchError(err);
-                })
+                    throw catchError(err);
             }
             return where;
         }
         return where;
     })
     return where;
+}
+
+export const buildMediaPath = (public_id: string, type: 'images' | 'videos', format: string) => {
+    const split = public_id.split('/');  //split 1 is folder aplit[2] is the id
+    const path = coraline.use(type);
+    const filename = `${path}/${split[0]}/${split[1]}.${format}`;
+    return filename;
+}
+
+export const buildMediaUrl = (public_id: string, type: 'images' | 'videos', format: string, w?: number, h?: number) => {
+    const split = public_id.split('/');
+    const base_url = config.SERVER_URL;
+    const url = `${base_url}/${type}/${split[0]}/${split[1]}.${format}`;
+    const query = `?w=${w}&h=${h}`
+    const final_url = w && h ? `${url}${query}` : url;
+    return final_url;
 }

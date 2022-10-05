@@ -15,7 +15,7 @@ const bbcapis = {
             await browser.close();
             return links;       
         } catch (err) {
-            return catchError(err);
+            throw catchError(err);
         }
     },
     getDescription: async (link: string) => {
@@ -33,7 +33,7 @@ const bbcapis = {
             await browser.close()
             return description;
         } catch (err) {
-            return catchError(err);
+            throw catchError(err);
         }
     }
 }
