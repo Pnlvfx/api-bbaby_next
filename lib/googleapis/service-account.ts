@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import coraline from "../../database/coraline";
 
 const serviceAccounts = {
-     getAccessToken: async (type: 'translate' | 'text_to_speech' | 'youtube') => {
+     getAccessToken: async (type: 'translate' | 'text_to_speech') => {
         try {
             const SCOPES = [
                 'https://www.googleapis.com/auth/cloud-platform',
@@ -11,7 +11,7 @@ const serviceAccounts = {
                 'https://www.googleapis.com/auth/youtube.upload'
             ]
             const path = coraline.use('private_key');
-            const file = type === 'youtube' ? `${path}/bbabystyle-private.json` : `${path}/bbabystyle_googleCredentials.json`;
+            const file = `${path}/bbabystyle_googleCredentials.json`;
             const service_account = await coraline.readJSON(file);
             const {private_key, client_email, private_key_id} = service_account;
             const scope = type === 'text_to_speech' ? SCOPES[0] : type === 'translate' ? SCOPES[1] : SCOPES[2];

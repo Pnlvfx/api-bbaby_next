@@ -1,4 +1,4 @@
-import type {Request, Response} from 'express';
+import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 import Post from '../../models/Post';
@@ -214,7 +214,7 @@ const PostCtrl = {
         } catch (err) {
             res.status(500).json({msg: "Something went wrong"})
         }
-    },
+    }
 }
 
 export default PostCtrl;
