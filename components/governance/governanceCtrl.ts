@@ -19,9 +19,9 @@ const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const {textColor, fontSize, description, title, format} = req.body;
+            const {textColor, fontSize, description, title} = req.body;
             if (description.length <= 1) return res.status(400).json({msg: "Please select at least 2 paragraph."});
-            const news = await News.findOne({title});
+            const news = await News.findOne({ title });
             if (!news) {return res.status(400).json({msg: "Invalid request, this article does not exist."})}
             description.reverse().push(news.title)
             description.reverse();
@@ -36,7 +36,7 @@ const governanceCtrl = {
                     const delay = parseInt(`${index}000`)
                     await wait(delay)
                     const loop = await createAudio(text, index, audio);
-                    const finalImage = await _createImage(text, news, textColor, width, height, parseInt(fontSize), format, index);
+                    const finalImage = await _createImage(text, news, textColor, width, height, parseInt(fontSize), 'png', index);
                     localImages.push({path: finalImage.filename, loop})
                     images.push(finalImage.url) //CLIENT
                 })
@@ -114,14 +114,14 @@ const governanceCtrl = {
             if (!lang) return res.status(400).json({msg: "Add the source language in your query url."});
             const path = coraline.use('token');
             const filename = `${path}/translate_token.json`;
-            let tokens = await coraline.readJSON(filename);
-            if (!tokens) {
-                tokens = await googleapis.serviceAccount.getAccessToken(filename);
+            let credentials = await coraline.readJSON(filename);
+            if (!credentials) {
+                credentials = await googleapis.serviceAccount.getAccessToken('translate');
             }
-            let translation = await googleapis.translate(text, lang.toString(), tokens);
+            let translation = await googleapis.translate(text, lang.toString(), credentials);
             if (!translation) {
-                tokens = await googleapis.serviceAccount.getAccessToken(filename);
-                translation = await googleapis.translate(text, lang.toString(), tokens);
+                credentials = await googleapis.serviceAccount.getAccessToken('translate');
+                translation = await googleapis.translate(text, lang.toString(), credentials);
             }
             res.status(200).json(translation);
         } catch (err) {

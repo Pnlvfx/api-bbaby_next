@@ -9,12 +9,6 @@ import fs from 'fs';
 
 const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;
 
-const checkOrigin = (req: Request, res: Response) => {
-    const {origin} = req.headers;
-    if (!origin) return res.status(400).json({msg: "This is an OAuth2 API so you need to acces it with a valid client!"});
-    return origin;
-}
-
 const youtubeCtrl = {
     bbaby_youtubePageAuth: async (expressRequest: Request, res: Response) => {
         try {
@@ -32,7 +26,7 @@ const youtubeCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {code} = req.query;
-            const origin = checkOrigin(req, res);
+            const {origin} = req.headers;
             const redirect_uri = `${origin}/governance`;
             if (!code) return res.status(400).json({msg: "No code find in your query."});
             const credentials = await getAccessToken({grant_type: 'authorization_code', code: code.toString(), redirect_uri});
@@ -44,10 +38,14 @@ const youtubeCtrl = {
     uploadYoutube: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const origin = checkOrigin(req, res);
-            const {title,description,tags,categoryId,privacyStatus} = req.body;
-            const credentials = await googleapis.checkTokenValidity();
-            if (!credentials.access_token) return res.status(401).json({msg: "Youtube token is expired."})
+            const {origin} = req.headers;
+            const {title, description, tags, categoryId, privacyStatus} = req.body;
+            const path = coraline.use('token');
+            const filename = `${path}/youtube_token.json`;
+            let credentials = await coraline.readJSON(filename) as Credentials;
+            if (!credentials) {
+                credentials = await googleapis.serviceAccount.getAccessToken('youtube');
+            }
             const youtubeFolder = coraline.use('youtube');
             const videoFilePath =  `${youtubeFolder}/video1.mp4`;
             const thumbFilePath = `${youtubeFolder}/image0.webp`;
@@ -61,7 +59,7 @@ const youtubeCtrl = {
             //googleapis.youtube.insert(title, description, tags, categoryId, privacyStatus)
             const youtube = google.youtube('v3')
             const response = await youtube.videos.insert({
-                auth: oauth2Client,
+                auth: `Bearer ${credentials.access_token}`,
                 part: ['snippet, status'],
                 requestBody: {
                     snippet: {

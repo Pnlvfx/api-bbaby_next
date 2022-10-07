@@ -1,7 +1,5 @@
 import fs from "fs";
-import puppeteer from "puppeteer";
 import * as TextToImage from 'text-to-image';
-import textToSpeech from '@google-cloud/text-to-speech';
 import util from 'util';
 import {getAudioDurationInSeconds} from 'get-audio-duration';
 import  coraline  from "../../../database/coraline";
@@ -9,25 +7,7 @@ import { NewsProps } from "../../../@types/news";
 import { catchError } from "../../../lib/common";
 import Jimp from 'jimp';
 import config from '../../../config/config';
-
-export const saveImageToDisk = async(imageUrl: string, index: number) => {
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disabled-setupid-sandbox'] })
-    const page = await browser.newPage()
-    const path = coraline.use('youtube')
-    page.on('response', async (response) => {
-        const url = response.url()
-        const type = response.request().resourceType()
-            if (type === 'document') {
-                response.buffer().then((file) => {
-                    const imagePath = `${path}/image${index}.webp`
-                    const writeStream = fs.createWriteStream(imagePath)
-                    writeStream.write(file)
-                })
-            }
-        })
-        await page.goto(imageUrl)
-        browser.close;
-}
+import googleapis from "../../../lib/googleapis/googleapis";
 
 const getFormat = (news: NewsProps) =>  {
     if (!news.mediaInfo.image) throw new Error('Missing image!');
@@ -87,20 +67,48 @@ export const _createImage = async (input: string, news: NewsProps, textColor: st
 
 export const createAudio = async (input: string, index: number, audio: Array<string>) => {
     try {
-        const client = new textToSpeech.TextToSpeechClient();
-        const [response] = await client.synthesizeSpeech({
-            input: {text: input},
-            voice: {languageCode: 'it', ssmlGender: 'MALE'},
-            audioConfig: {audioEncoding: 'MP3'}
+        const url = `https://texttospeech.googleapis.com/v1/text:synthesize`;
+        const path = coraline.use('token');
+            const filename = `${path}/texttospeech_token.json`;
+            let tokens = await coraline.readJSON(filename);
+            if (!tokens) {
+                tokens = await googleapis.serviceAccount.getAccessToken('text_to_speech');
+            }
+        const body = JSON.stringify({
+            input: {
+                text: input
+            },
+            voice: {
+                languageCode: 'it',
+                ssmlGender: 'MALE'
+            },
+            audioConfig: {
+                audioEncoding: 'MP3'
+            }
         });
-        if (!response.audioContent) throw new Error("Something went wrong. Don't panic. Try again.")
-        const youtubePath = coraline.use('youtube')
-        const audioPath = `${youtubePath}/audio${index}.mp3`
-        const writeFile = util.promisify(fs.writeFile)
-        await writeFile(audioPath, response.audioContent, 'binary')
-        const audioDuration = await getAudioDurationInSeconds(audioPath)
-        audio.push(audioPath);
-        return audioDuration;
+        
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "Accept": "application/json",
+                Authorization: `Bearer ${tokens.access_token}`
+            },
+            body
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data?.msg);
+        } else {
+            const youtubePath = coraline.use('youtube');
+            const audioPath = `${youtubePath}/audio${index}.mp3`;
+            const buffer = Buffer.from(data.audioContent, 'base64');
+            const writeFile = util.promisify(fs.writeFile);
+            await writeFile(audioPath, buffer, 'binary');
+            const audioDuration = await getAudioDurationInSeconds(audioPath);
+            audio.push(audioPath);
+            return audioDuration;
+        }
     } catch (err) {
         throw catchError(err);
     }

@@ -42,7 +42,7 @@ const imagePath = coraline.use('images');
 const youtubePath = coraline.use('youtube');
 connect(db).then((res) => {
     console.log("Successfully connected to bbabystyle database!")
-}).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`))
+}).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`));
 
 
 app.get('/', (req, res) => {
@@ -99,6 +99,6 @@ app.use('/reddit', auth,  redditRouter);
 
 app.use('/governance', auth, governance, governanceRouter);
 
-console.log('ok lets go')
+console.log('ok lets go');
 
-app.listen(4000)
+app.listen(4000);

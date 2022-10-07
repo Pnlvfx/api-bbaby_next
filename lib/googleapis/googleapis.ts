@@ -147,7 +147,6 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
     try {
         let body = null;
         if (code && redirect_uri) {
-            await telegramapis.sendLog(redirect_uri);
             body = new URLSearchParams({
                 client_id: YOUTUBE_CLIENT_ID,
                 client_secret: YOUTUBE_CLIENT_SECRET,
