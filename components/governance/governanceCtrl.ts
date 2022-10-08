@@ -142,15 +142,18 @@ const governanceCtrl = {
                 const links = await bbcapis.connect();
                 await Promise.all(
                     links.map(async (link) => {
-                        const {title, image, description} = await linkPreview(link); //metadata
-                        if (!title || !image) return;
-                        const exists = await BBC.exists({title});
+                        const exists = await BBC.exists({link});
                         if (exists) return;
+                        const {title, image, description} = await linkPreview(link); //metadata
+                        const permalink = buildUnderscoreUrl(`/governance/news/${title}`);
+                        console.log(permalink)
+                        if (!title || !image) return;
                         const news = new BBC({
                             title,
                             description,
                             image,
-                            link
+                            link,
+                            permalink
                         })
                         const save = await news.save()
                         scraped += 1
@@ -160,7 +163,7 @@ const governanceCtrl = {
                 total = allNews.length;
             }
             response = await BBC.find({}).sort({createdAt: -1}).limit(_limit).skip(_skip);
-            telegramapis.sendLog(`totalNewsScraped : ${scraped}`);
+            await telegramapis.sendLog(`totalNewsScraped : ${scraped}`);
             res.status(200).json({
                 data: response,
                 total
@@ -172,13 +175,15 @@ const governanceCtrl = {
     getArticleDescription: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const {title} = req.body;
-            if (!title) return res.status(400).json({msg: "Missing redirect link parameters"});
-            const regex = new RegExp(`^${title}$`, 'i')
-            const BBCnews = await BBC.findOne({title: regex});
+            const {permalink} = req.body;
+            if (!permalink) return res.status(400).json({msg: "Missing redirect link parameters"});
+            const BBCnews = await BBC.findOne({permalink});
             if (!BBCnews) return res.status(400).json({msg: "This news doesn't exist!"});
-            const full_description = await bbcapis.getDescription(BBCnews.link);
-            BBCnews.full_description = full_description.join('');
+            if (!BBCnews.full_description) {
+                const full_description = await bbcapis.getDescription(BBCnews.link);
+                BBCnews.full_description = full_description.join('');
+                await BBCnews.save()
+            }
             res.status(200).json(BBCnews);
         } catch (err) {
             catchErrorCtrl(err, res);
@@ -192,6 +197,7 @@ const governanceCtrl = {
             if (!title || !description || !mediaInfo.image) return res.status(400).json({msg: 'Missing required input!'});
             const exists = await News.exists({title});
             if (exists) return res.status(400).json({msg: "This news has already been shared!"})
+            const permalink = buildUnderscoreUrl(`/news/${title}`);
             const news = new News({
                 author: user.username,
                 title,
@@ -234,3 +240,18 @@ const governanceCtrl = {
 }
 
 export default governanceCtrl;
+
+export const buildUnderscoreUrl = (url: string) => {
+    const bo = url
+    .toLowerCase()
+    .replaceAll(' ', '_')
+    .replaceAll('%', '')
+    .replaceAll(':', '')
+    .replaceAll("'", "")
+    .replaceAll('"', '')
+    .replaceAll(',', '')
+    .replaceAll('?', '')
+    .replaceAll('-', '')
+    .replaceAll('’', '')
+    return bo;
+}

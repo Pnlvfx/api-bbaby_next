@@ -5,9 +5,9 @@ import {getAudioDurationInSeconds} from 'get-audio-duration';
 import  coraline  from "../../../database/coraline";
 import { NewsProps } from "../../../@types/news";
 import { catchError } from "../../../lib/common";
-import Jimp from 'jimp';
 import config from '../../../config/config';
 import googleapis from "../../../lib/googleapis/googleapis";
+import sharp from 'sharp';
 
 const getFormat = (news: NewsProps) =>  {
     if (!news.mediaInfo.image) throw new Error('Missing image!');
@@ -18,14 +18,7 @@ const getFormat = (news: NewsProps) =>  {
 
 const overlayImage = async (overlayImage: string, backgroundImage: string, destination: string) => {
     try {
-        let overlay = await Jimp.read(overlayImage);
-        const image = await Jimp.read(backgroundImage);
-        image.composite(overlay, 0, 0, {
-            mode: Jimp.BLEND_SOURCE_OVER,
-            opacityDest: 1,
-            opacitySource: 1
-        });
-        const finalImage = await image.writeAsync(destination);
+        await sharp(backgroundImage).composite([{input: overlayImage}]).toFile(destination);
         return destination
     } catch (err) {
         throw catchError(err);

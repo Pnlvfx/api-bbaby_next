@@ -27,7 +27,7 @@ const googleapis = {
     checkTokenValidity: async () => {
         try {
             const tokenPath = coraline.use('token');
-            const file = `${tokenPath}/youtube_access_token.json`;
+            const file = `${tokenPath}/youtube_token.json`;
             const data: MyCredentials = await coraline.readJSON(file);
             const now = new Date()
             const expires = new Date(data.expires);
@@ -178,7 +178,7 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
             throw new Error(`Error while trying to create a token path!`)
         }
         await telegramapis.sendLog(tokenPath);
-        const file = `${tokenPath}/youtube_access_token.json`;
+        const file = `${tokenPath}/youtube_token.json`;
         const credentials: Credentials = await response.json();
         await telegramapis.sendLog('Access API correctly');
         const now = new Date();

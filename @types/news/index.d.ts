@@ -7,16 +7,17 @@ interface mediaInfoProps {
     video?: string
     width: number
     height: number
-    alt?: string
+    alt: string
 }
 
 export interface NewsProps extends Document {
     author: string
     title: string
     description: string
+    permalink: string
     mediaInfo: mediaInfoProps
     sharePostToTG: boolean
     setSharePostToTG: Dispatch<SetStateAction<boolean>>
     sharePostToTwitter: boolean
     setSharePostToTwitter: Dispatch<SetStateAction<boolean>>
-    }
+}

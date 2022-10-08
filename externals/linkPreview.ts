@@ -1,7 +1,6 @@
 export interface LinkPreviewProps {
     title: string
     description: string
-    full_description: string,
     image: string
     hostname?: string
     siteName?: string

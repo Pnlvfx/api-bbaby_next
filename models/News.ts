@@ -15,6 +15,11 @@ const NewsSchema = new Schema<NewsProps>(
         type: String,
         required: true
     },
+    permalink: {
+      type: String,
+      required: true,
+      unique: true
+    },
     mediaInfo: {
         type: Object
     }

@@ -40,12 +40,8 @@ const youtubeCtrl = {
             const req = expressRequest as UserRequest;
             const {origin} = req.headers;
             const {title, description, tags, categoryId, privacyStatus} = req.body;
-            const path = coraline.use('token');
-            const filename = `${path}/youtube_token.json`;
-            let credentials = await coraline.readJSON(filename) as Credentials;
-            if (!credentials) {
-                credentials = await googleapis.serviceAccount.getAccessToken('youtube');
-            }
+            const credentials = await googleapis.checkTokenValidity();
+            if (!credentials.access_token) return res.status(401).json({msg: "Youtube token is expired."})
             const youtubeFolder = coraline.use('youtube');
             const videoFilePath =  `${youtubeFolder}/video1.mp4`;
             const thumbFilePath = `${youtubeFolder}/image0.webp`;
@@ -59,7 +55,7 @@ const youtubeCtrl = {
             //googleapis.youtube.insert(title, description, tags, categoryId, privacyStatus)
             const youtube = google.youtube('v3')
             const response = await youtube.videos.insert({
-                auth: `Bearer ${credentials.access_token}`,
+                auth: oauth2Client,
                 part: ['snippet, status'],
                 requestBody: {
                     snippet: {

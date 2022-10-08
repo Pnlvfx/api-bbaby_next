@@ -1,18 +1,21 @@
 import {Schema,model} from "mongoose";
-import { LinkPreviewProps } from "../externals/linkPreview";
 
-const BBCSchema = new Schema<LinkPreviewProps>({
+const BBCSchema = new Schema<ExternalNews>({
     title: {
-        type: String
+        type: String,
+        required: true,
+        unique: true
     },
     description: {
-        type: String
+        type: String,
+        required: true,
+        unique: true
     },
     full_description: {
         type: String
     },
     image: {
-        type: String
+        type: String,
     },
     hostname: {
         type: String
@@ -21,7 +24,14 @@ const BBCSchema = new Schema<LinkPreviewProps>({
         type: String
     },
     link: {
-        type: String
+        type: String,
+        required: true,
+        unique: true
+    },
+    permalink: {
+        type: String,
+        required: true,
+        unique: true
     }
 },
 {
