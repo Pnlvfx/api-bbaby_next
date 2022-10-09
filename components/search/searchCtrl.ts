@@ -2,6 +2,8 @@ import Post from '../../models/Post';
 import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
 import { Request, Response } from 'express';
+import { catchErrorCtrl } from '../../lib/common';
+import telegramapis from '../../lib/telegramapis';
 
 const searchCtrl = {
     search: async (req: Request, res: Response) => {
@@ -24,6 +26,13 @@ const searchCtrl = {
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
+        }
+    },
+    music: async (req: Request, res: Response) => {
+        try {
+            const music = await telegramapis.core.searchMusic();
+        } catch (err) {
+            catchErrorCtrl(err, res);
         }
     }
 }

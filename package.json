@@ -15,6 +15,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@mtproto/core": "^6.2.0",
     "audioconcat": "^0.1.4",
     "bcrypt": "^5.0.1",
     "cloudinary": "^1.32.0",

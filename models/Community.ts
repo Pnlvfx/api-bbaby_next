@@ -20,7 +20,7 @@ const schema = new Schema<CommunityProps>({
     },
     description: {
         type: String,
-        default: 'Add your description'
+        default: 'Add description'
     },
     acceptFollowers: {
         type: Boolean,

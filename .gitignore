@@ -6,3 +6,4 @@ public
 bbabystyle_googleCredentials.json
 config/config.env
 yarn.lock
+lib/telegram_core/*
