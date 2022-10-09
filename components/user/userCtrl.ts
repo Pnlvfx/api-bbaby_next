@@ -3,7 +3,7 @@ import type { UserRequest } from '../../@types/express';
 import User from '../../models/User';
 import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../lib/cloudinary';
-import telegramapis from '../../lib/telegramapis';
+import telegramapis from '../../lib/telegramapis/telegramapis';
 import { catchErrorCtrl } from '../../lib/common';
 
 const userCtrl = {

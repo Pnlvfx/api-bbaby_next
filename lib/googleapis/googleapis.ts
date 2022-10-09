@@ -2,7 +2,7 @@ import { youtube_v3 } from 'googleapis';
 import config from '../../config/config';
 import coraline from '../../database/coraline';
 import { catchError } from '../common';
-import telegramapis from '../telegramapis';
+import telegramapis from '../telegramapis/telegramapis';
 import serviceAccounts from './service-account';
 
 const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;

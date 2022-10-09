@@ -1,12 +1,11 @@
-import config from '../config/config';
+import config from '../../config/config';
 import fs from 'fs';
-import { catchError } from './common';
+import { catchError } from '../common';
+import core from './core';
 const fsPromises = fs.promises;
 const base_url = 'https://api.telegram.org'
 const logs_group_url = '-1001649395850'
-const token = config.TELEGRAM_TOKEN;
-import MTProto from '@mtproto/core';
-import path from 'path';
+const token = config.TELEGRAM_TOKEN;;
 
 
 const telegramapis = {
@@ -54,26 +53,7 @@ const telegramapis = {
             catchError(err);
         }
     },
-    core: {
-        searchMusic: async () => {
-            try {
-                console.log('ciao')
-                const api_id = config.TELEGRAM_API_KEY;
-                const api_hash = config.TELEGRAM_API_HASH;
-                const mtproto = new MTProto({
-                    api_id,
-                    api_hash,
-                    storageOptions: {
-                        path: path.resolve(__dirname, './telegram_core/session.json'),
-                    },
-                });
-                const res = await mtproto.call('messages.searchMessages')
-                console.log(res);
-            } catch (err) {
-                catchError(err);
-            }
-        },
-    }
+    core: core
 }
 
 export default telegramapis;

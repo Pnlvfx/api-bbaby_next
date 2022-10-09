@@ -8,7 +8,7 @@ import News from '../../models/News';
 import BBC from '../../models/BBC';
 import { linkPreview, LinkPreviewProps } from '../../externals/linkPreview';
 import  coraline  from '../../database/coraline';
-import telegramapis from '../../lib/telegramapis';
+import telegramapis from '../../lib/telegramapis/telegramapis';
 import bbcapis from '../../lib/bbcapis';
 import { catchErrorCtrl } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';

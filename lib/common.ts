@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import telegramapis from "./telegramapis";
+import telegramapis from "./telegramapis/telegramapis";
 import rateLimit from 'express-rate-limit';
 
 export const catchError = (err : unknown) => {

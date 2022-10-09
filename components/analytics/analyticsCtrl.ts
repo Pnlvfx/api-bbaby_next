@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { catchErrorCtrl } from "../../lib/common";
-import telegramapis from "../../lib/telegramapis";
+import telegramapis from "../../lib/telegramapis/telegramapis";
 
 const analyticsCtrl = {
     sendLog: async (req: Request, res: Response) => {

@@ -10,7 +10,7 @@ import Community from '../../models/Community';
 import { catchErrorCtrl } from '../../lib/common';
 import coraline from '../../database/coraline';
 import twitterapis from '../../lib/twitterapis';
-import telegramapis from '../../lib/telegramapis';
+import telegramapis from '../../lib/telegramapis/telegramapis';
 
 const PostCtrl = {
     getPosts: async (req: Request,res: Response) => {

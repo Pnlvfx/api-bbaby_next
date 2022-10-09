@@ -3,7 +3,7 @@ import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
 import { Request, Response } from 'express';
 import { catchErrorCtrl } from '../../lib/common';
-import telegramapis from '../../lib/telegramapis';
+import telegramapis from '../../lib/telegramapis/telegramapis';
 
 const searchCtrl = {
     search: async (req: Request, res: Response) => {
