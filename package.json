@@ -15,7 +15,6 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@mtproto/core": "^6.2.0",
     "audioconcat": "^0.1.4",
     "bcrypt": "^5.0.1",
     "cloudinary": "^1.32.0",
@@ -37,7 +36,8 @@
     "sharp": "^0.31.1",
     "text-to-image": "^5.2.0",
     "twitter-api-v2": "^1.12.7",
-    "videoshow": "^0.1.12"
+    "videoshow": "^0.1.12",
+    "youtube-mp3-downloader": "^0.7.11"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

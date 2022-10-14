@@ -9,14 +9,14 @@ export interface LinkPreviewProps {
 
 export const linkPreview = async (url: string) => {
   try {
-        const apiUrl = 'https://bbaby-link-preview.herokuapp.com'
+        const apiUrl = 'https://bbaby-link-preview.herokuapp.com';
         const response = await fetch(`${apiUrl}/v2?url=${url}`);
         const json = await response.json();
         if (response.ok) {
         const newsInfo = json.metadata;
         return newsInfo as LinkPreviewProps;
         } else {
-            throw new Error("Failed to get metadata info for this url!");
+            throw new Error(`failed to get metadata info from this url: ${url}`);
         }
     } catch (error) {
         throw new Error(`failed to get metadata info from this url: ${url}`)

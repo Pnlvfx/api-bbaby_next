@@ -1,7 +1,6 @@
 import config from '../../config/config';
 import fs from 'fs';
 import { catchError } from '../common';
-import core from './core';
 const fsPromises = fs.promises;
 const base_url = 'https://api.telegram.org'
 const logs_group_url = '-1001649395850'
@@ -53,7 +52,6 @@ const telegramapis = {
             catchError(err);
         }
     },
-    core: core
 }
 
 export default telegramapis;

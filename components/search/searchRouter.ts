@@ -8,6 +8,4 @@ searchRouter.get('/', searchCtrl.search);
 
 searchRouter.get('/today-trend', limiter, searchCtrl.searchTrend);
 
-searchRouter.post('/music', searchCtrl.music);
-
 export default searchRouter;
