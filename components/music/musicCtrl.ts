@@ -12,21 +12,19 @@ const musicCtrl = {
         try {
             const {text} = req.body;
             const path = coraline.use('puppeteer');
-
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
             });
             const page = await browser.newPage();
             const url = `https://www.youtube.com/results?search_query=${text}`;
-            await page.goto(url, {
-                waitUntil: 'load'
-            });
-            await page.screenshot({path: `${path}/test.png`})
+            await page.goto(url);
+            console.log((await page.goto(url))?.request().headers());
             const data = await page.evaluate(() =>
                 Array.from(document.querySelectorAll("#video-title") as NodeListOf<HTMLAnchorElement>).map((title) => (
                     {title: title.title, link: title.href}
-                )
-            ));
+                ))
+            );
+            await page.screenshot({path: `${path}/test.png`})
             console.log({data});
             await browser.close();
             res.status(200).json(data);
