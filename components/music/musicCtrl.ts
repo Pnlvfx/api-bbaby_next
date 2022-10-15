@@ -16,7 +16,9 @@ const musicCtrl = {
             });
             const page = await browser.newPage();
             const url = `https://www.youtube.com/results?search_query=${text}`;
-            await page.goto(url);
+            await page.goto(url, {
+                waitUntil: 'domcontentloaded'
+            });
             await page.waitForSelector('#video-title')
             const data = await page.evaluate(() =>
                 Array.from(document.querySelectorAll("#video-title") as NodeListOf<HTMLAnchorElement>).map((title) => (
