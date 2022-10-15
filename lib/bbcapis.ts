@@ -3,7 +3,9 @@ import { catchError } from './common';
 const bbcapis = {
     connect: async () => {
         try {
-            const browser = await puppeteer.launch();
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox', '--disabled-setupid-sandbox']
+            });
             const page = await browser.newPage();
             const url = `https://www.bbc.com`
             await page.goto(url);

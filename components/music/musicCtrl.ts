@@ -11,7 +11,9 @@ const musicCtrl = {
     search: async (req: Request, res: Response) => {
         try {
             const {text} = req.body;
-            const browser = await puppeteer.launch();
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox', '--disabled-setupid-sandbox']
+            });
             const page = await browser.newPage();
             const url = `https://www.youtube.com/results?search_query=${text}`;
             await page.goto(url);
