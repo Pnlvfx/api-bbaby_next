@@ -14,7 +14,9 @@ const musicCtrl = {
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
             });
+            console.log({text, browser})
             const page = await browser.newPage();
+            console.log({page});
             const url = `https://www.youtube.com/results?search_query=${text}`;
             await page.goto(url);
             const data = await page.evaluate(() =>
