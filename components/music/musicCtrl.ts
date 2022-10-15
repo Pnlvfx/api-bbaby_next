@@ -15,9 +15,9 @@ const musicCtrl = {
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
             });
             const page = await browser.newPage();
-            await page.waitForSelector('#container')
             const url = `https://www.youtube.com/results?search_query=${text}`;
             await page.goto(url);
+            await page.waitForSelector('#container')
             const data = await page.evaluate(() =>
                 Array.from(document.querySelectorAll("#video-title") as NodeListOf<HTMLAnchorElement>).map((title) => (
                     {title: title.title, link: title.href}
