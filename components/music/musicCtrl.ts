@@ -17,13 +17,13 @@ const musicCtrl = {
             const page = await browser.newPage();
             const url = `https://www.youtube.com/results?search_query=${text}`;
             await page.goto(url);
-            await page.waitForSelector('#container')
+            await page.waitForSelector('#video-title')
             const data = await page.evaluate(() =>
                 Array.from(document.querySelectorAll("#video-title") as NodeListOf<HTMLAnchorElement>).map((title) => (
                     {title: title.title, link: title.href}
                 ))
             );
-            console.log((await page.goto(url))?.request().headers());
+            //console.log((await page.goto(url))?.request().headers());
             console.log({data});
             await browser.close();
             res.status(200).json(data);
