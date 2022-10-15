@@ -8,8 +8,6 @@ interface ENV {
     CLIENT_URL: string | undefined
     SERVER_URL: string | undefined
     TELEGRAM_TOKEN: string | undefined
-    TELEGRAM_API_KEY: string | undefined
-    TELEGRAM_API_HASH: string | undefined
     SECRET: string | undefined
     SESSION_TRACKER: string | undefined
     CLOUD_NAME: string | undefined
@@ -44,8 +42,6 @@ interface Config {
     CLIENT_URL: string
     SERVER_URL: string
     TELEGRAM_TOKEN: string
-    TELEGRAM_API_KEY: string
-    TELEGRAM_API_HASH: string
     SECRET: string
     SESSION_TRACKER: string
     CLOUD_NAME: string
@@ -81,8 +77,6 @@ const getConfig = ():ENV => {
         CLIENT_URL: process.env.CLIENT_URL,
         SERVER_URL: process.env.SERVER_URL,
         TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
-        TELEGRAM_API_KEY: process.env.TELEGRAM_API_KEY,
-        TELEGRAM_API_HASH: process.env.TELEGRAM_API_HASH,
         SECRET: process.env.SECRET,
         SESSION_TRACKER: process.env.SESSION_TRACKER,
         CLOUD_NAME: process.env.CLOUD_NAME,
