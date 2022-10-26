@@ -7,9 +7,9 @@ import User from '../../models/User';
 
 const {COOKIE_DOMAIN, CLIENT_URL, ANON_ACCESS_TOKEN, ANON_ACCESS_TOKEN_SECRET} = config;
 const oauthCallback = `${CLIENT_URL}/settings`; //redirect
-const oauth = _oauth(oauthCallback)
-const COOKIE_NAME = 'oauth_token'
-let tokens: any = {}
+const oauth = _oauth(oauthCallback);
+const COOKIE_NAME = 'oauth_token';
+let tokens: any = {};
 
 const TwitterCtrl = {
     twitterReqToken: async (expressRequest: Request,res: Response) => {

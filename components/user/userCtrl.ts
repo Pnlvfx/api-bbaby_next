@@ -50,21 +50,21 @@ const userCtrl = {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
-            res.json({
+            const response = {
                 avatar: user?.avatar,
                 country: user?.country, 
-                email:user?.email,
-                externalAccounts:user?.externalAccounts,
+                email: user?.email,
+                externalAccounts: user?.externalAccounts,
                 hasExternalAccount: user?.hasExternalAccount,
                 role: user?.role,
                 username: user?.username
-            })
+            }
+            res.json(response);
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
-    changeAvatar: async (expressRequest:Request,res:Response) => {
+    changeAvatar: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
