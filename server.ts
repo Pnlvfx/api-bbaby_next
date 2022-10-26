@@ -26,7 +26,6 @@ import videoRouter from './bbaby_static/videoRouter';
 import coraline from './database/coraline';
 import analyticsRouter from './components/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
-import musicRouter from './components/music/musicRouter';
 const {MONGO_URI} = config;
 
 const app = express();
@@ -41,10 +40,12 @@ app.use(cors({origin: corsOrigin, credentials: true}));
 const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 const imagePath = coraline.use('images');
 const youtubePath = coraline.use('youtube');
-const musicPath = coraline.use('music');
-connect(db).then((res) => {
+connect(MONGO_URI)
+.then((res) => {
     console.log("Successfully connected to bbabystyle database!")
-}).catch(error => new Error(`Cannot connect to bbabystyle database: ${error}`));
+}).catch((error) => {
+    throw new Error(`Cannot connect to bbabystyle database: ${error}`)
+});
 
 
 app.get('/', (req, res) => {
@@ -66,8 +67,6 @@ app.get('/sitemaps', async (req,res) => {
         res.status(500).json({msg: err.message})
     }
 });
-
-app.use('/music', musicRouter);
 
 app.use('/analytics', analyticsRouter);
 

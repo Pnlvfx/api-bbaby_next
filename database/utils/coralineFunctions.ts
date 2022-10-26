@@ -19,8 +19,7 @@ export const stringify = (data: unknown) => {
     return JSON.stringify(data);
   }
 
-const {NODE_ENV} = config;
-const base_path =  NODE_ENV === 'production' ? `/home/simonegauli/coraline` : '/home/simone/simone/coraline';
+const base_path =  path.resolve(process.cwd(), '../coraline')
 
 export const coralinemkDir = (extra_path: string) => {
     const isAbsolute = path.isAbsolute(extra_path);
@@ -28,7 +27,7 @@ export const coralinemkDir = (extra_path: string) => {
     fs.mkdir(where, {recursive: true}, (err) => {
         if (err) {
             if (err.code != 'EEXIST') {
-                    throw catchError(err);
+                throw catchError(err);
             }
             return where;
         }
