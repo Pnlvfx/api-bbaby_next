@@ -25,8 +25,8 @@ const PostCtrl = {
             const filters = communityName?.toString()
             ? {community: new RegExp(`^${communityName.toString()}$`, 'i')} 
             : author ? {author: new RegExp(`^${author}$`, 'i')} 
-            : userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio']}}
-            : {community: ['Italy', 'calciomercato', 'Calcio']}
+            : userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio', 'Notizie']}}
+            : {community: ['Italy', 'calciomercato', 'Calcio', 'Notizie']}
             const posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip)
             if (token) {
                 const user = await getUserFromToken(token);
