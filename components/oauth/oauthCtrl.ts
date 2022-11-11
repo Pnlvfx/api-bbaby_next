@@ -12,11 +12,11 @@ const {COOKIE_DOMAIN} = config;
 const oauthCtrl = {
     register: async (req: Request,res: Response) => {
         try {
-            const {email,username,password,country,countryCode,city,region,lat,lon} = req.body;
+            const {email, username, password, country, countryCode, city, region, lat, lon} = req.body;
             if (!username || !email || !password) return res.status(400).json({msg: "Please fill in all fields"})
-            if(!validateEmail(email)) return res.status(400).json({msg: "That email is invalid"})
+            if(!validateEmail(email)) return res.status(400).json({msg: "Not a valid email address"})
             const existingEmail = await User.findOne({email})
-            if(existingEmail) return res.status(400).json({msg: "This email already exist!"})
+            if(existingEmail) return res.status(400).json({msg: "This email already exist!"});
             if(password.length < 8) return res.status(400).json({msg: "Password must be at least 8 characters long."})
             const passwordHash = bcrypt.hashSync(password, 10)
 
@@ -42,6 +42,17 @@ const oauthCtrl = {
         } catch (err) {
             if (err instanceof Error)
             res.status(500).json({msg: err.message})
+        }
+    },
+    checkEmail: async (req: Request,res: Response) => {
+        try {
+            const {email} = req.body;
+            if(!validateEmail(email)) return res.status(400).json({msg: "Not a valid email address"});
+            const existingEmail = await User.findOne({email})
+            if(existingEmail) return res.status(400).json({msg: "This email already exist!"});
+            res.status(200).json(true);
+        } catch (err) {
+            throw catchErrorCtrl(err, res);
         }
     },
     activateEmail: async (req: Request,res: Response) => {
