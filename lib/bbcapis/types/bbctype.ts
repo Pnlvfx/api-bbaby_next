@@ -1,9 +1,9 @@
-interface ExternalNews {
+export interface BBCInfo {
     title: string
     date: string
-    description: string
     image: string
     image_source: string
+    description: string
     permalink: string
     original_link: string
 }

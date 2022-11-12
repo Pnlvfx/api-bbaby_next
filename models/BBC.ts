@@ -1,4 +1,4 @@
-import {Schema,model} from "mongoose";
+import {Schema, model} from "mongoose";
 
 const BBCSchema = new Schema<ExternalNews>({
     title: {
@@ -6,36 +6,31 @@ const BBCSchema = new Schema<ExternalNews>({
         required: true,
         unique: true
     },
+    date: {
+        type: String,
+        required: true
+    },
     description: {
         type: String,
         required: true,
         unique: true
     },
-    full_description: {
-        type: String
-    },
     image: {
         type: String,
     },
-    hostname: {
-        type: String
-    },
-    siteName: {
-        type: String
-    },
-    link: {
+    image_source: {
         type: String,
-        required: true,
-        unique: true
     },
     permalink: {
         type: String,
         required: true,
         unique: true
-    }
-},
-{
-    timestamps: true
+    },
+    original_link: {
+        type: String,
+        required: true,
+        unique: true
+    },
 }
 );
 const BBC = model('BBC', BBCSchema);

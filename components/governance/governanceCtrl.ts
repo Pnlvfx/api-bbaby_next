@@ -6,10 +6,8 @@ import videoshow from 'videoshow';
 import audioconcat from 'audioconcat';
 import News from '../../models/News';
 import BBC from '../../models/BBC';
-import { linkPreview, LinkPreviewProps } from '../../externals/linkPreview';
 import  coraline  from '../../database/coraline';
-import telegramapis from '../../lib/telegramapis/telegramapis';
-import bbcapis from '../../lib/bbcapis';
+import bbcapis from '../../lib/bbcapis/bbcapis';
 import { catchErrorCtrl } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';
 import { coralinemkDir } from '../../database/utils/coralineFunctions';
@@ -128,62 +126,74 @@ const governanceCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    getBBCnews: async (expressRequest: Request, res: Response) => { 
+    BBCbot: async (expressRequest: Request, res: Response) => { 
+        try {
+            const req = expressRequest as UserRequest;
+            let index = 0;
+            const links = await bbcapis.connect();
+            let final_links: string[] = [];
+            await Promise.all(
+                links.map(async (link) => {
+                    const exist = await BBC.exists({original_link: link});
+                    if (exist) return;
+                    final_links.push(link);
+                })
+            )
+            final_links.length = 4
+            const interval = setInterval(async () => {
+                if (index === final_links.length - 1) {
+                    console.log('finished');
+                    clearInterval(interval);
+                }
+                const link = final_links[index];
+                const start = performance.now();
+                const BBCnews = await bbcapis.getInfo(link);
+                if (!BBCnews?.title) {
+                    console.log('missing title');
+                    return index += 1
+                }
+                const {title, description, image, image_source, date, permalink} = BBCnews;
+                const news = new BBC({
+                    title,
+                    date,
+                    description,
+                    image,
+                    image_source,
+                    permalink,
+                    original_link: link
+                })
+                await news.save();
+                const end = performance.now();
+                console.log(`Bot took ${end - start} milliseconds`);
+                index += 1;
+            }, 10000);
+            res.status(200).json({msg: 'Started'});
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    getBBCarticles: async (expressRequest: Request, res: Response) => { 
         try {
             const req = expressRequest as UserRequest;
             const {limit, skip} = req.query;
-            if (!limit || !skip) return res.status(400).json({msg: "This API require a pagination query params!"})
-            const _limit = parseInt(limit.toString());
-            const _skip = parseInt(skip.toString());
-            let response: Array<LinkPreviewProps | []> = [];
-            let total = 0
-            let scraped = 0;
-            if (_skip === 0) {
-                const links = await bbcapis.connect();
-                await Promise.all(
-                    links.map(async (link) => {
-                        const exists = await BBC.exists({link});
-                        if (exists) return;
-                        const {title, image, description} = await linkPreview(link); //metadata
-                        const permalink = buildUnderscoreUrl(`/governance/news/${title}`);
-                        console.log(permalink)
-                        if (!title || !image) return;
-                        const news = new BBC({
-                            title,
-                            description,
-                            image,
-                            link,
-                            permalink
-                        })
-                        const save = await news.save()
-                        scraped += 1
-                    })
-                )
-                const allNews = await BBC.find({});
-                total = allNews.length;
-            }
-            response = await BBC.find({}).sort({createdAt: -1}).limit(_limit).skip(_skip);
-            await telegramapis.sendLog(`totalNewsScraped : ${scraped}`);
+            if (!limit || !skip) return res.status(400).json({msg: "This API require a pagination query params!"});
+            const allNews = await BBC.find({}).sort({date: 1}).limit(Number(limit.toString())).skip(Number(skip.toString()));
+            const total = allNews.length;
             res.status(200).json({
-                data: response,
+                data: allNews,
                 total
             });
         } catch (err) {
             catchErrorCtrl(err, res);
         }
     },
-    getArticleDescription: async (expressRequest: Request, res: Response) => {
+    getBBCarticle: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {permalink} = req.body;
             if (!permalink) return res.status(400).json({msg: "Missing redirect link parameters"});
             const BBCnews = await BBC.findOne({permalink});
             if (!BBCnews) return res.status(400).json({msg: "This news doesn't exist!"});
-            if (!BBCnews.full_description) {
-                const full_description = await bbcapis.getDescription(BBCnews.link);
-                BBCnews.full_description = full_description.join('');
-                await BBCnews.save()
-            }
             res.status(200).json(BBCnews);
         } catch (err) {
             catchErrorCtrl(err, res);
@@ -197,11 +207,13 @@ const governanceCtrl = {
             if (!title || !description || !mediaInfo.image) return res.status(400).json({msg: 'Missing required input!'});
             const exists = await News.exists({title});
             if (exists) return res.status(400).json({msg: "This news has already been shared!"})
-            const permalink = buildUnderscoreUrl(`/news/${title}`);
+            const perma = title.toLowerCase().replace(/[^a-zA-Z0-9-_]/g, '_');
+            const permalink = `/news/${perma}`
             const news = new News({
                 author: user.username,
                 title,
                 description,
+                permalink,
                 mediaInfo
             });
             const public_id = `news/${news._id}`;
@@ -240,18 +252,3 @@ const governanceCtrl = {
 }
 
 export default governanceCtrl;
-
-export const buildUnderscoreUrl = (url: string) => {
-    const bo = url
-    .toLowerCase()
-    .replaceAll(' ', '_')
-    .replaceAll('%', '')
-    .replaceAll(':', '')
-    .replaceAll("'", "")
-    .replaceAll('"', '')
-    .replaceAll(',', '')
-    .replaceAll('?', '')
-    .replaceAll('-', '')
-    .replaceAll('’', '')
-    return bo;
-}

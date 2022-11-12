@@ -5,6 +5,6 @@ const newsRouter = express.Router();
 
 newsRouter.get('/', newsCtrl.getNews);
 
-newsRouter.get('/:title', newsCtrl.getOneNews);
+newsRouter.get('/:permalink', newsCtrl.getOneNews);
 
 export default newsRouter;

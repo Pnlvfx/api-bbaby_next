@@ -13,9 +13,9 @@ const newsCtrl = {
     },
     getOneNews: async (req: Request, res: Response) => {
         try {
-            const {title} = req.params;
-            const regex = new RegExp(`^${title}$`, 'i')
-            const news = await News.findOne({title: regex});
+            const {permalink: req_permalink} = req.params;
+            const permalink = `/news/${req_permalink}`;
+            const news = await News.findOne({permalink});
             res.status(200).json(news);
         } catch (err) {
             if (err instanceof Error)
