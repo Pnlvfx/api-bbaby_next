@@ -139,7 +139,6 @@ const governanceCtrl = {
                     final_links.push(link);
                 })
             )
-            final_links.length = 4
             const interval = setInterval(async () => {
                 if (index === final_links.length - 1) {
                     console.log('finished');
@@ -166,7 +165,7 @@ const governanceCtrl = {
                 const end = performance.now();
                 console.log(`Bot took ${end - start} milliseconds`);
                 index += 1;
-            }, 10000);
+            }, 15000);
             res.status(200).json({msg: 'Started'});
         } catch (err) {
             console.log(err);
@@ -177,7 +176,7 @@ const governanceCtrl = {
             const req = expressRequest as UserRequest;
             const {limit, skip} = req.query;
             if (!limit || !skip) return res.status(400).json({msg: "This API require a pagination query params!"});
-            const allNews = await BBC.find({}).sort({date: 1}).limit(Number(limit.toString())).skip(Number(skip.toString()));
+            const allNews = await BBC.find({}).sort({date: -1}).limit(Number(limit.toString())).skip(Number(skip.toString()));
             const total = allNews.length;
             res.status(200).json({
                 data: allNews,

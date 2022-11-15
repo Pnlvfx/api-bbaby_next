@@ -21,13 +21,23 @@ const PostCtrl = {
             if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
             const _skip = parseInt(skip.toString());
             const user_agent = req.useragent;
-            const _limit = user_agent?.isMobile && _skip < 15 ? 7 : parseInt(limit.toString())
+            const _limit = user_agent?.isMobile && _skip < 15 ? 7 : parseInt(limit.toString());
+            let posts = [];
+            // if (communityName) {
+            //     const community = new RegExp(`^${communityName.toString()}$`, 'i');
+            //     posts = await Post.find({community}).sort({createdAt: -1}).limit(_limit).skip(_skip);
+            // } else if (author) {
+            //     const _author = new RegExp(`^${author}$`, 'i')
+            //     posts = await Post.find({author: _author}).sort({createdAt: -1}).limit(_limit).skip(_skip);
+            // } else {
+
+            // }
             const filters = communityName?.toString()
             ? {community: new RegExp(`^${communityName.toString()}$`, 'i')} 
             : author ? {author: new RegExp(`^${author}$`, 'i')} 
             : userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio', 'Notizie']}}
             : {community: ['Italy', 'calciomercato', 'Calcio', 'Notizie']}
-            const posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip)
+            posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip);
             if (token) {
                 const user = await getUserFromToken(token);
                 posts.map((post) => {
@@ -92,6 +102,8 @@ const PostCtrl = {
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."});
             const communityInfo = await Community.findOne({name: community});
             if (!communityInfo) return res.status(500).json({msg: "Please select a valid community."});
+            const exists = await Post.exists({title});
+            if (exists) return res.status(400).json({msg: 'This post already exist.'});
             const post = new Post({
                 author: user?.username,
                 authorAvatar: user?.avatar,
