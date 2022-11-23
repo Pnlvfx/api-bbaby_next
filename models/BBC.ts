@@ -4,7 +4,6 @@ const BBCSchema = new Schema<ExternalNews>({
     title: {
         type: String,
         required: true,
-        unique: true
     },
     date: {
         type: String,
@@ -13,7 +12,6 @@ const BBCSchema = new Schema<ExternalNews>({
     description: {
         type: String,
         required: true,
-        unique: true
     },
     image: {
         type: String,
