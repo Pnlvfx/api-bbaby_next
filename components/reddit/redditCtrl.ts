@@ -3,12 +3,13 @@ import type{ UserRequest } from "../../@types/express";
 import config from '../../config/config';
 import coraline from '../../database/coraline';
 import { catchError, catchErrorCtrl } from '../../lib/common';
+import redditapis from '../../lib/redditapis/redditapis';
 import User from '../../models/User';
 
 const USER_AGENT = `bbabysyle/1.0.0 (www.bbabytyle.com)`;
 
 const redditCtrl = {
-    redditLogin: async (expressRequest:Request,res:Response) => {
+    redditLogin: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -49,7 +50,7 @@ const redditCtrl = {
             res.status(500).json({msg: err.message})
         }
     },
-    redditLogout: async (expressRequest:Request,res:Response) => {
+    redditLogout: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req
@@ -61,60 +62,20 @@ const redditCtrl = {
             res.status(403).json({msg: err.message})
         }
     },
-    redditPostsWithToken: async (expressRequest:Request,res:Response) => {
+    redditPostsWithToken: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
             const {after, count} = req.query;
             const now = new Date();
-            const {REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET} = config;
             const redditTokens = user?.tokens?.find(provider => provider.provider === 'reddit');
             if (!redditTokens) return res.status(500).json({msg: 'You are not authorized to see this content.'})
-            const {access_token_expiration} = redditTokens;
-            if (!access_token_expiration) return res.status(500).json({msg: 'You are not authorized to see this content.'})
-            const getRefreshToken = async () => {
-                try {
-                    const encondedHeader = Buffer.from(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`).toString("base64");
-                    const response = await fetch(`https://www.reddit.com/api/v1/access_token`, {
-                        method: 'POST',
-                        body: `grant_type=refresh_token&refresh_token=${redditTokens.refresh_token}`,
-                        headers: {authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded'}
-                    });
-                    if (!response.ok) return res.status(500).json({msg: "For some reason reddit have refused your credentials. Please try to contact reddit support."})
-                    const body = await response.json();
-                    const date = new Date();
-                    const expiration = coraline.addHours(1, date);
-                    redditTokens.access_token = body.access_token
-                    redditTokens.access_token_expiration = expiration
-                    return 'ok';
-                } catch (err) {
-                    catchError(err);
-                }
-            }
-            const getRedditPosts = async () => {
-                return new Promise(async (resolve, reject) => {
-                    const url = `https://oauth.reddit.com/best?sr_detail=true`
-                    const query = after ? `after=${after}&count=${count}` : null
-                    const finalUrl = query ? `${url}&${query}` : url;
-                    const response = await fetch(finalUrl, {
-                        method: 'GET',
-                        headers: {authorization: `bearer ${redditTokens.access_token}`, 'User-Agent': USER_AGENT}
-                    })
-                    if (!response.ok) {
-                        const error = response.status + response.statusText;
-                        reject(new Error(error));
-                    } else {
-                        const posts = await response.json();
-                        resolve(posts);
-                    }                    
-                })
-            }
-            const registrationDate = new Date(access_token_expiration);
+            if (!redditTokens.access_token_expiration) return res.status(500).json({msg: 'You are not authorized to see this content.'})
+            const registrationDate = new Date(redditTokens.access_token_expiration);
             if (now >= registrationDate) {
-                const token = await getRefreshToken();
+                const token = await redditapis.getNewToken(redditTokens);
             }
-            const posts = await getRedditPosts();
-            if (!posts) console.log('error')
+            const posts = await redditapis.getPosts(after?.toString(), count?.toString(), redditTokens.access_token as string);
             res.status(200).json(posts)
         } catch (err) {
             catchErrorCtrl(err, res);

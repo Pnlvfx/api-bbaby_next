@@ -20,7 +20,7 @@ interface IUser extends Document {
     subscribed?: [string]
 }
 
-interface TokensProps {
+export type TokensProps = {
     access_token?: string
     refresh_token?: string
     provider: 'reddit' | 'twitter'

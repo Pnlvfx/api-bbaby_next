@@ -52,7 +52,7 @@ const oauthCtrl = {
             if(existingEmail) return res.status(400).json({msg: "This email already exist!"});
             res.status(200).json(true);
         } catch (err) {
-            throw catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res);
         }
     },
     activateEmail: async (req: Request,res: Response) => {

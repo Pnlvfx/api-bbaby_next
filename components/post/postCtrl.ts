@@ -22,21 +22,15 @@ const PostCtrl = {
             const _skip = parseInt(skip.toString());
             const user_agent = req.useragent;
             const _limit = user_agent?.isMobile && _skip < 15 ? 7 : parseInt(limit.toString());
+            const communities = await Community.find({language: userLang});
+            const selectedCommunities = Array.from(communities.map((community) => (
+                community.name
+            )));
             let posts = [];
-            // if (communityName) {
-            //     const community = new RegExp(`^${communityName.toString()}$`, 'i');
-            //     posts = await Post.find({community}).sort({createdAt: -1}).limit(_limit).skip(_skip);
-            // } else if (author) {
-            //     const _author = new RegExp(`^${author}$`, 'i')
-            //     posts = await Post.find({author: _author}).sort({createdAt: -1}).limit(_limit).skip(_skip);
-            // } else {
-
-            // }
             const filters = communityName?.toString()
             ? {community: new RegExp(`^${communityName.toString()}$`, 'i')} 
             : author ? {author: new RegExp(`^${author}$`, 'i')} 
-            : userLang !== 'it' ? {community: {'$nin': ['Italy', 'calciomercato', 'Calcio', 'Notizie']}}
-            : {community: ['Italy', 'calciomercato', 'Calcio', 'Notizie']}
+            : {community: selectedCommunities} //this is for home
             posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip);
             if (token) {
                 const user = await getUserFromToken(token);

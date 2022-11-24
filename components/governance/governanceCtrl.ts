@@ -11,6 +11,7 @@ import bbcapis from '../../lib/bbcapis/bbcapis';
 import { catchErrorCtrl } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';
 import { coralinemkDir } from '../../database/utils/coralineFunctions';
+import telegramapis from '../../lib/telegramapis/telegramapis';
 
 
 const governanceCtrl = {
@@ -145,10 +146,9 @@ const governanceCtrl = {
                     clearInterval(interval);
                 }
                 const link = final_links[index];
-                const start = performance.now();
                 const BBCnews = await bbcapis.getInfo(link);
                 if (!BBCnews?.title) {
-                    console.log('missing title');
+                    console.log('missing title', link);
                     return index += 1
                 }
                 const {title, description, image, image_source, date, permalink} = BBCnews;
@@ -162,13 +162,11 @@ const governanceCtrl = {
                     original_link: link
                 })
                 await news.save();
-                const end = performance.now();
-                console.log(`Bot took ${end - start} milliseconds`);
                 index += 1;
             }, 15000);
             res.status(200).json({msg: 'Started'});
         } catch (err) {
-            console.log(err);
+            telegramapis.sendLog(JSON.stringify(err));
         }
     },
     getBBCarticles: async (expressRequest: Request, res: Response) => { 
