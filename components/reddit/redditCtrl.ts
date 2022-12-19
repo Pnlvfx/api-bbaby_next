@@ -1,7 +1,7 @@
 import type { Request,Response } from 'express';
 import type{ UserRequest } from "../../@types/express";
 import config from '../../config/config';
-import coraline from '../../database/coraline';
+import coraline from '../../coraline/coraline';
 import { catchError, catchErrorCtrl } from '../../lib/common';
 import redditapis from '../../lib/redditapis/redditapis';
 import User from '../../models/User';
@@ -88,7 +88,7 @@ const redditCtrl = {
             })
             if (!response.ok) {
                 const text = await response.text();
-                catchError(text);
+                res.status(400).json({msg: text});
             }
             const data = await response.json();
             res.status(200).json(data);
@@ -103,7 +103,7 @@ const redditCtrl = {
             })
             if (!response.ok) {
                 const text = await response.text();
-                catchError(text);
+                res.status(400).json({msg: text});
             }
             const data = await response.json();
             res.status(200).json(data);

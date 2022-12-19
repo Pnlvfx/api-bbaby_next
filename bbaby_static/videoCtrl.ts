@@ -1,4 +1,4 @@
-import coraline from "../database/coraline";
+import coraline from "../coraline/coraline";
 import fs from 'fs';
 import { Request, Response } from "express";
 import { catchErrorCtrl } from "../lib/common";

@@ -9,14 +9,14 @@ const UserSchema = new Schema<IUser>({
         trim: true,
     },
     username: {
-        type:String,
-        unique:true,
-        required:[true, "can't be blank"],
+        type: String,
+        unique: true,
+        required: [true, "can't be blank"],
         trim: true
     },
     password: {
-        type:String,
-        required:true
+        type: String,
+        required: true
     },
     role: {
         type: Number,
@@ -65,6 +65,9 @@ const UserSchema = new Schema<IUser>({
     subscribed: {
         type: [String],
         default: null
+    },
+    last_post: {
+        type: [Schema.Types.ObjectId]
     }
 }, {
     timestamps: true

@@ -1,6 +1,6 @@
 import { TokensProps } from '../../@types/user';
 import config from '../../config/config';
-import coraline from '../../database/coraline';
+import coraline from '../../coraline/coraline';
 import { catchError } from '../common';
 const USER_AGENT = `bbabysyle/1.0.0 (www.bbabytyle.com)`;
 

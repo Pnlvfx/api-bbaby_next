@@ -8,9 +8,8 @@ import cloudinary from '../../lib/cloudinary';
 import Comment from '../../models/Comment';
 import Community from '../../models/Community';
 import { catchErrorCtrl } from '../../lib/common';
-import coraline from '../../database/coraline';
-import twitterapis from '../../lib/twitterapis';
 import telegramapis from '../../lib/telegramapis/telegramapis';
+import postapis from './postapis';
 
 const PostCtrl = {
     getPosts: async (req: Request,res: Response) => {
@@ -96,7 +95,7 @@ const PostCtrl = {
             if (!community || !communityIcon) return res.status(500).json({msg: "Please select a valid community."});
             const communityInfo = await Community.findOne({name: community});
             if (!communityInfo) return res.status(500).json({msg: "Please select a valid community."});
-            const exists = await Post.exists({title});
+            const exists = await Post.exists({title, author: user.username});
             if (exists) return res.status(400).json({msg: 'This post already exist.'});
             const post = new Post({
                 author: user?.username,
@@ -114,7 +113,6 @@ const PostCtrl = {
                 post.$set({mediaInfo: {isImage, image: image.secure_url, dimension: [height, width]}});
             }
             if (isVideo) {
-                //const _video = await coraline.videos.saveVideo(`posts/${post._id.toString()}`, selectedFile, width, height); 
                 const video = await cloudinary.v2.uploader.upload(selectedFile, {
                     upload_preset: 'bbaby_posts',
                     public_id: post._id.toString(),
@@ -124,40 +122,21 @@ const PostCtrl = {
                 if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
                 post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height, width]}})
             }
-            const url = `https://www.bbabystyle.com/b/${post.community}/comments/${post._id}`;
+            const url = `/b/${post.community}/comments/${post._id}`;
             post.url = url;
             const savedPost = await post.save();
             if (sharePostToTwitter) {
-                const govText = savedPost.title.substring(0, 200) + ' ' + url;
-                const twitterText = user.role === 0 ? url : govText;
-                if (!communityInfo.language) return res.status(400).json({msg: "This community doesn't have a language"});
-                const twitterUser = twitterapis.chooseUser(user, savedPost, communityInfo.language);
-                if (user.role === 1) {
-                    if (isImage || isVideo) {
-                        const type = isImage ? 'images' : 'videos';
-                        const video = isVideo ? selectedFile.toString().split('?')[0] : null;
-                        const isUrl = type === 'images'
-                        ? coraline.urlisImage(selectedFile) 
-                        : coraline.urlisVideo(video);
-                        const public_id = `posts/${post._id.toString()}`;
-                        const media = isUrl ? await coraline.getMediaFromUrl(selectedFile, public_id, type) : selectedFile;
-                        const twimage = await twitterapis.uploadMedia(twitterUser, media?.filename ? media.filename : media);
-                        await twitterapis.tweet(twitterUser, twitterText, twimage);
-                    } else {
-                        await twitterapis.tweet(twitterUser, twitterText);
-                    }
-                } else {
-                    await twitterapis.tweet(twitterUser, twitterText);
-                }
+                await postapis.shareToTwitter(savedPost, url, user, communityInfo, isImage, isVideo, selectedFile);
             }
             if (sharePostToTG) {
                 const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' || 'calcio' ? '@bbabystyle1' : '@bbaby_style';
                 await telegramapis.sendMessage(chat_id, url);
             }
             const updateComNumber = communityInfo.$inc('number_of_posts', 1);
+            user.last_post = communityInfo._id
+            user.save();
             res.status(201).json(savedPost)
             telegramapis.sendLog(`New post created from ${user.username}`);
-            res.end();
          } catch (err) {
             catchErrorCtrl(err, res);
          }

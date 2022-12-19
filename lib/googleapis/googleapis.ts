@@ -1,6 +1,6 @@
 import { youtube_v3 } from 'googleapis';
 import config from '../../config/config';
-import coraline from '../../database/coraline';
+import coraline from '../../coraline/coraline';
 import { catchError } from '../common';
 import telegramapis from '../telegramapis/telegramapis';
 import serviceAccounts from './service-account';
@@ -85,7 +85,7 @@ const googleapis = {
                     console.log(data);
                 }
             } catch (err) {
-                catchError(err)
+                throw catchError(err)
             }
         }
     },
@@ -190,6 +190,6 @@ export const getAccessToken = async ({ grant_type, code, redirect_uri, refresh_t
         await coraline.saveJSON(file, data);
         return credentials;
     } catch (err) {
-        catchError(err);
+        throw catchError(err);
     }
 }

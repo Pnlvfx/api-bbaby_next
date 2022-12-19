@@ -1,4 +1,5 @@
 import type {Request, Response} from 'express';
+import { catchErrorCtrl } from '../../lib/common';
 import Comment from '../../models/Comment';
 import Post from '../../models/Post';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
@@ -26,19 +27,17 @@ const commentCtrl = {
                     if (!postNumComments) return res.status(500).json({msg: "Something went wrong in our database, sorry for the inconvenience."})
                     res.json(savedComment)
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg:err.message})
+            catchErrorCtrl(err, res);
         }
     },
-    childComments: async (req:Request,res:Response) => {
+    childComments: async (req: Request,res :Response) => {
         try {
             const {rootId} = req.params
             const comments = await Comment.find({rootId:rootId}).sort({createdAt: -1})
             if (!comments) return res.status(500).json({msg: "Failed to load comments for this posts, it could be for some reason. Try to refresh the page otherwise this posts could be banned"})
             res.status(200).json(comments)       
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg:err.message})
+            catchErrorCtrl(err, res);
         }
     },
 }

@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import { catchError } from '../common';
-import telegramapis from '../telegramapis/telegramapis';
+
 const bbcapis = {
     connect: async () => {
         try {
@@ -62,7 +62,7 @@ const bbcapis = {
                     };
                     return scraped;
                 } catch (err) {
-                    
+                   
                 }
             });
             await browser.close();

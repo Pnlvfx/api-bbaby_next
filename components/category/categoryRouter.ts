@@ -1,7 +1,7 @@
-import express from 'express';
+import { Router } from 'express';
 import categoryCtrl from './categoryCtrl';
 
-const categoryRouter = express.Router();
+const categoryRouter = Router();
 
 categoryRouter.get("/", categoryCtrl.getCategories)
 

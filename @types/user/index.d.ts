@@ -12,12 +12,13 @@ interface IUser extends Document {
     region: string
     lat: string
     lon: string
-    upVotes: [Types.ObjectId]
-    downVotes: [Types.ObjectId]
+    upVotes: Types.ObjectId[]
+    downVotes: Types.ObjectId[]
     tokens: TokensProps[]
     hasExternalAccount: boolean
     externalAccounts: ExternalAccountsProps[]
-    subscribed?: [string]
+    subscribed?: string[]
+    last_post: Types.ObjectId[]
 }
 
 export type TokensProps = {

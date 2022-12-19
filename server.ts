@@ -23,7 +23,7 @@ import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
 import videoRouter from './bbaby_static/videoRouter';
-import coraline from './database/coraline';
+import coraline from './coraline/coraline';
 import analyticsRouter from './components/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
 const {MONGO_URI} = config;
@@ -40,7 +40,7 @@ app.use(cors({origin: corsOrigin, credentials: true}));
 const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 const imagePath = coraline.use('images');
 const youtubePath = coraline.use('youtube');
-connect(MONGO_URI)
+connect(db)
 .then((res) => {
     console.log("Successfully connected to bbabystyle database!")
 }).catch((error) => {

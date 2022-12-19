@@ -3,7 +3,7 @@ import { UserRequest } from "../../../@types/express";
 import googleapis, { getAccessToken } from "../../../lib/googleapis/googleapis";
 import { catchErrorCtrl } from "../../../lib/common";
 import {google} from 'googleapis'
-import coraline  from "../../../database/coraline";
+import coraline  from "../../../coraline/coraline";
 import config from '../../../config/config';
 import fs from 'fs';
 

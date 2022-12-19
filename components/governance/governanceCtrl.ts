@@ -6,11 +6,11 @@ import videoshow from 'videoshow';
 import audioconcat from 'audioconcat';
 import News from '../../models/News';
 import BBC from '../../models/BBC';
-import  coraline  from '../../database/coraline';
+import  coraline  from '../../coraline/coraline';
 import bbcapis from '../../lib/bbcapis/bbcapis';
 import { catchErrorCtrl } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';
-import { coralinemkDir } from '../../database/utils/coralineFunctions';
+import { coralinemkDir } from '../../coraline/utils/coralineFunctions';
 import telegramapis from '../../lib/telegramapis/telegramapis';
 
 
@@ -140,6 +140,7 @@ const governanceCtrl = {
                     final_links.push(link);
                 })
             )
+            console.log({total: final_links.length, links: final_links});
             const interval = setInterval(async () => {
                 try {
                     if (index === final_links.length - 1) {
@@ -167,10 +168,12 @@ const governanceCtrl = {
                 } catch (err) {
                     console.log(err);
                     telegramapis.sendLog(JSON.stringify(err));
+                    clearInterval(interval);
                 }
-            }, 15000);
+            }, 25000);
             res.status(200).json({msg: 'Started'});
         } catch (err) {
+            console.log(err);
             telegramapis.sendLog(JSON.stringify(err));
         }
     },
@@ -179,12 +182,8 @@ const governanceCtrl = {
             const req = expressRequest as UserRequest;
             const {limit, skip} = req.query;
             if (!limit || !skip) return res.status(400).json({msg: "This API require a pagination query params!"});
-            const allNews = await BBC.find({}).sort({date: -1}).limit(Number(limit.toString())).skip(Number(skip.toString()));
-            const total = allNews.length;
-            res.status(200).json({
-                data: allNews,
-                total
-            });
+            const news = await BBC.find({}).sort({date: -1}).limit(Number(limit.toString())).skip(Number(skip.toString()));
+            res.status(200).json(news);
         } catch (err) {
             catchErrorCtrl(err, res);
         }

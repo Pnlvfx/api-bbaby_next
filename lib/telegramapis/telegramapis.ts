@@ -2,13 +2,12 @@ import config from '../../config/config';
 import fs from 'fs';
 import { catchError } from '../common';
 const fsPromises = fs.promises;
-const base_url = 'https://api.telegram.org'
-const logs_group_url = '-1001649395850'
-const token = config.TELEGRAM_TOKEN;;
 
 
 const telegramapis = {
     buildUrl: (METHOD: string) => {
+        const base_url = 'https://api.telegram.org'
+        const token = config.TELEGRAM_TOKEN;
         return `${base_url}/bot${token}/${METHOD}`;
     },
     sendMessage: async (chatId: string, text: string) => {
@@ -23,10 +22,10 @@ const telegramapis = {
                 headers,
             })
             const data = await res.json()
-            if (!data) catchError(data?.msg);
+            if (!data) throw new Error(data?.msg);
             return data;
         } catch (err) {
-            catchError(err);
+            throw catchError(err);
         }
     },
     getChatId : async () => {
@@ -42,14 +41,15 @@ const telegramapis = {
             const response = await res.json()
             await fsPromises.writeFile('telegramLogs.json', JSON.stringify(response));
         } catch (err) {
-            catchError(err)
+            throw catchError(err)
         }
     },
     sendLog : async (message: string) => {
         try {
-            telegramapis.sendMessage(logs_group_url, message);
+            const logs_group_url = '-1001649395850'
+            await telegramapis.sendMessage(logs_group_url, message);
         } catch (err) {
-            catchError(err);
+            throw catchError(err);
         }
     },
 }

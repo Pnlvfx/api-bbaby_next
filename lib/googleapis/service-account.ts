@@ -1,6 +1,6 @@
 import { catchError } from "../common";
 import jwt from 'jsonwebtoken';
-import coraline from "../../database/coraline";
+import coraline from "../../coraline/coraline";
 
 const serviceAccounts = {
      getAccessToken: async (type: 'translate' | 'text_to_speech') => {

@@ -7,7 +7,7 @@ export const corsOrigin = NODE_ENV === 'production' ? [
     'https://new.bbabystyle.com'
 ] : [
     'http://localhost:3000',
-    'http://192.168.1.22:3000',
+    'http://192.168.1.27:3000',
     'http://192.168.1.21:3000',
     'http://127.0.0.1:3000'
 ]

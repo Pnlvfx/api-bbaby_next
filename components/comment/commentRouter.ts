@@ -1,7 +1,7 @@
-import express from 'express'
+import { Router } from 'express'
 import commentCtrl from './commentCtrl'
 
-const commentRouter = express.Router()
+const commentRouter = Router()
 
 commentRouter.post('/', commentCtrl.createComment)
 

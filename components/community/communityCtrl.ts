@@ -152,7 +152,7 @@ const communityCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    chooseCategory : async (expressRequest:Request,res:Response) => {
+    chooseCategory : async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -167,8 +167,7 @@ const communityCtrl = {
                 res.json(true);
             }
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     getCommunitiesByCategory: async (expressRequest: Request, res: Response) => {
@@ -178,7 +177,7 @@ const communityCtrl = {
             
         }
     },
-    searchCommunity: async (expressRequest:Request,res:Response) => {
+    searchCommunity: async (expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -197,8 +196,7 @@ const communityCtrl = {
             // }
             res.json(communities)
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
 }

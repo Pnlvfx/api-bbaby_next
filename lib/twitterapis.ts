@@ -1,8 +1,7 @@
 import { IUser } from "../@types/user";
 import { catchError } from "./common";
-import {TwitterApi} from 'twitter-api-v2';
+import {TUploadableMedia, TwitterApi} from 'twitter-api-v2';
 import config from '../config/config';
-import { Document, Types } from "mongoose";
 import { PostProps } from "../@types/post";
 
 const {
@@ -17,7 +16,7 @@ const {
 } = config;
 
 const twitterapis = {
-    uploadMedia: async (client: TwitterApi, media: string) => {
+    uploadMedia: async (client: TwitterApi, media: TUploadableMedia) => {
         try {
             // const stats = fs.statSync(media);
             // const size = stats.size / (1024*1024)
@@ -29,7 +28,7 @@ const twitterapis = {
     },
     chooseUser: (
         user: IUser,
-        post: Document<unknown, any, PostProps> & PostProps & {_id: Types.ObjectId;},
+        post: PostProps,
         language: 'it' | 'en'
     ) => {
         try {
@@ -72,7 +71,7 @@ const twitterapis = {
             if (!response) throw new Error("Something went wrong during the upload on twitter");
             return 'ok';
         } catch (err) {
-            catchError(err)
+            throw catchError(err)
         }
     }
 }

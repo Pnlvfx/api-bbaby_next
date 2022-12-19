@@ -2,7 +2,7 @@ import fs from "fs";
 import * as TextToImage from 'text-to-image';
 import util from 'util';
 import {getAudioDurationInSeconds} from 'get-audio-duration';
-import  coraline  from "../../../database/coraline";
+import  coraline  from "../../../coraline/coraline";
 import { NewsProps } from "../../../@types/news";
 import { catchError } from "../../../lib/common";
 import config from '../../../config/config';
@@ -19,7 +19,7 @@ const getFormat = (news: NewsProps) =>  {
 const overlayImage = async (overlayImage: string, backgroundImage: string, destination: string) => {
     try {
         await sharp(backgroundImage).composite([{input: overlayImage}]).toFile(destination);
-        return destination
+        return destination;
     } catch (err) {
         throw catchError(err);
     }
