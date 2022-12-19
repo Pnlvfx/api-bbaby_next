@@ -8,7 +8,7 @@ userRouter.get('/', userCtrl.user);
 
 userRouter.get('/analytics', userCtrl.analytics);
 
-userRouter.use('/', auth);
+userRouter.use(auth);
 
 userRouter.get('/about', userCtrl.userInfo);
 

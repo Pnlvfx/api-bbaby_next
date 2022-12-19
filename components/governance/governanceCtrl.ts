@@ -141,28 +141,33 @@ const governanceCtrl = {
                 })
             )
             const interval = setInterval(async () => {
-                if (index === final_links.length - 1) {
-                    console.log('finished');
-                    clearInterval(interval);
+                try {
+                    if (index === final_links.length - 1) {
+                        console.log('finished');
+                        clearInterval(interval);
+                    }
+                    const link = final_links[index];
+                    const BBCnews = await bbcapis.getInfo(link);
+                    if (!BBCnews?.title) {
+                        console.log('missing title', link);
+                        return index += 1
+                    }
+                    const {title, description, image, image_source, date, permalink} = BBCnews;
+                    const news = new BBC({
+                        title,
+                        date,
+                        description,
+                        image,
+                        image_source,
+                        permalink,
+                        original_link: link
+                    })
+                    await news.save();
+                    index += 1;
+                } catch (err) {
+                    console.log(err);
+                    telegramapis.sendLog(JSON.stringify(err));
                 }
-                const link = final_links[index];
-                const BBCnews = await bbcapis.getInfo(link);
-                if (!BBCnews?.title) {
-                    console.log('missing title', link);
-                    return index += 1
-                }
-                const {title, description, image, image_source, date, permalink} = BBCnews;
-                const news = new BBC({
-                    title,
-                    date,
-                    description,
-                    image,
-                    image_source,
-                    permalink,
-                    original_link: link
-                })
-                await news.save();
-                index += 1;
             }, 15000);
             res.status(200).json({msg: 'Started'});
         } catch (err) {

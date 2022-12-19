@@ -1,7 +1,6 @@
 import puppeteer from 'puppeteer';
 import { catchError } from '../common';
 import telegramapis from '../telegramapis/telegramapis';
-import { BBCInfo } from './types/bbctype';
 const bbcapis = {
     connect: async () => {
         try {
@@ -20,7 +19,7 @@ const bbcapis = {
             await browser.close();
             return links;       
         } catch (err) {
-            throw telegramapis.sendLog(JSON.stringify(err));
+            throw catchError(err);
         }
     },
     getInfo: async (link: string) => {
