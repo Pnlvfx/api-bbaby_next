@@ -113,8 +113,10 @@ const governanceCtrl = {
             if (!lang) return res.status(400).json({msg: "Add the source language in your query url."});
             const path = coraline.use('token');
             const filename = `${path}/translate_token.json`;
-            let credentials = await coraline.readJSON(filename);
-            if (!credentials) {
+            let credentials;
+            try {
+                credentials = await coraline.readJSON(filename);
+            } catch (err) {
                 credentials = await googleapis.serviceAccount.getAccessToken('translate');
             }
             let translation = await googleapis.translate(text, lang.toString(), credentials);

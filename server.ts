@@ -40,7 +40,7 @@ app.use(cors({origin: corsOrigin, credentials: true}));
 const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
 const imagePath = coraline.use('images');
 const youtubePath = coraline.use('youtube');
-connect(db)
+connect(MONGO_URI)
 .then((res) => {
     console.log("Successfully connected to bbabystyle database!")
 }).catch((error) => {

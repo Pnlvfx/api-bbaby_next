@@ -123,7 +123,6 @@ const coraline = {
   readJSON: async (file: string) => {
     try {
       const _find = await fsPromises.readFile(file);
-      if (!_find) throw new Error(`File not found!`);
       return JSON.parse(_find.toString());
     } catch (err) {
       throw catchError(err);
