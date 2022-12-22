@@ -73,6 +73,13 @@ const twitterapis = {
         } catch (err) {
             throw catchError(err)
         }
+    },
+    deleteTweet: async (client: TwitterApi) => {
+        try {
+            
+        } catch (err) {
+            
+        }
     }
 }
 

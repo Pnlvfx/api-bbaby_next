@@ -122,7 +122,7 @@ const PostCtrl = {
                 if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
                 post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height, width]}})
             }
-            const url = `/b/${post.community}/comments/${post._id}`;
+            const url = `www.bbabystyle.com/b/${post.community}/comments/${post._id}`;
             post.url = url;
             const savedPost = await post.save();
             if (sharePostToTwitter) {
@@ -191,9 +191,9 @@ const PostCtrl = {
             const {user} = req;
             const {id} = req.params;
             const post = await Post.findByIdAndDelete(id)
-            if (post?.mediaInfo) {
-                //const deleteImage = await cloudinary.v2.uploader.destroy(findPost.imageId)
-            }
+            // if (post?.mediaInfo) {
+            //     await cloudinary.v2.uploader.destroy(`posts/${post._id.toString()}`);
+            // }
             const childComments = await Comment.deleteMany({rootId: id})
             res.json({msg: "Deleted success"});
         } catch (err) {
