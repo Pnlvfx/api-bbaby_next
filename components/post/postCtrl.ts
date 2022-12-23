@@ -122,7 +122,7 @@ const PostCtrl = {
                 if (!video) return res.status(500).json({msg: 'Cloudinary error!'})
                 post.$set({mediaInfo: {isVideo, video: {url: video.secure_url},dimension: [height, width]}})
             }
-            const url = `https://www.bbabystyle.com/b/${post.community}/comments/${post._id}`;
+            const url = `https://www.bbabystyle.com/b/${post.community.toLowerCase()}/comments/${post._id}`;
             post.url = url;
             const savedPost = await post.save();
             if (sharePostToTwitter) {

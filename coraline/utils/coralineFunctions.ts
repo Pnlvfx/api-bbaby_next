@@ -13,7 +13,7 @@ export const stringify = (data: unknown) => {
     return JSON.stringify(data);
   }
 
-const base_path =  path.resolve(process.cwd(), '../coraline')
+const base_path = path.resolve(process.cwd(), '../coraline')
 
 export const coralinemkDir = (extra_path: string) => {
     const isAbsolute = path.isAbsolute(extra_path);

@@ -46,13 +46,18 @@ const coraline = {
     }>((resolve, reject) => {
       https.get(url, (res) => {
         const format = res.headers["content-type"]?.split("/")[1];
-        if (!format) throw new Error("This URL does not contain any images!");
+        if (!format) return reject("This URL does not contain any images!");
         const filename = buildMediaPath(public_id, type, format);
         const url = buildMediaUrl(public_id, type, format);
         const fileStream = fs.createWriteStream(filename);
         res.pipe(fileStream);
         fileStream.on("error", (err) => {
+          if (err.message.match('no such file or directory')) {
+          coraline.use('/images/posts');
           return reject(err);
+          } else {
+            return reject(err);
+          }
         });
         fileStream.on("finish", () => {
           fileStream.close();
