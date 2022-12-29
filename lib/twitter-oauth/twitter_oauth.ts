@@ -1,8 +1,5 @@
 import config from '../../config/config';
 import OAuth from 'oauth';
-import crypto from 'crypto';
-import http from 'http';
-import https from 'https';
 
 interface RequestToken {
     oauth_token: string
@@ -29,44 +26,6 @@ export default (oauthCallback: string) => {
                     if (error) reject(error)
                     resolve({oauth_token,oauth_token_secret, results})
                 });
-            });
-        },
-        getOAuthRequestToken2: () => {
-            return new Promise<any>(async (resolve, reject) => {
-                try {
-                    const timestamp = Math.floor((new Date().getTime() / 1000));
-                    const oauth_nonce = crypto.randomBytes(25).toString('hex');
-                    const oauth_signature = crypto.randomBytes(20).toString('hex');
-                    const callback = encodeURIComponent(oauthCallback)
-                    const Authorization = `OAuth oauth_callback="${callback}",oauth_consumer_key="${TWITTER_CONSUMER_KEY}",oauth_nonce="${oauth_nonce}",oauth_signature="${oauth_signature}",oauth_signature_method="HMAC-SHA1",oauth_timestamp="${timestamp}",oauth_version="1.0"`
-                    const headers = {
-                        Authorization,
-                        "Accept": "*/*",
-                        "Connection" : "close",
-                        "User-Agent": "Node authentication",
-                        "Content-length": "0",
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    }
-                    const options = {
-                        host: 'api.twitter.com',
-                        port: 443,
-                        path: '/oauth/request_token',
-                        method: 'POST',
-                        headers
-                    }
-                    const request = http.request(options);
-                    console.log(request);
-                    request.on('response', (response) => {
-                        response.on('data', (data) => {
-                            console.log(data);
-                        })
-                        response.on('error', (err) => {
-                            console.log(err);
-                        })
-                    })
-                } catch (err) {
-                    console.log(err);
-                }
             });
         },
         getOauthAccessToken: (oauth_token: string,oauth_token_secret: string,oauth_verifier: string) => {

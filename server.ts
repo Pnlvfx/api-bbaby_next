@@ -102,6 +102,4 @@ app.use('/reddit', auth,  redditRouter);
 
 app.use('/governance', auth, governance, governanceRouter);
 
-console.log('ok lets go');
-
 app.listen(4000);

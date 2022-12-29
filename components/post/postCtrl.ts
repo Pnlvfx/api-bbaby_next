@@ -129,8 +129,9 @@ const PostCtrl = {
                 await postapis.shareToTwitter(savedPost, url, user, communityInfo, isImage, isVideo, selectedFile);
             }
             if (sharePostToTG) {
-                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : savedPost.community === 'calciomercato' || 'calcio' ? '@bbabystyle1' : '@bbaby_style';
-                await telegramapis.sendMessage(chat_id, url);
+                const text = `${savedPost.title + ' ' + savedPost.body + ' ' + url}`
+                const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
+                await telegramapis.sendMessage(chat_id, text);
             }
             const updateComNumber = communityInfo.$inc('number_of_posts', 1);
             user.last_post = communityInfo._id

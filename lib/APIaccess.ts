@@ -8,19 +8,8 @@ export const corsOrigin = NODE_ENV === 'production' ? [
 ] : [
     'http://localhost:3000',
     'http://192.168.1.27:3000',
+    'http://192.168.1.7:3000',
     'http://192.168.1.21:3000',
     'http://127.0.0.1:3000'
 ]
-
-const validGoogleOrigin = [
-    'https://www.bbabystyle.com',
-    'https://new.bbabystyle.com',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-]
-export const isGoogleAPI = (req_origin: string) => {
-    const origins = validGoogleOrigin;
-    const check = origins.find((origin) => origin === req_origin) ? true : false;
-    return check;
-}
 

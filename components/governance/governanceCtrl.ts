@@ -13,7 +13,6 @@ import googleapis from '../../lib/googleapis/googleapis';
 import { coralinemkDir } from '../../coraline/utils/coralineFunctions';
 import telegramapis from '../../lib/telegramapis/telegramapis';
 
-
 const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
         try {
@@ -131,7 +130,6 @@ const governanceCtrl = {
     },
     BBCbot: async (expressRequest: Request, res: Response) => { 
         try {
-            const req = expressRequest as UserRequest;
             let index = 0;
             const links = await bbcapis.connect();
             let final_links: string[] = [];
@@ -142,7 +140,6 @@ const governanceCtrl = {
                     final_links.push(link);
                 })
             )
-            console.log({total: final_links.length, links: final_links});
             const interval = setInterval(async () => {
                 try {
                     if (index === final_links.length - 1) {

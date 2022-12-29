@@ -23,7 +23,7 @@ export const catchErrorCtrl = (err: unknown, res: Response) => {
             res.status(500).json({msg: err});
         })
     } else {
-        telegramapis.sendLog(`API error`).then(() => {
+        telegramapis.sendLog(JSON.stringify(err)).then(() => {
             res.status(500).json({msg: 'API error'});
         })
     }

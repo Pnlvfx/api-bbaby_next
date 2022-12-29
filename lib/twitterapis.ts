@@ -3,6 +3,7 @@ import { catchError } from "./common";
 import {TUploadableMedia, TwitterApi} from 'twitter-api-v2';
 import config from '../config/config';
 import { PostProps } from "../@types/post";
+import _oauth from '../lib/twitter-oauth/twitter_oauth';
 
 const {
     TWITTER_CONSUMER_KEY,
@@ -15,7 +16,10 @@ const {
     BBABY_ACCESS_TOKEN_SECRET
 } = config;
 
+const oauthCallback = `${config.CLIENT_URL}/settings`; //redirect
+
 const twitterapis = {
+    oauth: _oauth(oauthCallback),
     uploadMedia: async (client: TwitterApi, media: TUploadableMedia) => {
         try {
             // const stats = fs.statSync(media);
@@ -79,6 +83,24 @@ const twitterapis = {
             
         } catch (err) {
             
+        }
+    },
+    getTrendsLocations: async () => {
+        try {
+            const url = 'https://api.twitter.com/1.1/trends/available.json';
+            const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET)
+            return JSON.parse(response.data);
+        } catch (err) {
+            throw catchError(err);
+        }
+    },
+    getTrends: async (id = 1) => {
+        try {
+            const url = `https://api.twitter.com/1.1/trends/place.json?id=${id}`
+            const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET)
+            return JSON.parse(response.data);
+        } catch (err) {
+            throw catchError(err);
         }
     }
 }
