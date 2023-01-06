@@ -12,6 +12,7 @@ import { catchErrorCtrl } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';
 import { coralinemkDir } from '../../coraline/utils/coralineFunctions';
 import telegramapis from '../../lib/telegramapis/telegramapis';
+import openaiapis from '../../lib/openaiapis/openaiapis';
 
 const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {
@@ -165,7 +166,6 @@ const governanceCtrl = {
                     await news.save();
                     index += 1;
                 } catch (err) {
-                    console.log(err);
                     telegramapis.sendLog(JSON.stringify(err));
                     clearInterval(interval);
                 }

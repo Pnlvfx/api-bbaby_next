@@ -35,6 +35,7 @@ interface ENV {
     YOUTUBE_CLIENT_SECRET: string | undefined
     NODE_ENV: string | undefined
     PEXELS_API_KEY: string | undefined
+    OPENAI_API_KEY: string | undefined
 }
 
 interface Config {
@@ -69,6 +70,7 @@ interface Config {
     YOUTUBE_CLIENT_SECRET: string
     NODE_ENV: 'development' | 'production';
     PEXELS_API_KEY: string
+    OPENAI_API_KEY: string
 }
 
 const getConfig = ():ENV => {
@@ -103,7 +105,8 @@ const getConfig = ():ENV => {
         YOUTUBE_CLIENT_ID: process.env.YOUTUBE_CLIENT_ID,
         YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET,
         NODE_ENV: process.env.NODE_ENV,
-        PEXELS_API_KEY: process.env.PEXELS_API_KEY
+        PEXELS_API_KEY: process.env.PEXELS_API_KEY,
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY
     }
 }
 

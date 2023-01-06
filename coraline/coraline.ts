@@ -28,9 +28,9 @@ const coraline = {
     return Math.floor(Math.random() * max);
   },
   validateEmail: (email: string) => {
-    const re =
+    const res =
       /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
+    return res.test(email);
   },
   getUniqueArray: (arr: any[], key: string) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
