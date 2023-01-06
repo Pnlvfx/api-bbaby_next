@@ -1,4 +1,4 @@
-import puppeteer, { Page } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import { catchError } from '../common';
 
 const bbcapis = {
@@ -22,7 +22,7 @@ const bbcapis = {
             throw catchError(err);
         }
     },
-    getInfo: async (page: Page, link: string) => {
+    getInfo: async (link: string) => {
         try {
             const browser = await puppeteer.launch({
                 args: ['--no-sandbox', '--disabled-setupid-sandbox']
