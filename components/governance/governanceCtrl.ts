@@ -12,7 +12,6 @@ import { catchErrorCtrl } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';
 import { coralinemkDir } from '../../coraline/utils/coralineFunctions';
 import telegramapis from '../../lib/telegramapis/telegramapis';
-import openaiapis from '../../lib/openaiapis/openaiapis';
 
 const governanceCtrl = {
     createImage: async (expressRequest: Request, res: Response) => {

@@ -12,16 +12,15 @@ import telegramapis from '../../lib/telegramapis/telegramapis';
 import postapis from './postapis';
 
 const PostCtrl = {
-    getPosts: async (req: Request,res: Response) => {
+    getPosts: async (req: Request, res: Response) => {
         try {
             const {token} = req.cookies;
             const userLang = req.acceptsLanguages('it', 'en');
             const {community: communityName, author, limit, skip} = req.query;
             if (!limit || !skip) return res.status(500).json({msg: "Limit and Skip parameters are required for this API."});
-            const _skip = parseInt(skip.toString());
             const user_agent = req.useragent;
-            const _limit = user_agent?.isMobile && _skip < 15 ? 7 : parseInt(limit.toString());
-            const communities = await Community.find({language: userLang});
+            const _limit = user_agent?.isMobile && Number(skip.toString()) < 15 ? 7 : parseInt(limit.toString());
+            const communities = await Community.find({language: userLang ? userLang : 'en'});
             const selectedCommunities = Array.from(communities.map((community) => (
                 community.name
             )));
@@ -30,7 +29,7 @@ const PostCtrl = {
             ? {community: new RegExp(`^${communityName.toString()}$`, 'i')} 
             : author ? {author: new RegExp(`^${author}$`, 'i')} 
             : {community: selectedCommunities} //this is for home
-            posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(_skip);
+            posts = await Post.find(filters).sort({createdAt: -1}).limit(_limit).skip(Number(skip));
             if (token) {
                 const user = await getUserFromToken(token);
                 posts.map((post) => {
@@ -43,7 +42,7 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    getPost: async (req: Request,res: Response) => {
+    getPost: async (req: Request, res: Response) => {
         try {
             const {token} = req.cookies;
             const {id} = req.params;
@@ -73,7 +72,7 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    createPost: async (expressRequest: Request,res: Response) => {
+    createPost: async (expressRequest: Request, res: Response) => {
          try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -142,7 +141,7 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
          }
     },
-    voting: async (expressRequest: Request,res: Response) => {
+    voting: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;
@@ -186,7 +185,7 @@ const PostCtrl = {
             catchErrorCtrl(err, res);
         }
     },
-    deletePost: async (expressRequest:Request,res:Response) => {
+    deletePost: async (expressRequest: Request, res: Response) => {
         try {
             const req = expressRequest as UserRequest;
             const {user} = req;

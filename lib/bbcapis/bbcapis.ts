@@ -70,6 +70,13 @@ const bbcapis = {
         } catch (err) {
             throw catchError(err);
         }
+    },
+    bot: async () => {
+        try {
+            
+        } catch (err) {
+            
+        }
     }
 }
 
