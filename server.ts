@@ -47,7 +47,6 @@ connect(MONGO_URI)
     throw new Error(`Cannot connect to bbabystyle database: ${error}`)
 });
 
-
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
 });

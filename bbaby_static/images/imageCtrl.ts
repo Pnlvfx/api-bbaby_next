@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import coraline from "../../coraline/coraline";
 import { catchErrorCtrl } from "../../lib/common";
 import fs from 'fs';
+import telegramapis from "../../lib/telegramapis/telegramapis";
 
 const imageCtrl = {
     route: async (req: Request, res: Response) => {
@@ -17,6 +18,9 @@ const imageCtrl = {
             }
             res.writeHead(200, headers);
             const videoStream = fs.createReadStream(image);
+            videoStream.on('error', (err) => {
+                return telegramapis.sendLog(err.message)
+            })
             videoStream.pipe(res);
         } catch (err) {
             catchErrorCtrl(err, res, 'imageCtrl.route');

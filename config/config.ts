@@ -13,7 +13,6 @@ interface ENV {
     CLOUD_NAME: string | undefined
     CLOUD_API_KEY: string | undefined
     CLOUD_API_SECRET: string | undefined
-    GOOGLE_APPLICATION_CREDENTIALS: string | undefined
     TWITTER_CONSUMER_KEY: string | undefined
     TWITTER_CONSUMER_SECRET: string | undefined
     ACTIVATION_TOKEN_SECRET: string | undefined
@@ -48,7 +47,6 @@ interface Config {
     CLOUD_NAME: string
     CLOUD_API_KEY: string
     CLOUD_API_SECRET: string
-    GOOGLE_APPLICATION_CREDENTIALS: string
     TWITTER_CONSUMER_KEY: string
     TWITTER_CONSUMER_SECRET: string
     ACTIVATION_TOKEN_SECRET: string
@@ -84,7 +82,6 @@ const getConfig = ():ENV => {
         CLOUD_NAME: process.env.CLOUD_NAME,
         CLOUD_API_KEY: process.env.CLOUD_API_KEY,
         CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
-        GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
         TWITTER_CONSUMER_KEY: process.env.TWITTER_CONSUMER_KEY,
         TWITTER_CONSUMER_SECRET: process.env.TWITTER_CONSUMER_SECRET,
         ACTIVATION_TOKEN_SECRET: process.env.ACTIVATION_TOKEN_SECRET,

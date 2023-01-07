@@ -2,10 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import coraline from '../coraline';
 
-export const baseDocument = (document: string) => {
-    [document]
-}
-
 export const stringify = (data: unknown) => {
     if (typeof data === 'string') {
       return data;
@@ -21,7 +17,7 @@ export const coralinemkDir = (extra_path: string) => {
     fs.mkdir(where, {recursive: true}, (err) => {
         if (err) {
             if (err.code != 'EEXIST') {
-                console.log(err.message, 'coraline.coralinmkDir');
+                throw new Error(err.message);
             }
             return where;
         }
