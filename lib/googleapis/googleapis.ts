@@ -3,7 +3,8 @@ import config from '../../config/config';
 import coraline from '../../coraline/coraline';
 import { catchError } from '../common';
 import telegramapis from '../telegramapis/telegramapis';
-import serviceAccounts from './service-account';
+import serviceAccount from './service-account';
+import { Credentials, MyCredentials } from './types/credentials';
 
 const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;
 
@@ -27,7 +28,7 @@ const googleapis = {
     try {
       const tokenPath = coraline.use('token');
       const file = `${tokenPath}/youtube_token.json`;
-      const data: MyCredentials = await coraline.readJSON(file);
+      const data = await coraline.readJSON(file) as MyCredentials
       const now = new Date();
       const expires = new Date(data.expires);
       if (now > expires) throw new Error(`Token is expired!`);
@@ -88,7 +89,7 @@ const googleapis = {
       }
     },
   },
-  serviceAccount: serviceAccounts,
+  serviceAccount,
   translate: async (text: string, lang: string, tokens: Credentials) => {
     try {
       const projectId = 'bbabystyle';

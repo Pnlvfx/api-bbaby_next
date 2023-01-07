@@ -1,4 +1,4 @@
-interface Credentials {
+export interface Credentials {
     /**
      * This field is only present if the access_type parameter was set to offline in the authentication request. For details, see Refresh tokens.
      */
@@ -25,7 +25,7 @@ interface Credentials {
     scope?: string;
 }
 
-interface MyCredentials extends Credentials {
+export interface MyCredentials extends Credentials {
     expires: string
     credentials: Credentials
 }

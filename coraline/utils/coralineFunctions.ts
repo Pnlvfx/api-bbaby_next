@@ -9,11 +9,13 @@ export const stringify = (data: unknown) => {
     return JSON.stringify(data);
   }
 
-const base_path = path.resolve(process.cwd(), '../coraline')
+const _path = process.cwd();  
+const base_path = path.resolve(_path, '../coraline')
+const projectName = _path.split('/')[_path.split('/').length - 1].replace('api-', '').replace('api_', '');
 
 export const coralinemkDir = (extra_path: string) => {
     const isAbsolute = path.isAbsolute(extra_path);
-    const where = isAbsolute ? path.join(base_path, extra_path) : path.resolve(base_path, extra_path);
+    const where = isAbsolute ? path.join(base_path, projectName, extra_path) : path.resolve(base_path, projectName, extra_path);
     fs.mkdir(where, {recursive: true}, (err) => {
         if (err) {
             if (err.code != 'EEXIST') {
