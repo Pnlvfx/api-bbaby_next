@@ -31,12 +31,16 @@ const governanceCtrl = {
             const youtubePath = coraline.use('youtube');
             await Promise.all(
                 description.map(async (text: string, index: number) => {
-                    const delay = parseInt(`${index}000`)
-                    await wait(delay)
-                    const loop = await createAudio(text, index, audio);
-                    const finalImage = await _createImage(text, news, textColor, width, height, parseInt(fontSize), 'png', index);
-                    localImages.push({path: finalImage.filename, loop})
-                    images.push(finalImage.url) //CLIENT
+                    try {
+                        const delay = parseInt(`${index}000`)
+                        await wait(delay)
+                        const loop = await createAudio(text, index, audio);
+                        const finalImage = await _createImage(text, news, textColor, width, height, parseInt(fontSize), 'png', index);
+                        localImages.push({path: finalImage.filename, loop})
+                        images.push(finalImage.url) //CLIENT
+                    } catch (err) {
+                        
+                    }
                 })
             )
             audioconcat(audio)
@@ -67,7 +71,7 @@ const governanceCtrl = {
                 })
             })
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.createImage');
         }
     },
     createVideo: async (expressRequest: Request, res: Response) => {
@@ -100,7 +104,7 @@ const governanceCtrl = {
                 return res.status(201).json({msg: "Video created successfully",video: url});
             })
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.createVideo');
         }
     },
     translate: async (expressRequest: Request, res: Response) => {
@@ -125,7 +129,7 @@ const governanceCtrl = {
             }
             res.status(200).json(translation);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.translate');
         }
     },
     BBCbot: async (expressRequest: Request, res: Response) => { 
@@ -135,9 +139,13 @@ const governanceCtrl = {
             let final_links: string[] = [];
             await Promise.all(
                 links.map(async (link) => {
-                    const exist = await BBC.exists({original_link: link});
-                    if (exist) return;
-                    final_links.push(link);
+                    try {
+                        const exist = await BBC.exists({original_link: link});
+                        if (exist) return;
+                        final_links.push(link);
+                    } catch (err) {
+                        
+                    }
                 })
             )
             const interval = setInterval(async () => {
@@ -171,8 +179,13 @@ const governanceCtrl = {
             }, 25000);
             res.status(200).json({msg: 'Started'});
         } catch (err) {
-            console.log(err);
-            telegramapis.sendLog(JSON.stringify(err));
+            if (err instanceof Error) {
+                telegramapis.sendLog(err.message);
+            } else if (typeof err === 'string') {
+                telegramapis.sendLog(err);
+            } else {
+                telegramapis.sendLog('Error during bbcapis scrape');
+            }
         }
     },
     getBBCarticles: async (expressRequest: Request, res: Response) => { 
@@ -183,7 +196,7 @@ const governanceCtrl = {
             const news = await BBC.find({}).sort({date: -1}).limit(Number(limit.toString())).skip(Number(skip.toString()));
             res.status(200).json(news);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.getBBCarticles');
         }
     },
     getBBCarticle: async (expressRequest: Request, res: Response) => {
@@ -195,7 +208,7 @@ const governanceCtrl = {
             if (!BBCnews) return res.status(400).json({msg: "This news doesn't exist!"});
             res.status(200).json(BBCnews);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.getBBCarticle');
         }
     },
     postArticle: async (expressRequest: Request, res: Response) => {
@@ -223,7 +236,7 @@ const governanceCtrl = {
             const savedNews = await news.save();
             res.status(201).json(savedNews);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.postArticle');
         }
     },
     getPexelsImage: async (expressRequest: Request, res: Response) => {
@@ -245,7 +258,7 @@ const governanceCtrl = {
             if (!response.ok) return res.status(500).json({msg: "Pexels API error."});
             res.status(200).json(data.photos);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'governanceCtrl.getPexelsImage');
         }
     },
 }

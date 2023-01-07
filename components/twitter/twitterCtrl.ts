@@ -105,7 +105,7 @@ const TwitterCtrl = {
             if (!Array.isArray(data)) return res.status(500).json({msg: "Invalid response from twitter!"})
             res.status(200).json(data);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'twitterCtrl.getHome');
         }
     },
 }

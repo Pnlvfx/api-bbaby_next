@@ -32,7 +32,7 @@ const communityCtrl = {
             }
             res.json(community);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'communityCtrl.getCommunity');
         }
     },
     updateDescription: async (expressRequest: Request,res: Response) => {
@@ -92,7 +92,7 @@ const communityCtrl = {
                 res.status(201).json({msg: "You have successfully created a new community"});
             }
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'communityCtrl.createCommunity');
         }
     },
     changeAvatar: async(expressRequest: Request,res: Response) => {
@@ -134,7 +134,7 @@ const communityCtrl = {
             }
             res.status(200).json({msg: true})
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'communityCtrl.subscribe');
         }
     },
     getUserPreferredCommunities: async (expressRequest: Request,res: Response) => {
@@ -149,7 +149,7 @@ const communityCtrl = {
                 res.json(subscribedCommunities)
             }
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'communityCtrl.getUserPreferredCommunities');
         }
     },
     chooseCategory : async (expressRequest: Request,res: Response) => {
@@ -167,14 +167,7 @@ const communityCtrl = {
                 res.json(true);
             }
         } catch (err) {
-            catchErrorCtrl(err, res);
-        }
-    },
-    getCommunitiesByCategory: async (expressRequest: Request, res: Response) => {
-        try {
-            
-        } catch (err) {
-            
+            catchErrorCtrl(err, res, 'communityCtrl.chooseCategory');
         }
     },
     searchCommunity: async (expressRequest: Request,res: Response) => {
@@ -196,7 +189,7 @@ const communityCtrl = {
             // }
             res.json(communities)
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'communityCtrl.searchCommunity');
         }
     },
 }

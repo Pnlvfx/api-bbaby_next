@@ -19,7 +19,7 @@ const imageCtrl = {
             const videoStream = fs.createReadStream(image);
             videoStream.pipe(res);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'imageCtrl.route');
         }
     }
 }

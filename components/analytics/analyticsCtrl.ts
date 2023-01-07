@@ -10,7 +10,7 @@ const analyticsCtrl = {
             await telegramapis.sendLog(message.toString())
             res.status(200).json('ok');
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'analyticsCtrl.sendLog');
         }
     }
 }

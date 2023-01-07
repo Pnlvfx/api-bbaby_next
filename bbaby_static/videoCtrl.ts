@@ -28,7 +28,7 @@ const videoCtrl = {
             const videoStream = fs.createReadStream(video, { start, end });
             videoStream.pipe(res);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'videoCtrl.sendVideo');
         }
     },
 }

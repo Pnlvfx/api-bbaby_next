@@ -19,7 +19,7 @@ const youtubeCtrl = {
             if (!credentials) return res.status(401).json({msg: "Your acces token is expired"});
             return res.status(200).json(true)
         } catch (err) {
-            catchErrorCtrl(err, res)
+            catchErrorCtrl(err, res, 'youtubeCtrl.bbaby_youtubePageAuth')
         }
     },
     youtubeAccessToken: async (expressRequest: Request, res: Response) => {
@@ -32,7 +32,7 @@ const youtubeCtrl = {
             const credentials = await getAccessToken({grant_type: 'authorization_code', code: code.toString(), redirect_uri});
             res.status(200).json({msg: "Token stored successfully"})
         } catch (err) {
-            catchErrorCtrl(err, res)
+            catchErrorCtrl(err, res, 'youtubeCtrl.youtubeAccessToken')
         }
     },
     uploadYoutube: async (expressRequest: Request, res: Response) => {
@@ -87,7 +87,7 @@ const youtubeCtrl = {
             // remember to clean the folder
             res.status(201).json({videoInfo: data, msg: `Video and thumbnail updated successfully`})
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'youtubeCtrl.uploadYoutube');
         }
     },
 }

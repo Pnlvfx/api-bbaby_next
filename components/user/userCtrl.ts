@@ -43,7 +43,7 @@ const userCtrl = {
         });
       }
     } catch (err) {
-      catchErrorCtrl(err, res);
+      catchErrorCtrl(err, res, 'userCtrl.user');
     }
   },
   userInfo: async (expressRequest: Request, res: Response) => {
@@ -61,7 +61,7 @@ const userCtrl = {
       };
       res.json(response);
     } catch (err) {
-      catchErrorCtrl(err, res);
+      catchErrorCtrl(err, res, 'userCtrl.userInfo');
     }
   },
   changeAvatar: async (expressRequest: Request, res: Response) => {
@@ -118,7 +118,7 @@ const userCtrl = {
       );
       res.status(200).json("ok");
     } catch (err) {
-      catchErrorCtrl(err, res);
+      catchErrorCtrl(err, res, 'userCtrl.analytics');
     }
   },
 };

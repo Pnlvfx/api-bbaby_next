@@ -40,8 +40,7 @@ const oauthCtrl = {
             const savedUser = await user.save()
             login(user._id.toString(), res)
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res, 'oauthCtrl.register')
         }
     },
     checkEmail: async (req: Request,res: Response) => {
@@ -52,7 +51,7 @@ const oauthCtrl = {
             if(existingEmail) return res.status(400).json({msg: "This email already exist!"});
             res.status(200).json(true);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'oauthCtrl.checkEmail');
         }
     },
     activateEmail: async (req: Request,res: Response) => {
@@ -168,7 +167,7 @@ const oauthCtrl = {
             const value = `{%22nonessential:${status}%2C%22opted:true}`;
             res.status(201).cookie('eu_cookie', value, cookieOptions).json(value);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'oauthCtrl.eu_cookie');
         }
     }
 }

@@ -71,13 +71,6 @@ const bbcapis = {
             throw catchError(err);
         }
     },
-    bot: async () => {
-        try {
-            
-        } catch (err) {
-            
-        }
-    }
 }
 
 export default bbcapis;

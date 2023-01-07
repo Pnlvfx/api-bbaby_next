@@ -39,7 +39,7 @@ const PostCtrl = {
             }
             res.status(200).json(posts);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'postCtrl.getPosts');
         }
     },
     getPost: async (req: Request, res: Response) => {
@@ -69,7 +69,7 @@ const PostCtrl = {
             }
             res.json(post)
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'postCtrl.getPost');
         }
     },
     createPost: async (expressRequest: Request, res: Response) => {
@@ -138,7 +138,7 @@ const PostCtrl = {
             res.status(201).json(savedPost)
             telegramapis.sendLog(`New post created from ${user.username}`);
          } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'postCtrl.createPost');
          }
     },
     voting: async (expressRequest: Request, res: Response) => {
@@ -182,7 +182,7 @@ const PostCtrl = {
             await post.save();
             res.status(200).json({vote: post.ups});
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'postCtrl.voting');
         }
     },
     deletePost: async (expressRequest: Request, res: Response) => {

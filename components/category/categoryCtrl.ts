@@ -8,7 +8,7 @@ const categoryCtrl = {
             const categories = await Category.find({})
             res.status(200).json(categories);
         } catch (err) {
-            catchErrorCtrl(err, res);
+            catchErrorCtrl(err, res, 'categoryCtrl.getCategories');
         }
     }
 }

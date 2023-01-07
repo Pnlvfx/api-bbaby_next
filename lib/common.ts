@@ -13,17 +13,17 @@ export const catchError = (err : unknown) => {
 }
 
 
-export const catchErrorCtrl = (err: unknown, res: Response) => {
+export const catchErrorCtrl = (err: unknown, res: Response, from: string) => {
     if (err instanceof Error) {
-        telegramapis.sendLog(err.message).then(() => {
+        telegramapis.sendLog(err.message + ' ' + from).then(() => {
             res.status(500).json({msg: err.message});
         })
     } else if (typeof err === 'string') {
-        telegramapis.sendLog(err).then(() => {
+        telegramapis.sendLog(err + ' ' + from).then(() => {
             res.status(500).json({msg: err});
         })
     } else {
-        telegramapis.sendLog(JSON.stringify(err)).then(() => {
+        telegramapis.sendLog('API ERROR' + ' ' + from).then(() => {
             res.status(500).json({msg: 'API error'});
         })
     }
