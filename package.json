@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint --fix",
     "dev": "tsc -w & nodemon .",
-    "build": "rimraf dist && tsc -p tsconfig.json && cp config/config.env dist/config/config.env",
+    "build": "rimraf dist && tsc -p tsconfig.json",
     "start": "tsc & node ."
   },
   "dependencies": {
