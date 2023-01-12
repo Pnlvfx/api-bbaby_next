@@ -2,7 +2,7 @@
   "name": "api-bbaby_next",
   "version": "1.0.9",
   "description": "API of bbabystyle.com url: https://api.bbabystyle.com",
-  "main": "server.js",
+  "main": "dist/server.js",
   "repository": "https://github.com/Pnlvfx/api-bbaby_next.git",
   "author": "PnlVFX <simone97_19@hotmail.it>",
   "license": "MIT",
@@ -11,9 +11,9 @@
   },
   "scripts": {
     "lint": "eslint --fix",
-    "dev": "nodemon server.ts",
+    "dev": "tsc -w & nodemon .",
     "build": "rimraf dist && tsc -p tsconfig.json && cp config/config.env dist/config/config.env",
-    "start": "node dist/server.js"
+    "start": "tsc & node ."
   },
   "dependencies": {
     "audioconcat": "^0.1.4",
@@ -27,6 +27,7 @@
     "express": "^4.18.1",
     "express-rate-limit": "^6.6.0",
     "express-useragent": "^1.0.15",
+    "form-data": "^4.0.0",
     "get-audio-duration": "^3.1.1",
     "googleapis": "110.0.0",
     "jsonwebtoken": "^9.0.0",
