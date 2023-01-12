@@ -6,7 +6,6 @@ import fs from 'fs';
 import https from 'https';
 import http from 'http';
 import { buildMediaPath, buildMediaUrl } from "../../utils/coralineFunctions";
-import { CoralineImage } from "../../types/image";
 
 const coralineMedia = {
   image: coralineImage,

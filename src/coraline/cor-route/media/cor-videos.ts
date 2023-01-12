@@ -2,7 +2,7 @@ import coraline from "../../coraline";
 import https from 'https';
 import fs from 'fs';
 import { VideoProps } from "../../types/video";
-import { catchError } from "../../../lib/common";
+import { catchError } from "../crlerror";
 
 const coralineVideos = {
     splitId: (public_id: string) => {

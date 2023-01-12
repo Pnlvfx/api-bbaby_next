@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { limiter } from '../../lib/common';
+import { limiter } from '../../config/common';
 import TwitterCtrl from './twitterCtrl';
 
 const twitterRouter = Router();

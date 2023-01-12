@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import type { UserRequest } from "../../@types/express";
 import User from "../../models/User";
 import { getUserFromToken } from "./user-functions/userFunctions";
-import cloudinary from "../../lib/cloudinary";
-import { catchErrorCtrl } from "../../lib/common";
+import cloudinary from "../../config/cloudinary";
 import coraline from "../../coraline/coraline";
+import { catchErrorCtrl } from "../../coraline/cor-route/crlerror";
 
 const userCtrl = {
   user: async (req: Request, res: Response) => {
@@ -43,7 +43,7 @@ const userCtrl = {
         });
       }
     } catch (err) {
-      catchErrorCtrl(err, res, 'userCtrl.user');
+      catchErrorCtrl(err, res);
     }
   },
   userInfo: async (expressRequest: Request, res: Response) => {
@@ -61,7 +61,7 @@ const userCtrl = {
       };
       res.json(response);
     } catch (err) {
-      catchErrorCtrl(err, res, 'userCtrl.userInfo');
+      catchErrorCtrl(err, res);
     }
   },
   changeAvatar: async (expressRequest: Request, res: Response) => {
@@ -118,7 +118,7 @@ const userCtrl = {
       );
       res.status(200).json("ok");
     } catch (err) {
-      catchErrorCtrl(err, res, 'userCtrl.analytics');
+      catchErrorCtrl(err, res);
     }
   },
 };

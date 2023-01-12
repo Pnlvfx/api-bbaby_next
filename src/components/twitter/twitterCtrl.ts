@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
-import { catchErrorCtrl } from '../../lib/common';
 import _oauth from '../../lib/twitter-oauth/twitter_oauth';
 import User from '../../models/User';
-import twitterapis from '../../lib/twitterapis';
+import twitterapis from '../../lib/twitterapis/twitterapis';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 const COOKIE_NAME = 'oauth_token';
 let tokens: any = {};
 
@@ -105,7 +105,7 @@ const TwitterCtrl = {
             if (!Array.isArray(data)) return res.status(500).json({msg: "Invalid response from twitter!"})
             res.status(200).json(data);
         } catch (err) {
-            catchErrorCtrl(err, res, 'twitterCtrl.getHome');
+            catchErrorCtrl(err, res);
         }
     },
 }

@@ -1,14 +1,14 @@
-import fs from "fs";
-import path from "path";
-import { coraline_path, coralinemkDir, projectName, stringify } from "./utils/coralineFunctions";
-import coralMongo from "./cor-route/coralMongo";
-import coralineDate from "./cor-route/cor-date";
+import fs from 'fs';
+import path from 'path';
+import { coraline_path, coralinemkDir, projectName, stringify } from './utils/coralineFunctions';
+import coralMongo from './cor-route/coralMongo';
+import coralineDate from './cor-route/cor-date';
 const fsPromises = fs.promises;
-import crypto from "crypto";
-import coralineMedia from "./cor-route/media/cor-media";
-import coralineColors from "./cor-route/cor-colors";
-import telegramapis from "../lib/telegramapis/telegramapis";
-import { catchError } from "../lib/common";
+import crypto from 'crypto';
+import coralineMedia from './cor-route/media/cor-media';
+import coralineColors from './cor-route/cor-colors';
+import telegramapis from '../lib/telegramapis/telegramapis';
+import { catchError, catchErrorCtrl } from './cor-route/crlerror';
 
 const coraline = {
   wait: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
@@ -25,15 +25,16 @@ const coraline = {
     return Math.floor(Math.random() * max);
   },
   validateEmail: (email: string) => {
-    const res = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const res =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return res.test(email);
   },
   getUniqueArray: (arr: any[], key: string) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
   },
   use: (document: string) => {
-    const isStatic = document.match("images") ? true : document.match("videos") ? true : false;
-    const subFolder = isStatic ? "static" : "gov";
+    const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
+    const subFolder = isStatic ? 'static' : 'gov';
     const extra_path = path.join(subFolder, document);
     const isAbsolute = path.isAbsolute(extra_path);
     const folder = isAbsolute ? path.join(coraline_path, projectName, extra_path) : path.resolve(coraline_path, projectName, extra_path);
@@ -48,16 +49,16 @@ const coraline = {
     try {
       const string = stringify(file);
       await fsPromises.writeFile(filename, string);
-      await fsPromises.chmod(filename, "777");
+      await fsPromises.chmod(filename, '777');
     } catch (err) {
       const error = err as NodeJS.ErrnoException;
-      if (error.code === "ENOENT") {
-        const folder = path.normalize(path.join(filename, ".."));
+      if (error.code === 'ENOENT') {
+        const folder = path.normalize(path.join(filename, '..'));
         const subfolder = folder
-          .split(projectName + "/")[1]
-          .split("/")
+          .split(projectName + '/')[1]
+          .split('/')
           .slice(1)
-          .join("/");
+          .join('/');
         coraline.use(subfolder);
         await coraline.saveFile(filename, file);
       } else {
@@ -103,7 +104,7 @@ const coraline = {
       throw catchError(err);
     }
   },
-  runAtSpecificTime: (hour: number, minute: number,  callback: () => Promise<void>, repeat: boolean) => {
+  runAtSpecificTime: (hour: number, minute: number, callback: () => Promise<void>, repeat: boolean) => {
     const date = new Date();
     date.setHours(hour);
     date.setMinutes(minute);
@@ -128,7 +129,7 @@ const coraline = {
           coraline.runAtSpecificTime(hour, minute, callback, true);
         }
       } catch (err) {
-        const error = 'Coraline: Error during a timeout'
+        const error = 'Coraline: Error during a timeout';
         if (err instanceof Error) coraline.sendLog(error + err.message);
         if (typeof err === 'string') coraline.sendLog(error + err);
         coraline.sendLog(error);
@@ -136,20 +137,27 @@ const coraline = {
     }, timeUntilFunction);
   },
   generateRandomId: (max: number) => {
-    return crypto.randomBytes(max / 2).toString("hex");
+    return crypto.randomBytes(max / 2).toString('hex');
   },
   sendLog: async (message: string) => {
     try {
-      const logs_group_id = "-1001649395850";
+      const logs_group_id = '-1001649395850';
       await telegramapis.sendMessage(logs_group_id, message);
     } catch (err) {
-      throw catchError(err);
+      
     }
+  },
+  performanceEnd: (start: number, api: string) => {
+    const end = performance.now();
+    const time = `api: ${api} took ${end - start} milliseconds`;
+    return console.log(time);
   },
   media: coralineMedia,
   date: coralineDate,
   mongo: coralMongo,
   colors: coralineColors,
+  catchError: catchError,
+  catchErrorCtrl: catchErrorCtrl,
 };
 
 export default coraline;

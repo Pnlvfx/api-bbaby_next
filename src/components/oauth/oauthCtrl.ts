@@ -5,7 +5,7 @@ import { createActivationToken, login, validateEmail } from "../user/user-functi
 import bcrypt from 'bcrypt';
 import sendEMail from "../user/user-functions/sendMail";
 import jwt from 'jsonwebtoken';
-import { catchErrorCtrl } from "../../lib/common";
+import { catchErrorCtrl } from "../../coraline/cor-route/crlerror";
 
 const {COOKIE_DOMAIN} = config;
 
@@ -40,7 +40,7 @@ const oauthCtrl = {
             const savedUser = await user.save()
             login(user._id.toString(), res)
         } catch (err) {
-            catchErrorCtrl(err, res, 'oauthCtrl.register')
+            catchErrorCtrl(err, res)
         }
     },
     checkEmail: async (req: Request,res: Response) => {
@@ -51,7 +51,7 @@ const oauthCtrl = {
             if(existingEmail) return res.status(400).json({msg: "This email already exist!"});
             res.status(200).json(true);
         } catch (err) {
-            catchErrorCtrl(err, res, 'oauthCtrl.checkEmail');
+            catchErrorCtrl(err, res);
         }
     },
     activateEmail: async (req: Request,res: Response) => {
@@ -167,7 +167,7 @@ const oauthCtrl = {
             const value = `{%22nonessential:${status}%2C%22opted:true}`;
             res.status(201).cookie('eu_cookie', value, cookieOptions).json(value);
         } catch (err) {
-            catchErrorCtrl(err, res, 'oauthCtrl.eu_cookie');
+            catchErrorCtrl(err, res);
         }
     }
 }

@@ -22,6 +22,9 @@ const coralineDate = {
     const time = formatDate(date);
     const formatted = `${time.year}-${time.month}-${time.day} ${time.hours}:${time.minutes}`
     return formatted;
+  },
+  startOfDay: (date: Date) => {
+    return date.setUTCHours(0, 0, 0, 0)
   }
 };
 

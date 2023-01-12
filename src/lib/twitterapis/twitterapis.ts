@@ -1,9 +1,9 @@
-import { IUser } from "../@types/user";
-import { catchError } from "./common";
+import { IUser } from "../../@types/user";
 import {TUploadableMedia, TwitterApi} from 'twitter-api-v2';
-import config from '../config/config';
-import { PostProps } from "../@types/post";
-import _oauth from './twitter-oauth/twitter_oauth';
+import config from '../../config/config';
+import { PostProps } from "../../@types/post";
+import _oauth from '../twitter-oauth/twitter_oauth';
+import { catchError } from "../../coraline/cor-route/crlerror";
 
 const {
     TWITTER_CONSUMER_KEY,

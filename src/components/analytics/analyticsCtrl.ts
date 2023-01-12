@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { catchErrorCtrl } from "../../lib/common";
 import coraline from "../../coraline/coraline";
+import { catchErrorCtrl } from "../../coraline/cor-route/crlerror";
 
 const analyticsCtrl = {
     sendLog: async (req: Request, res: Response) => {
@@ -10,7 +10,7 @@ const analyticsCtrl = {
             await coraline.sendLog(message.toString())
             res.status(200).json('ok');
         } catch (err) {
-            catchErrorCtrl(err, res, 'analyticsCtrl.sendLog');
+            catchErrorCtrl(err, res);
         }
     }
 }

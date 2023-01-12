@@ -10,7 +10,7 @@ interface mediaInfoProps {
     alt: string
 }
 
-export interface NewsProps extends Document {
+interface NewsProps extends Document {
     author: string
     title: string
     description: string

@@ -1,11 +1,11 @@
 import type {Request, Response} from 'express';
 import type { UserRequest } from '../../@types/express';
-import cloudinary from '../../lib/cloudinary';
-import { catchErrorCtrl } from '../../lib/common';
+import cloudinary from '../../config/cloudinary';
 import Community from '../../models/Community';
 import Post from '../../models/Post';
 import User from '../../models/User';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 
 const communityCtrl = {
     getCommunity: async (req: Request, res: Response) => {
@@ -32,7 +32,7 @@ const communityCtrl = {
             }
             res.json(community);
         } catch (err) {
-            catchErrorCtrl(err, res, 'communityCtrl.getCommunity');
+            catchErrorCtrl(err, res);
         }
     },
     updateDescription: async (expressRequest: Request,res: Response) => {
@@ -92,7 +92,7 @@ const communityCtrl = {
                 res.status(201).json({msg: "You have successfully created a new community"});
             }
         } catch (err) {
-            catchErrorCtrl(err, res, 'communityCtrl.createCommunity');
+            catchErrorCtrl(err, res);
         }
     },
     changeAvatar: async(expressRequest: Request,res: Response) => {
@@ -111,8 +111,7 @@ const communityCtrl = {
             if(!postThumb) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
             res.json({msg: "Image updated successfully"})
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message})
+            catchErrorCtrl(err, res);
         }
     },
     subscribe: async (expressRequest: Request,res: Response) => {
@@ -134,7 +133,7 @@ const communityCtrl = {
             }
             res.status(200).json({msg: true})
         } catch (err) {
-            catchErrorCtrl(err, res, 'communityCtrl.subscribe');
+            catchErrorCtrl(err, res);
         }
     },
     getUserPreferredCommunities: async (expressRequest: Request,res: Response) => {
@@ -149,7 +148,7 @@ const communityCtrl = {
                 res.json(subscribedCommunities)
             }
         } catch (err) {
-            catchErrorCtrl(err, res, 'communityCtrl.getUserPreferredCommunities');
+            catchErrorCtrl(err, res);
         }
     },
     chooseCategory : async (expressRequest: Request,res: Response) => {
@@ -167,7 +166,7 @@ const communityCtrl = {
                 res.json(true);
             }
         } catch (err) {
-            catchErrorCtrl(err, res, 'communityCtrl.chooseCategory');
+            catchErrorCtrl(err, res);
         }
     },
     searchCommunity: async (expressRequest: Request,res: Response) => {
@@ -189,7 +188,7 @@ const communityCtrl = {
             // }
             res.json(communities)
         } catch (err) {
-            catchErrorCtrl(err, res, 'communityCtrl.searchCommunity');
+            catchErrorCtrl(err, res);
         }
     },
 }

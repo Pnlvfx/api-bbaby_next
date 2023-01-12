@@ -1,22 +1,89 @@
-import puppeteer from 'puppeteer';
-import { catchError, catchErrorWithTelegram } from '../common';
+import { catchErrorWithTelegram } from '../../config/common';
 import BBC from '../../models/BBC';
-import coraline from '../../coraline/coraline';
+import { catchError } from '../../coraline/cor-route/crlerror';
+import puppeteerapis from '../puppeteerapis/puppeteerapis';
+import { Browser, Page } from 'puppeteer';
 
 const bbcapis = {
+  getNews: async () => {
+    let puppeteer!: {browser: Browser, page: Page}
+    try {
+      const url = `https://www.bbc.com`;
+      puppeteer = await puppeteerapis.connect(url, {headless: false});
+      const links = await puppeteer.page.evaluate(() =>
+        Array.from(document.querySelectorAll('a.media__link') as NodeListOf<HTMLAnchorElement>).map((link) => link.href),
+      );
+      const existing = await BBC.find({original_link: links});
+      console.log(existing);
+      await puppeteer.page.close()
+      await puppeteer.browser.close();
+      return;
+      const news = [];
+      let missed: string[] = []
+      await Promise.all(
+        links.map(async (link, index) => {
+          await new Promise((resolve) => {
+            setTimeout(resolve, index * 1000)
+          })
+          try {
+            const newspage = await puppeteerapis.goto(puppeteer.browser, link);
+            const info = await newspage.evaluate(() => {
+              try {
+                const article = document.body.querySelector('article');
+                if (!article) throw new Error('Missing article');
+                const title = (article.querySelector('h1') as HTMLHeadingElement)?.textContent;
+                if (!title) throw new Error(`Missing title for ${window.location.href}`);
+                const date = (article.querySelector('time') as HTMLTimeElement).dateTime;
+                const imageContainer = article.querySelector('picture') as HTMLPictureElement;
+                const image = (imageContainer.querySelector('img') as HTMLImageElement)?.src;
+                const image_source = (imageContainer.querySelector('span.text') as HTMLSpanElement)?.innerText;
+                const description = Array.from(article.querySelectorAll('div.ep2nwvo0') as NodeListOf<HTMLDivElement>).map(
+                  (descr) => `${descr.textContent}\n\n`,
+                );
+                const mylink = title.toLowerCase().replace(/[^a-zA-Z0-9-_]/g, '_');
+                const permalink = `/governance/news/${mylink}`;
+                const scraped = {
+                  title,
+                  date,
+                  image,
+                  image_source,
+                  description: description.join(''),
+                  permalink,
+                };
+                return scraped;
+              } catch (err) {
+                if (err instanceof Error) {
+                  console.log(err.message)
+                }
+                return window.location.href
+              }
+            });
+            await newspage.close();
+            if (typeof info === 'string') {
+              missed.push(info)
+              return
+            }
+            news.push(info);
+          } catch (err) {
+            throw catchError(err)
+          }
+        }),
+      );
+      puppeteer.browser.close();
+      console.log({missed})
+      return news;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
   connect: async () => {
     try {
-      const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disabled-setupid-sandbox'],
-      });
-      const page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36');
       const url = `https://www.bbc.com`;
-      await page.goto(url);
+      const { browser, page } = await puppeteerapis.connect(url);
       const links = await page.evaluate(() =>
         Array.from(document.querySelectorAll('a.media__link') as NodeListOf<HTMLAnchorElement>).map((link) => link.href),
       );
-      await browser.close();
+      browser.close();
       return links;
     } catch (err) {
       throw catchError(err);
@@ -24,23 +91,7 @@ const bbcapis = {
   },
   getInfo: async (link: string) => {
     try {
-      const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disabled-setupid-sandbox'],
-      });
-      const page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36');
-      await page.goto(link);
-      await page.waitForNetworkIdle();
-      page.on('console', async (msg) => {
-        try {
-          const msgArgs = msg.args();
-          for (let i = 0; i < msgArgs.length; ++i) {
-            console.log(await msgArgs[i].jsonValue());
-          }
-        } catch (err) {
-          coraline.sendLog('Error while trying to console log with puppeteer');
-        }
-      });
+      const { browser, page } = await puppeteerapis.connect(link);
       const info = await page.evaluate(() => {
         try {
           const article = document.body.querySelector('article');
@@ -57,7 +108,6 @@ const bbcapis = {
           const mylink = title.toLowerCase().replace(/[^a-zA-Z0-9-_]/g, '_');
           const permalink = `/governance/news/${mylink}`;
           const scraped = {
-            article,
             title,
             date,
             image,
@@ -69,7 +119,6 @@ const bbcapis = {
         } catch (err) {}
       });
       browser.close();
-      console.log({info});
       return info;
     } catch (err) {
       throw catchError(err);

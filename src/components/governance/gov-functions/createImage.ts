@@ -4,10 +4,10 @@ import util from 'util';
 import { getAudioDurationInSeconds } from 'get-audio-duration';
 import coraline from '../../../coraline/coraline';
 import { NewsProps } from '../../../@types/news';
-import { catchError } from '../../../lib/common';
 import config from '../../../config/config';
 import googleapis from '../../../lib/googleapis/googleapis';
 import sharp from 'sharp';
+import { catchError } from '../../../coraline/cor-route/crlerror';
 
 const getFormat = (news: NewsProps) => {
   if (!news.mediaInfo.image) throw new Error('Missing image!');

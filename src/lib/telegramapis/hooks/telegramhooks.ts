@@ -1,5 +1,3 @@
-import { METHODPROPS, TelegramError } from "../types";
-
 export const buildUrl = (METHOD: METHODPROPS, query?: string) => {
   const base_url = "https://api.telegram.org";
   const token = process.env.TELEGRAM_TOKEN;

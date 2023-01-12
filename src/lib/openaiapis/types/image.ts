@@ -1,4 +1,4 @@
-export interface AImageResponse {
+interface AImageResponse {
     created: number,
     data: AiImage[]
 }

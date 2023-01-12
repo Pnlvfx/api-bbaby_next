@@ -1,10 +1,8 @@
 import express from 'express';
-import config from './config/config';
 import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import compression from 'compression';
-import {connect} from 'mongoose';
 import postRouter from './components/post/postRouter';
 import userRouter from './components/user/userRouter';
 import governanceRouter from './components/governance/governanceRouter';
@@ -16,7 +14,7 @@ import searchRouter from './components/search/searchRouter';
 import categoryRouter from './components/category/categoryRouter';
 import newsRouter from './components/news/newsRouter';
 import Community from './models/Community';
-import { corsOrigin } from './lib/APIaccess';
+import { corsOrigin } from './config/APIaccess';
 import redditRouter from './components/reddit/redditRouter';
 import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
@@ -26,7 +24,7 @@ import videoRouter from './bbaby_static/videoRouter';
 import coraline from './coraline/coraline';
 import analyticsRouter from './components/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
-const {MONGO_URI} = config;
+import bbabyapis from './lib/bbabyapis/bbabyapis';
 
 const app = express();
 
@@ -36,16 +34,11 @@ app.use(cookieParser());
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit: '50mb'}))
 app.use(compression());
-app.use(cors({origin: corsOrigin, credentials: true}));
-const db = config.NODE_ENV === 'production' ? MONGO_URI : 'mongodb://localhost:27017'; // local;
+//app.use(cors({origin: corsOrigin, credentials: true}));
 const imagePath = coraline.use('images');
 const youtubePath = coraline.use('youtube');
-connect(MONGO_URI)
-.then((res) => {
-    console.log("Successfully connected to bbabystyle database!")
-}).catch((error) => {
-    throw new Error(`Cannot connect to bbabystyle database: ${error}`)
-});
+
+bbabyapis.initialize();
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');

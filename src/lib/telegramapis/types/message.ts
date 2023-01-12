@@ -1,4 +1,4 @@
-export interface TelegramMessage {
+interface TelegramMessage {
     message_id: number,
     from: {
         id: number

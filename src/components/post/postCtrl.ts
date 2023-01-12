@@ -4,13 +4,13 @@ import { getUserFromToken } from '../user/user-functions/userFunctions';
 import Post from '../../models/Post';
 import User from '../../models/User';
 import { Types, isValidObjectId } from 'mongoose';
-import cloudinary from '../../lib/cloudinary';
+import cloudinary from '../../config/cloudinary';
 import Comment from '../../models/Comment';
 import Community from '../../models/Community';
-import { catchErrorCtrl } from '../../lib/common';
 import telegramapis from '../../lib/telegramapis/telegramapis';
 import postapis from './postapis';
 import coraline from '../../coraline/coraline';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -39,7 +39,7 @@ const PostCtrl = {
       }
       res.status(200).json(posts);
     } catch (err) {
-      catchErrorCtrl(err, res, 'postCtrl.getPosts');
+      catchErrorCtrl(err, res);
     }
   },
   getPost: async (req: Request, res: Response) => {
@@ -68,7 +68,7 @@ const PostCtrl = {
       }
       res.json(post);
     } catch (err) {
-      catchErrorCtrl(err, res, 'postCtrl.getPost');
+      catchErrorCtrl(err, res);
     }
   },
   createPost: async (expressRequest: Request, res: Response) => {
@@ -125,7 +125,7 @@ const PostCtrl = {
       res.status(201).json(savedPost);
       coraline.sendLog(`New post created from ${user.username}`);
     } catch (err) {
-      catchErrorCtrl(err, res, 'postCtrl.createPost');
+      catchErrorCtrl(err, res);
     }
   },
   voting: async (expressRequest: Request, res: Response) => {
@@ -169,7 +169,7 @@ const PostCtrl = {
       await post.save();
       res.status(200).json({ vote: post.ups });
     } catch (err) {
-      catchErrorCtrl(err, res, 'postCtrl.voting');
+      catchErrorCtrl(err, res);
     }
   },
   deletePost: async (expressRequest: Request, res: Response) => {

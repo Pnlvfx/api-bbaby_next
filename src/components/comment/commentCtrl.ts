@@ -1,8 +1,8 @@
 import type {Request, Response} from 'express';
-import { catchErrorCtrl } from '../../lib/common';
 import Comment from '../../models/Comment';
 import Post from '../../models/Post';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 
 const commentCtrl = {
     createComment: async (req: Request,res: Response) => {
@@ -27,7 +27,7 @@ const commentCtrl = {
                     if (!postNumComments) return res.status(500).json({msg: "Something went wrong in our database, sorry for the inconvenience."})
                     res.json(savedComment)
         } catch (err) {
-            catchErrorCtrl(err, res, 'commentCtrl.createComment');
+            catchErrorCtrl(err, res);
         }
     },
     childComments: async (req: Request,res :Response) => {
@@ -37,7 +37,7 @@ const commentCtrl = {
             if (!comments) return res.status(500).json({msg: "Failed to load comments for this posts, it could be for some reason. Try to refresh the page otherwise this posts could be banned"})
             res.status(200).json(comments)       
         } catch (err) {
-            catchErrorCtrl(err, res, 'commentCtrl.childComments');
+            catchErrorCtrl(err, res);
         }
     },
 }

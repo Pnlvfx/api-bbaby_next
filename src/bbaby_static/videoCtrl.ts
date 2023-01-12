@@ -1,7 +1,7 @@
 import coraline from "../coraline/coraline";
 import fs from 'fs';
 import { Request, Response } from "express";
-import { catchErrorCtrl } from "../lib/common";
+import { catchErrorCtrl } from "../coraline/cor-route/crlerror";
 
 const videoCtrl = {
     sendVideo : async (req: Request, res: Response) => {
@@ -28,7 +28,7 @@ const videoCtrl = {
             const videoStream = fs.createReadStream(video, { start, end });
             videoStream.pipe(res);
         } catch (err) {
-            catchErrorCtrl(err, res, 'videoCtrl.sendVideo');
+            catchErrorCtrl(err, res);
         }
     },
 }

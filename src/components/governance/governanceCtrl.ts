@@ -8,10 +8,9 @@ import News from '../../models/News';
 import BBC from '../../models/BBC';
 import coraline from '../../coraline/coraline';
 import bbcapis from '../../lib/bbcapis/bbcapis';
-import { catchError, catchErrorCtrl, catchErrorWithTelegram } from '../../lib/common';
 import googleapis from '../../lib/googleapis/googleapis';
 import { coralinemkDir } from '../../coraline/utils/coralineFunctions';
-import telegramapis from '../../lib/telegramapis/telegramapis';
+import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 
 const governanceCtrl = {
   createImage: async (expressRequest: Request, res: Response) => {
@@ -45,10 +44,10 @@ const governanceCtrl = {
       audioconcat(audio)
         .concat(`${youtubePath}/final.mp3`)
         .on('start', (command: string) => {
-          console.log('ffmpeg process started:', command)
+          console.log('ffmpeg process started:', command);
         })
         .on('error', (err: string, stdout: string, stderr: string) => {
-          return res.status(500).json(`${err}, ${stderr}, ${stdout}`)
+          return res.status(500).json(`${err}, ${stderr}, ${stdout}`);
         })
         .on('end', (output: string) => {
           const base_url = config.SERVER_URL;
@@ -69,7 +68,7 @@ const governanceCtrl = {
           });
         });
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.createImage');
+      catchErrorCtrl(err, res);
     }
   },
   createVideo: async (expressRequest: Request, res: Response) => {
@@ -102,7 +101,7 @@ const governanceCtrl = {
           return res.status(201).json({ msg: 'Video created successfully', video: url });
         });
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.createVideo');
+      catchErrorCtrl(err, res);
     }
   },
   translate: async (expressRequest: Request, res: Response) => {
@@ -127,12 +126,12 @@ const governanceCtrl = {
       }
       res.status(200).json(translation);
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.translate');
+      catchErrorCtrl(err, res);
     }
   },
   BBCbot: (expressRequest: Request, res: Response) => {
-      bbcapis.bot();
-      res.status(200).json({ msg: 'Started' });
+    bbcapis.bot();
+    res.status(200).json({ msg: 'Started' });
   },
   getBBCarticles: async (expressRequest: Request, res: Response) => {
     try {
@@ -142,7 +141,7 @@ const governanceCtrl = {
       const news = await BBC.find({}).sort({ date: -1 }).limit(Number(limit.toString())).skip(Number(skip.toString()));
       res.status(200).json(news);
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.getBBCarticles');
+      catchErrorCtrl(err, res);
     }
   },
   getBBCarticle: async (expressRequest: Request, res: Response) => {
@@ -154,7 +153,7 @@ const governanceCtrl = {
       if (!BBCnews) return res.status(400).json({ msg: "This news doesn't exist!" });
       res.status(200).json(BBCnews);
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.getBBCarticle');
+      catchErrorCtrl(err, res);
     }
   },
   postArticle: async (expressRequest: Request, res: Response) => {
@@ -182,7 +181,7 @@ const governanceCtrl = {
       const savedNews = await news.save();
       res.status(201).json(savedNews);
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.postArticle');
+      catchErrorCtrl(err, res);
     }
   },
   getPexelsImage: async (expressRequest: Request, res: Response) => {
@@ -204,7 +203,7 @@ const governanceCtrl = {
       if (!response.ok) return res.status(500).json({ msg: 'Pexels API error.' });
       res.status(200).json(data.photos);
     } catch (err) {
-      catchErrorCtrl(err, res, 'governanceCtrl.getPexelsImage');
+      catchErrorCtrl(err, res);
     }
   },
 };

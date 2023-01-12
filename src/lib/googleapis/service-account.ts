@@ -1,7 +1,7 @@
-import { catchError } from '../common';
 import jwt from 'jsonwebtoken';
 import coraline from '../../coraline/coraline';
 import { Credentials } from './types/credentials';
+import { catchError } from '../../coraline/cor-route/crlerror';
 
 const serviceAccount = {
   getAccessToken: async (type: 'translate' | 'text_to_speech' | 'youtube') => {

@@ -1,4 +1,4 @@
-export interface BotCommands {
+interface BotCommands {
     command: string
     description: string
 }

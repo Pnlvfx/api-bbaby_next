@@ -2,9 +2,9 @@ import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
 import config from '../../config/config';
 import coraline from '../../coraline/coraline';
-import { catchErrorCtrl } from '../../lib/common';
 import redditapis from '../../lib/redditapis/redditapis';
 import User from '../../models/User';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 
 const USER_AGENT = `bbabysyle/1.0.0 (www.bbabytyle.com)`;
 
@@ -85,7 +85,7 @@ const redditCtrl = {
       const posts = await redditapis.getPosts(after?.toString(), count?.toString(), redditTokens.access_token as string);
       res.status(200).json(posts);
     } catch (err) {
-      catchErrorCtrl(err, res, 'redditCtrl.getRedditPostsWithToken');
+      catchErrorCtrl(err, res);
     }
   },
   getRedditPosts: async (expressRequest: Request, res: Response) => {
@@ -100,7 +100,7 @@ const redditCtrl = {
       const data = await response.json();
       res.status(200).json(data);
     } catch (err) {
-      catchErrorCtrl(err, res, 'redditCtrl.getRedditPosts');
+      catchErrorCtrl(err, res);
     }
   },
   getRedditPostsFromCommunity: async (expressRequest: Request, res: Response) => {
@@ -115,7 +115,7 @@ const redditCtrl = {
       const data = await response.json();
       res.status(200).json(data);
     } catch (err) {
-      catchErrorCtrl(err, res, 'redditCtrl.getRedditPostsFromCommunity');
+      catchErrorCtrl(err, res);
     }
   },
 };

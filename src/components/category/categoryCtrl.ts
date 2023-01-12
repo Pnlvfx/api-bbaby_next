@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { catchErrorCtrl } from '../../lib/common';
 import Category from '../../models/Category';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 
 const categoryCtrl = {
     getCategories: async (req: Request,res: Response) => {
@@ -8,7 +8,7 @@ const categoryCtrl = {
             const categories = await Category.find({})
             res.status(200).json(categories);
         } catch (err) {
-            catchErrorCtrl(err, res, 'categoryCtrl.getCategories');
+            catchErrorCtrl(err, res);
         }
     }
 }

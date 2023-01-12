@@ -1,9 +1,9 @@
 import { CommunityProps } from '../../@types/community';
 import { PostProps } from '../../@types/post';
 import { IUser } from '../../@types/user';
+import { catchError } from '../../coraline/cor-route/crlerror';
 import coraline from '../../coraline/coraline';
-import { catchError } from '../../lib/common';
-import twitterapis from '../../lib/twitterapis';
+import twitterapis from '../../lib/twitterapis/twitterapis';
 
 const postapis = {
   shareToTwitter: async (

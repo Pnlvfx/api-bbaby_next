@@ -3,8 +3,7 @@ import { Stream } from "stream";
 import fs from "fs";
 import https from "https";
 import FormData from "form-data";
-import { catchError } from "../common";
-import { BotCommands } from "./types/bot";
+import { catchError } from "../../coraline/cor-route/crlerror";
 
 const telegramapis = {
   sendMessage: async (chatId: string | number, text: string) => {
@@ -18,6 +17,69 @@ const telegramapis = {
       const data = await res.json();
       if (!res.ok) throw telegramError(data);
       return data;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  sendPhoto: async (chatId: string | number, photo: string | Stream, options?: SendPhotoOptions) => {
+    try {
+      const form = new FormData();
+      form.append("chat_id", chatId);
+      if (options) {
+        const usedOptions = Object.entries(options).filter(([key, value]) => value !== undefined);
+        usedOptions.forEach(([key, value]) => {
+          form.append(key, String(value));
+        });
+      }
+      let data = "";
+      const req_options = {
+        host: "api.telegram.org",
+        path: `/bot${process.env.TELEGRAM_TOKEN}/sendPhoto`,
+        method: "POST",
+        headers: {},
+      };
+      if (photo instanceof Stream) {
+        if (photo instanceof fs.ReadStream) {
+          console.log("its a stream");
+          form.append("photo", photo);
+          req_options.headers = form.getHeaders();
+        }
+      } else if (photo.startsWith("http")) {
+        console.log("typeof url");
+        data = `photo=${photo}&chat_id=${chatId}`;
+        if (options) {
+          const usedOptions = Object.entries(options).filter(([key, value]) => value !== undefined);
+          usedOptions.forEach(([key, value]) => {
+            data += `&${key}=${value}`;
+          });
+        }
+        req_options.headers = {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": data.length,
+        };
+      } else {
+        console.log("typeof string");
+        form.append("photo", fs.createReadStream(photo));
+        req_options.headers = form.getHeaders();
+      }
+
+      const req = https.request(req_options, (res) => {
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => {
+          console.log(`Response: ${chunk}`);
+        });
+        res.on("end", () => {
+          console.log("No more data in response.");
+        });
+      });
+      req.on("error", (error: Error) => {
+        console.error(`Error: ${error.message}`);
+      });
+      if (data) {
+        req.write(data);
+      } else {
+        form.pipe(req);
+      }
     } catch (err) {
       throw catchError(err);
     }

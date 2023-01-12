@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { catchError } from "../../../lib/common";
+import { catchError } from "../crlerror";
 
 const coralineImage = {
   resize: async (image: { filename: string; url: string }) => {

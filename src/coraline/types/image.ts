@@ -1,4 +1,4 @@
-export interface CoralineImage {
+interface CoralineImage {
     filename: string
     url: string
     format: string

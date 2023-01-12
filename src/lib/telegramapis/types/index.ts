@@ -1,6 +1,6 @@
-export type METHODPROPS = 'sendMessage' | 'sendPhoto' | 'getUpdates' | 'setWebhook' | 'setMyCommands'
+type METHODPROPS = 'sendMessage' | 'sendPhoto' | 'getUpdates' | 'setWebhook' | 'setMyCommands'
 
-export interface TelegramError {
+interface TelegramError {
     ok: boolean
     error_code: number
     description: string
