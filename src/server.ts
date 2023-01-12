@@ -34,11 +34,11 @@ app.use(cookieParser());
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit: '50mb'}))
 app.use(compression());
-//app.use(cors({origin: corsOrigin, credentials: true}));
+app.use(cors({origin: corsOrigin, credentials: true}));
 const imagePath = coraline.use('images');
 const youtubePath = coraline.use('youtube');
 
-bbabyapis.initialize();
+bbabyapis.initialize()
 
 app.get('/', (req, res) => {
     res.send('This is Bbabystyle API');
