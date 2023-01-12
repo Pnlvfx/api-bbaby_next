@@ -5,6 +5,7 @@ import { getUserFromToken } from '../components/user/user-functions/userFunction
 const auth = async (expressRequest: Request, res: Response, next: NextFunction) => {
     try {
         const req = expressRequest as UserRequest;
+        console.log(req.headers.origin);
         const {token} = req.cookies;
         const errorMessage = "This API require user authentication";
         if (!token) {
