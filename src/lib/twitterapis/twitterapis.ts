@@ -4,7 +4,6 @@ import config from '../../config/config';
 import { PostProps } from "../../@types/post";
 import _oauth from '../twitter-oauth/twitter_oauth';
 import { catchError } from "../../coraline/cor-route/crlerror";
-
 const {
     TWITTER_CONSUMER_KEY,
     TWITTER_CONSUMER_SECRET,
@@ -76,13 +75,6 @@ const twitterapis = {
             return 'ok';
         } catch (err) {
             throw catchError(err)
-        }
-    },
-    deleteTweet: async (client: TwitterApi) => {
-        try {
-            
-        } catch (err) {
-            
         }
     },
     getTrendsLocations: async () => {

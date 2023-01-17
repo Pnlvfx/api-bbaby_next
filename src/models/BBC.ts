@@ -1,4 +1,5 @@
 import {Schema, model} from "mongoose";
+import { ExternalNews } from "../@types/external-news";
 
 const BBCSchema = new Schema<ExternalNews>({
     title: {
@@ -7,7 +8,6 @@ const BBCSchema = new Schema<ExternalNews>({
     },
     date: {
         type: String,
-        required: true
     },
     description: {
         type: String,
@@ -15,6 +15,7 @@ const BBCSchema = new Schema<ExternalNews>({
     },
     image: {
         type: String,
+        required: true,
     },
     image_source: {
         type: String,
@@ -29,6 +30,9 @@ const BBCSchema = new Schema<ExternalNews>({
         required: true,
         unique: true
     },
+    notified: {
+        type: Boolean
+    }
 }
 );
 const BBC = model('BBC', BBCSchema);

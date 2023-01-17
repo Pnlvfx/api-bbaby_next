@@ -98,13 +98,11 @@ const communityCtrl = {
     changeAvatar: async(expressRequest: Request,res: Response) => {
         try {
             const req = expressRequest as UserRequest;
-            const {user} = req
             const {image} = req.body;
             const {name} = req.params;
             const response = await cloudinary.v2.uploader.upload(image, {
                 height: 256, width: 256, crop: 'scale', upload_preset: 'bbaby_community'
             });
-            if (!response) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
             const community = await Community.findOneAndUpdate({name}, {communityAvatar: response.secure_url})
             if(!community) return res.status(500).json({msg: 'Something went wrong with this image. Please try with another one'})
             const postThumb = await Post.updateMany({community: name}, {$set: {communityIcon: response.secure_url}})

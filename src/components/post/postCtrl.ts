@@ -81,8 +81,8 @@ const PostCtrl = {
       if (!community || !communityIcon) return res.status(500).json({ msg: 'Please select a valid community.' });
       const communityInfo = await Community.findOne({ name: community });
       if (!communityInfo) return res.status(500).json({ msg: 'Please select a valid community.' });
-      const exists = await Post.exists({ title, author: user.username });
-      if (exists) return res.status(400).json({ msg: 'This post already exist.' });
+      // const exists = await Post.exists({ title, author: user.username, isImage, isVideo, community  });
+      // if (exists) return res.status(400).json({ msg: 'This post already exist.' });
       const post = new Post({
         author: user?.username,
         authorAvatar: user?.avatar,

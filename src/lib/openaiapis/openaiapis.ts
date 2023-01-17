@@ -10,12 +10,13 @@ const openaiapis = {
   translate: async (text: string, from: string, to: string) => {
     try {
       const url = 'https://api.openai.com/v1/completions';
+      const translate_msg = `Transform this text from ${from} to ${to}, you are allowed to change something, but it's important that is readable for people`;
       const res = await fetch(url, {
         method: 'POST',
         headers,
         body: JSON.stringify({
           model: 'text-davinci-003',
-          prompt: `Translate this text from ${from} to ${to}: \n\n ${text.substring(0, 3300)}`,
+          prompt: `${translate_msg}: ${text.substring(0, 3300)}`,
           temperature: 0.3,
           max_tokens: text.length,
           top_p: 1.0,
@@ -24,11 +25,9 @@ const openaiapis = {
         }),
       });
       const data = await res.json();
-      console.log(data);
       if (!res.ok) throw new Error(`Unable to translate text: ${res.statusText + ' ' + res.status}`);
-      return data.choices[0].text;
+      return data.choices[0].text as string;
     } catch (err) {
-      console.log(err);
       throw catchError(err);
     }
   },
@@ -46,8 +45,32 @@ const openaiapis = {
         }),
       });
       const data = (await res.json()) as AImageResponse;
-      if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+      if (!res.ok) throw new Error(data.error.message);
       return data.data;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  synthetize: async (text: string) => {
+    try {
+      const url = 'https://api.openai.com/v1/completions';
+      const prompt = `I want you to tell me what is this story talking about in one word in english, just send the word without extra arguments: \n ${text}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: 'text-davinci-002',
+          prompt,
+          temperature: 0.7,
+          max_tokens: text.length,
+          top_p: 1.0,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(`Unable to syntethize text: ${res.statusText + ' ' + res.status}`);
+      return data.choices[0].text.replace('\n\n', '') as string;
     } catch (err) {
       throw catchError(err);
     }

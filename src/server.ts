@@ -1,3 +1,4 @@
+import config from './config/config';
 import express from 'express';
 import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
@@ -14,7 +15,6 @@ import searchRouter from './components/search/searchRouter';
 import categoryRouter from './components/category/categoryRouter';
 import newsRouter from './components/news/newsRouter';
 import Community from './models/Community';
-import { corsOrigin } from './config/APIaccess';
 import redditRouter from './components/reddit/redditRouter';
 import oauthRouter from './components/oauth/oauthRouter';
 import auth from './middleware/auth';
@@ -25,48 +25,50 @@ import coraline from './coraline/coraline';
 import analyticsRouter from './components/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
 import bbabyapis from './lib/bbabyapis/bbabyapis';
+import telegramRouter from './components/telegram/telegramRouter';
 
 const app = express();
 
 app.use(contentType);
 app.use(useragent.express());
 app.use(cookieParser());
-app.use(express.urlencoded({extended: true}))
-app.use(express.json({limit: '50mb'}))
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
 app.use(compression());
-app.use(cors({origin: corsOrigin, credentials: true}));
+app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
+const staticPath = coraline.useStatic();
 const imagePath = coraline.use('images');
-const youtubePath = coraline.use('youtube');
 
-bbabyapis.initialize()
+bbabyapis.initialize();
 
 app.get('/', (req, res) => {
-    res.send('This is Bbabystyle API');
+  res.send('This is Bbabystyle API');
 });
 
-app.get('/sitemaps', async (req,res) => {
-    try {
-        const {type} = req.query;
-        if (!type) {
-            const posts = await Post.find({}).sort({createdAt: -1})
-            res.status(200).json(posts)
-        } else {
-            const communities = await Community.find({})
-            res.status(200).json(communities)
-        }
-    } catch (err) {
-        if (err instanceof Error)
-        res.status(500).json({msg: err.message})
+app.get('/sitemaps', async (req, res) => {
+  try {
+    const { type } = req.query;
+    if (!type) {
+      const posts = await Post.find({}).sort({ createdAt: -1 });
+      res.status(200).json(posts);
+    } else {
+      const communities = await Community.find({});
+      res.status(200).json(communities);
     }
+  } catch (err) {
+    if (err instanceof Error) res.status(500).json({ msg: err.message });
+  }
 });
 
-app.use('/analytics', analyticsRouter);
+app.use('/static', express.static(staticPath));
 
 app.use('/images/favicon', express.static(`${imagePath}/favicon`));
 
 app.use('/images/icons', express.static(`${imagePath}/icons`));
 
-app.use('/gov/youtube', express.static(youtubePath));
+app.use('/', telegramRouter);
+
+app.use('/analytics', analyticsRouter);
 
 app.use('/images', imageRouter);
 
@@ -88,9 +90,9 @@ app.use('/categories', categoryRouter);
 
 app.use('/news', newsRouter);
 
-app.use('/twitter', auth,  twitterRouter)
+app.use('/twitter', auth, twitterRouter);
 
-app.use('/reddit', auth,  redditRouter);
+app.use('/reddit', auth, redditRouter);
 
 app.use('/governance', auth, governance, governanceRouter);
 

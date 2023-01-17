@@ -44,10 +44,3 @@ export const buildMediaUrl = (public_id: string, type: "images" | "videos", form
   const final_url = w && h ? `${url}${query}` : url;
   return final_url;
 };
-
-export const stringify = (data: unknown) => {
-  if (typeof data === "string") {
-    return data;
-  }
-  return JSON.stringify(data);
-};

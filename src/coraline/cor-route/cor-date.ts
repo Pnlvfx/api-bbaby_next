@@ -24,7 +24,15 @@ const coralineDate = {
     return formatted;
   },
   startOfDay: (date: Date) => {
-    return date.setUTCHours(0, 0, 0, 0)
+    date.setUTCHours(0, 0, 0, 0)
+    return date
+  },
+  endOfDay: (date: Date) => {
+    date.setUTCHours(23, 59, 59, 999)
+    return date;
+  },
+  hourToms: (hour: number) => {
+    return hour * 60 * 60 * 1000;
   }
 };
 

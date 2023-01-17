@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { coraline_path, coralinemkDir, projectName, stringify } from './utils/coralineFunctions';
+import { coraline_path, coralinemkDir, projectName } from './utils/coralineFunctions';
 import coralMongo from './cor-route/coralMongo';
 import coralineDate from './cor-route/cor-date';
 const fsPromises = fs.promises;
@@ -11,6 +11,12 @@ import telegramapis from '../lib/telegramapis/telegramapis';
 import { catchError, catchErrorCtrl } from './cor-route/crlerror';
 
 const coraline = {
+  stringify: (data: unknown) => {
+    if (typeof data === "string") {
+      return data;
+    }
+    return JSON.stringify(data);
+  },
   wait: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
   addHours: (numOfHours: number, date = new Date()) => {
     date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
@@ -32,6 +38,11 @@ const coraline = {
   getUniqueArray: (arr: any[], key: string) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
   },
+  createPermalink: (text: string) => {
+    let permalink = text.trim().replace(/ /g, '_');
+    permalink = permalink.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().substring(0, 50)
+    return permalink
+  },
   use: (document: string) => {
     const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
     const subFolder = isStatic ? 'static' : 'gov';
@@ -45,9 +56,20 @@ const coraline = {
       return coralinemkDir(folder);
     }
   },
+  useStatic: (document?: string) => {
+    const extra_path = document ? path.join('static', document) : 'static'
+    const isAbsolute = path.isAbsolute(extra_path);
+    const folder = isAbsolute ? path.join(coraline_path, projectName, extra_path) : path.resolve(coraline_path, projectName, extra_path);
+    const exist = fs.existsSync(folder);
+    if (exist) {
+      return folder;
+    } else {
+      return coralinemkDir(folder);
+    }
+  },
   saveFile: async (filename: string, file: any) => {
     try {
-      const string = stringify(file);
+      const string = coraline.stringify(file);
       await fsPromises.writeFile(filename, string);
       await fsPromises.chmod(filename, '777');
     } catch (err) {

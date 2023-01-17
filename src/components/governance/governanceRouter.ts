@@ -2,10 +2,13 @@ import {Router} from 'express';
 import { limiter } from '../../config/common';
 import governanceCtrl from './governanceCtrl';
 import youtubeRouter from './youtube/youtubeRouter';
+import tiktakRouter from './tiktak/tiktakRouter';
 
 const governanceRouter = Router()
 
 governanceRouter.use('/youtube', youtubeRouter);
+
+governanceRouter.use('/tiktak', tiktakRouter);
 
 governanceRouter.post('/create-image', governanceCtrl.createImage);
 
@@ -20,7 +23,5 @@ governanceRouter.post('/news', governanceCtrl.postArticle);
 governanceRouter.get('/pexels', governanceCtrl.getPexelsImage);
 
 governanceRouter.get('/BBCnews', limiter, governanceCtrl.getBBCarticles);
-
-governanceRouter.get('/BBCbot', limiter, governanceCtrl.BBCbot);
 
 export default governanceRouter;
