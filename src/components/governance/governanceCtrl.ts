@@ -46,6 +46,7 @@ const governanceCtrl = {
           }
         }),
       );
+      const audio_path = `${folder}/final.mp3`
       audioconcat(audio)
         .concat(`${folder}/final.mp3`)
         .on('start', (command: string) => {
@@ -55,8 +56,7 @@ const governanceCtrl = {
           return res.status(500).json(`${err}, ${stderr}, ${stdout}`);
         })
         .on('end', (output: string) => {
-          const base_url = config.SERVER_URL;
-          const url = `${base_url}/gov/youtube/final.mp3`;
+          const audio_url = coraline.media.getUrlFromPath(audio_path)
           res.json({
             title: news.title,
             description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Questo è il link all'articolo completo: https://www.bbabystyle.com/news/${news.title.toLowerCase()}. Contribuisci a far crescere bbabystyle https://www.bbabystyle.com`,
@@ -66,7 +66,7 @@ const governanceCtrl = {
             images,
             localImages,
             audio,
-            finalAudio: url,
+            finalAudio: audio_url,
             width,
             height,
             msg: 'Image created successfully',
@@ -123,8 +123,6 @@ const governanceCtrl = {
       } catch (err) {
         translation = await googleapis.translate(text, lang.toString(), to);
       }
-      console.log({text});
-      console.log({translation});
       res.status(200).json(translation);
     } catch (err) {
       catchErrorCtrl(err, res);

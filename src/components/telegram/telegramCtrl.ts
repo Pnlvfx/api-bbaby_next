@@ -46,7 +46,7 @@ const telegramCtrl = {
           } else if (coraline.isUrl(msg.text as string)) {
             if (isTiktokUrl(msg.text as string)) {
             } else {
-              console.log(msg);
+              
             }
           }
         } else {
