@@ -31,5 +31,6 @@ namespace NodeJS {
         NODE_ENV: 'development' | 'production';
         PEXELS_API_KEY: string
         OPENAI_API_KEY: string
+        IP_LOOKUP_API_KEY: string
     }
   }

@@ -23,11 +23,6 @@ export const createActivationToken = ({...payload}) => {
     return jwt.sign(payload, ACTIVATION_TOKEN_SECRET, {expiresIn: '3d'})
 }
 
-export const validateEmail = (email: string) => {
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email); 
-}
-
 export const login = (id: string, res: Response) => {
     const token = jwt.sign({id}, SECRET);
     const maxAge = 63072000000
