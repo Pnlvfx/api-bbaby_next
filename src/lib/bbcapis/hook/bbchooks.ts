@@ -10,11 +10,11 @@ import bbabyapis from '../../bbabyapis/bbabyapis';
 const save = async (BBCnews: BBCInfo) => {
   try {
     const exist = await BBC.findOne({ original_link: BBCnews.original_link });
-    if (exist) throw new Error('This news already exist');
+    if (exist) return exist;
     const { title, description, image, image_source, date, original_link } = BBCnews;
     const permalink = `/governance/news/${coraline.createPermalink(title)}`;
     const permalinkexist = await BBC.findOne({ permalink });
-    if (permalinkexist) throw new Error('This news already exist');
+    if (permalinkexist) return permalinkexist
     const news = new BBC({
       title,
       date,

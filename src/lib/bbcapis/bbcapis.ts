@@ -1,7 +1,6 @@
 import { catchError } from '../../coraline/cor-route/crlerror';
 import { getLinks, getSomeNews, saveBBCnewstodb } from './hook/bbchooks';
 import coraline from '../../coraline/coraline';
-import bbabyapis from '../bbabyapis/bbabyapis';
 
 const bbcapis = {
   start: async () => {
@@ -15,7 +14,7 @@ const bbcapis = {
         await saveBBCnewstodb(news);
         console.log('end scraping')
       }
-      await bbabyapis.news.send();
+      //await bbabyapis.news.send();
       coraline.performanceEnd(start, 'getting new BBCnews');
       return true;
     } catch (err) {
