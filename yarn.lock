@@ -1396,7 +1396,7 @@ camelcase@^2.0.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-2.1.1.tgz#7c1d16d679a1bbe59ca02cacecfb011e201f5a1f"
   integrity sha512-DLIsRzJVBQu72meAKPkWQOLcujdXT32hwdfnkI1frSiSRMK1MofjKHf+MEx0SB6fjEFXL8fBDv1dKymBlOp4Qw==
 
-canvas@^2.11.0, canvas@^2.6.0:
+canvas@^2.6.0:
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/canvas/-/canvas-2.11.0.tgz#7f0c3e9ae94cf469269b5d3a7963a7f3a9936434"
   integrity sha512-bdTjFexjKJEwtIo0oRx8eD4G2yWoUOXP9lj279jmQ2zMnTQhT8C3512OKz3s+ZOaQlLbE7TuVvRDYDB3Llyy5g==

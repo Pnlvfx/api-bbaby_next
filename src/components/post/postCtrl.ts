@@ -21,15 +21,22 @@ const PostCtrl = {
       if (!limit || !skip) return res.status(500).json({ msg: 'Limit and Skip parameters are required for this API.' });
       const user_agent = req.useragent;
       const _limit = user_agent?.isMobile && Number(skip.toString()) < 15 ? 7 : parseInt(limit.toString());
-      const communities = await Community.find({ language: userLang ? userLang : 'en' });
-      const selectedCommunities = Array.from(communities.map((community) => community.name));
-      let posts = [];
-      const filters = communityName?.toString()
-        ? { community: new RegExp(`^${communityName.toString()}$`, 'i') }
-        : author
-        ? { author: new RegExp(`^${author}$`, 'i') }
-        : { community: selectedCommunities }; //this is for home
-      posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
+      let filters = {};
+      if (communityName) {
+        filters = { community: new RegExp(`^${communityName.toString()}$`, 'i') };
+      } else if (author) {
+        filters = { author: new RegExp(`^${author}$`, 'i') };
+      } else {
+        const communities = await Community.find({ language: userLang ? userLang : 'en' });
+        const selectedCommunities = Array.from(communities.map((community) => community.name));
+        filters = { community: selectedCommunities };
+      }
+      let posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
+      if (posts.length < _limit && !author && !communityName) {
+        //home
+        filters = {}
+        posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
+      }
       if (token) {
         const user = await getUserFromToken(token);
         posts.map((post) => {

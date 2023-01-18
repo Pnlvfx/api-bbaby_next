@@ -123,6 +123,8 @@ const governanceCtrl = {
       } catch (err) {
         translation = await googleapis.translate(text, lang.toString(), to);
       }
+      console.log({text});
+      console.log({translation});
       res.status(200).json(translation);
     } catch (err) {
       catchErrorCtrl(err, res);

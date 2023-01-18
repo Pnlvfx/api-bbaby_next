@@ -29,16 +29,18 @@ const puppeteerapis = {
       page.setDefaultNavigationTimeout(150000);
       await page.goto(url);
       await page.waitForNetworkIdle();
-      page.on('console', async (msg) => {
-        try {
-          const msgArgs = msg.args();
-          for (let i = 0; i < msgArgs.length; ++i) {
-            console.log(await msgArgs[i].jsonValue());
+      if (process.env.NODE_ENV === 'development') {
+        page.on('console', async (msg) => {
+          try {
+            const msgArgs = msg.args();
+            for (let i = 0; i < msgArgs.length; ++i) {
+              console.log(await msgArgs[i].jsonValue());
+            }
+          } catch (err) {
+            console.log('Error when console.log on puppeteer');
           }
-        } catch (err) {
-          console.log('Error when console.log on puppeteer');
-        }
-      });
+        });
+      }
       return { browser, page };
     } catch (err) {
       throw catchError(err);

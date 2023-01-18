@@ -26,7 +26,7 @@ const openaiapis = {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(`Unable to translate text: ${res.statusText + ' ' + res.status}`);
-      return data.choices[0].text as string;
+      return data.choices[0].text.trimStart() as string;
     } catch (err) {
       throw catchError(err);
     }

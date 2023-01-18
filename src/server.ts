@@ -37,7 +37,6 @@ app.use(express.json({ limit: '50mb' }));
 app.use(compression());
 app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
 const staticPath = coraline.useStatic();
-const imagePath = coraline.use('images');
 
 bbabyapis.initialize();
 
@@ -61,10 +60,6 @@ app.get('/sitemaps', async (req, res) => {
 });
 
 app.use('/static', express.static(staticPath));
-
-app.use('/images/favicon', express.static(`${imagePath}/favicon`));
-
-app.use('/images/icons', express.static(`${imagePath}/icons`));
 
 app.use('/', telegramRouter);
 
