@@ -19,7 +19,7 @@ const bbabyapis = {
         { command: 'quora', description: 'Quora' },
       ]);
       const timeinterval = coraline.date.hourToms(1);
-      const interval = setInterval(bbcapis.start, 60000);
+      const interval = setInterval(bbcapis.start, timeinterval);
       await bbcapis.start();
       //const latest = await BBC.find({ date: { $ne: undefined } }).sort({ date: -1 });
     } catch (err) {
