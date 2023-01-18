@@ -12,15 +12,13 @@ import fs from 'fs';
 import { catchErrorWithTelegram } from '../../config/common';
 import { TiktakProps } from '../../models/types/tiktak';
 
-const getPexelsVideo = async (text: string, output: string, min_duration: number, width: number, height: number) => {
+const getPexelsVideo = async (synthetize: string, output: string, min_duration: number, width: number, height: number) => {
   try {
-    const synthetize = await openaiapis.synthetize(text);
-    console.log({synthetize});
     const orientation = width >= 1920 ? 'landscape' : 'portrait'
-    const pexelsVideo = await pexelsapi.getVideo(synthetize, {per_page: 80, orientation});
-    console.log({pexelsVideo: pexelsVideo.length, min_duration});
-    if (pexelsVideo.length === 0) throw new Error('pexels research return 00 videos');
-    const filtered1 = pexelsVideo.filter((video) => video.duration > min_duration)
+    const pexelsVideos = await pexelsapi.getVideo(synthetize, {per_page: 80, orientation});
+    console.log({pexelsVideo: pexelsVideos.length, min_duration});
+    if (pexelsVideos.length === 0) throw new Error('pexels research return 00 videos');
+    const filtered1 = pexelsVideos.filter((video) => video.duration > min_duration)
     console.log({filtered1: filtered1.length})
     if (filtered1.length === 0) throw new Error('pexels research return 000 videos');
     let videoSource: PexelsVideo['video_files'] = []
@@ -64,14 +62,14 @@ const tiktokapis = {
   },
   quoraVideo: async (tiktak: TiktakProps, width: number, height: number) => {
     try {
-      const pitch = -8;
       const folder = coraline.useStatic(`tiktak/${tiktak._id}`);
       const audio_path = `${folder}/audio_final.mp3`;
+      const pitch = -8;
       const full_audio = await googleapis.textToSpeech(tiktak.body, pitch);
       tiktak.audio =  await coraline.media.saveAudio(full_audio.audioContent, audio_path);
       tiktak.duration = await ffmpeg.getDuration(audio_path);
       const backgroundPath = `${folder}/background_video.mp4`
-      const backgroundVideo = await getPexelsVideo(tiktak.body, backgroundPath, tiktak.duration, width, height);
+      const backgroundVideo = await getPexelsVideo(tiktak.synthetize, backgroundPath, tiktak.duration, width, height);
       tiktak.background_video = coraline.media.getUrlFromPath(backgroundPath);
       const textArray = tiktokquora.splitText(tiktak.body, 150);
       const bgColor = 'rgba(0,0,0,0';
@@ -114,7 +112,7 @@ const tiktokapis = {
       await tiktak.save();
       return tiktak;
     } catch (err) {
-      catchErrorWithTelegram(err);
+      throw catchError(err);
     }
   },
 };

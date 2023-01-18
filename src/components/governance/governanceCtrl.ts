@@ -11,16 +11,22 @@ import googleapis from '../../lib/googleapis/googleapis';
 import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import openaiapis from '../../lib/openaiapis/openaiapis';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
+import telegramapis from '../../lib/telegramapis/telegramapis';
 
 const governanceCtrl = {
   createImage: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;
-      const { textColor, fontSize, description, title }: {
-        textColor: string
-        fontSize: string
-        description: string[]
-        title: string
+      const {
+        textColor,
+        fontSize,
+        description,
+        title,
+      }: {
+        textColor: string;
+        fontSize: string;
+        description: string[];
+        title: string;
       } = req.body;
       if (description.length <= 1) return res.status(400).json({ msg: 'Please select at least 2 paragraph.' });
       const news = await News.findOne({ title });
@@ -46,7 +52,7 @@ const governanceCtrl = {
           }
         }),
       );
-      const audio_path = `${folder}/final.mp3`
+      const audio_path = `${folder}/final.mp3`;
       audioconcat(audio)
         .concat(`${folder}/final.mp3`)
         .on('start', (command: string) => {
@@ -56,7 +62,7 @@ const governanceCtrl = {
           return res.status(500).json(`${err}, ${stderr}, ${stdout}`);
         })
         .on('end', (output: string) => {
-          const audio_url = coraline.media.getUrlFromPath(audio_path)
+          const audio_url = coraline.media.getUrlFromPath(audio_path);
           res.json({
             title: news.title,
             description: `Bbabystyle è un social network indipendente,esistiamo solo grazie a voi. Questo è il link all'articolo completo: https://www.bbabystyle.com/news/${news.title.toLowerCase()}. Contribuisci a far crescere bbabystyle https://www.bbabystyle.com`,
@@ -94,7 +100,7 @@ const governanceCtrl = {
         pixelFormat: 'yuv420p',
       };
       const youtubePath = coraline.useStatic('youtube');
-      const videoPath = `${youtubePath}/video1.mp4`
+      const videoPath = `${youtubePath}/video1.mp4`;
       videoshow(images, videoOptions)
         .audio(`${youtubePath}/final.mp3`)
         .save(videoPath)
@@ -102,7 +108,7 @@ const governanceCtrl = {
           return res.status(500).json({ msg: `Some error occured ${err ? err : stdout ? stdout : stderr}` });
         })
         .on('end', (output: string) => {
-          const url = coraline.media.getUrlFromPath(videoPath)
+          const url = coraline.media.getUrlFromPath(videoPath);
           return res.status(201).json({ msg: 'Video created successfully', video: url });
         });
     } catch (err) {
@@ -158,7 +164,7 @@ const governanceCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { user } = req;
-      const { title, description, mediaInfo } = req.body;
+      const { title, description, mediaInfo, sharePostToTG, sharePostToTwitter } = req.body;
       if (!title || !description || !mediaInfo.image) return res.status(400).json({ msg: 'Missing required input!' });
       const exists = await News.exists({ title });
       if (exists) return res.status(400).json({ msg: 'This news has already been shared!' });
@@ -176,6 +182,12 @@ const governanceCtrl = {
       const newImage = await coraline.media.image.resize(bigImage);
       news.$set({ 'mediaInfo.image': newImage.url, 'mediaInfo.width': 1920, 'mediaInfo.height': 1080 });
       const savedNews = await news.save();
+      const url = `${config.CLIENT_URL}${news.permalink}`;
+      if (sharePostToTG) {
+        const text = `${savedNews.title + ' ' + url}`;
+        const chat_id = '@bbabystyle1';
+        await telegramapis.sendMessage(chat_id, text);
+      }
       res.status(201).json(savedNews);
     } catch (err) {
       catchErrorCtrl(err, res);

@@ -33,6 +33,9 @@ const TiktakSchema = new Schema<TiktakProps>({
     audios: [String],
     video: {
         type: String
+    },
+    synthetize: {
+        type: String,
     }
 },
 {

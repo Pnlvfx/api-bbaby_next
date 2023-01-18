@@ -6,6 +6,7 @@ import googleapis from '../../../lib/googleapis/googleapis';
 import Tiktak from '../../../models/Tiktak';
 import coraline from '../../../coraline/coraline';
 import tiktokapis from '../../../lib/tiktokapis/tiktokapis';
+import { catchErrorWithTelegram } from '../../../config/common';
 
 const tiktakCtrl = {
   newTiktak: async (userRequest: Request, res: Response) => {
@@ -18,17 +19,21 @@ const tiktakCtrl = {
       const to = lang.toString() === 'en' ? 'it' : 'en';
       const exist = await Tiktak.findOne({original_body: text});
       if (exist) return res.status(200).json(exist);
+      const permalink = `/governance/tiktak/${coraline.createPermalink(text)}`;
+      const exist2 = await Tiktak.findOne({permalink});
+      if (exist2) return res.status(200).json(exist2);
       let translation;
       try {
         translation = await openaiapis.translate(text, lang.toString(), to);
       } catch (err) {
         translation = await googleapis.translate(text, lang.toString(), to);
       }
-      const permalink = `/governance/tiktak/${coraline.createPermalink(text)}`;
+      const synthetize = await openaiapis.synthetize(text);
       const tiktak = new Tiktak({
         original_body: text,
         body: translation,
         permalink,
+        magick_word: synthetize
       });
       await tiktak.save();
       res.status(201).json(tiktak);
@@ -60,14 +65,18 @@ const tiktakCtrl = {
     try {
       const req = userRequest as UserRequest;
       const { permalink } = req.query;
-      const { text } = req.body;
+      const { text, synthetize } = req.body;
       if (!text) return res.status(400).json({ msg: 'Missing required parameter: text' });
       const tiktak = await Tiktak.findOne({ permalink });
       if (!tiktak) return res.status(400).json({ msg: 'This tiktak does not exist!' });
+      if (synthetize) {
+        tiktak.synthetize = synthetize
+      }
       tiktak.body = text;
       await tiktokapis.quoraVideo(tiktak, 1080, 1920);
       res.status(201).json(tiktak);
     } catch (err) {
+      catchErrorWithTelegram(err);
       catchErrorCtrl(err, res);
     }
   },

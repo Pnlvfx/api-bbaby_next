@@ -10,4 +10,5 @@ export interface TiktakProps extends Document {
     images: FFmpegImage[]
     audios: string[]
     video: string
+    synthetize: string
 }
