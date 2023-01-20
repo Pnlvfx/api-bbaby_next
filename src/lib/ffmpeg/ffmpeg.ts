@@ -158,30 +158,75 @@ const ffmpeg = {
       }
       args.push('-i', audio);
       args.push('-filter_complex');
-      let filtergraph = []
-      let start_time = 0
+      let filtergraph = [];
+      let start_time = 0;
       for (let i = 0; i < images.length; i++) {
         if (i === 0) {
-          filtergraph.push(`[0][1]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable='between(t,${start_time},${start_time + images[i].loop})'[v1]`)
+          filtergraph.push(
+            `[0][1]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable='between(t,${start_time},${start_time + images[i].loop})'[v1]`,
+          );
         } else {
-          filtergraph.push(`[v${i}][${i + 1}]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable='between(t,${start_time},${start_time + images[i].loop})'[v${i + 1}]`)
+          filtergraph.push(
+            `[v${i}][${i + 1}]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable='between(t,${start_time},${
+              start_time + images[i].loop
+            })'[v${i + 1}]`,
+          );
         }
-        start_time += images[i].loop
+        start_time += images[i].loop;
       }
-      const filter = filtergraph.join(';')
+      const filter = filtergraph.join(';');
       args.push(filter);
-      args.push('-map', `[v${images.length}]`, '-map', `${images.length + 1}:a`)
-      args.push('-t', duration.toString(), output) //-t duration
+      args.push('-map', `[v${images.length}]`, '-map', `${images.length + 1}:a`);
+      args.push('-t', duration.toString(), output); //-t duration
       const ffmpegCommand = spawn('ffmpeg', args);
       ffmpegCommand.on('error', (err) => {
         reject(err);
-      })
+      });
       ffmpegCommand.stderr.on('data', (data) => {
-        console.log(data.toString())
+        console.log(data.toString());
       });
       ffmpegCommand.on('close', (code) => {
         if (code === 0) resolve(output);
-      })
+      });
+    });
+  },
+  concatenateVideos: (videos: string[], output: string) => {
+    return new Promise<string>((resolve, reject) => {
+      const inputs = videos.map((path) => ['-i', path])
+      .reduce((a, b) => a.concat(b), []);
+      const concatFilter = `[0:v][1:v][2:v]concat=n=3:v=1:a=0[outv]`;
+
+      const ffmpeg = spawn('ffmpeg', [
+        '-y',
+        ...inputs,
+        '-filter_complex',
+        concatFilter,
+        '-map',
+        '[outv]',
+        '-s',
+        '1080x1920',
+        '-c:v',
+        'libx264',
+        '-c:a',
+        'aac',
+        '-b:v',
+        '2M',
+        '-r',
+        '30',
+        output,
+      ]);
+
+      ffmpeg.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+      });
+
+      ffmpeg.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+      });
+
+      ffmpeg.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+      });
     });
   },
 };

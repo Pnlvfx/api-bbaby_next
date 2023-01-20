@@ -32,12 +32,12 @@ const pexelsapi = {
           url += `&${key}=${value}`;
         });
       }
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method: 'GET',
         headers,
       });
-      const data = (await response.json()) as PexelsResponse;
-      if (!response.ok) throw new Error('Pexels API error.');
+      const data = (await res.json()) as PexelsResponse;
+      if (!res.ok) throw new Error('Pexels API error.');
       return data.videos;
     } catch (err) {
       throw catchError(err);

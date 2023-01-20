@@ -73,6 +73,7 @@ const tiktakCtrl = {
         tiktak.synthetize = synthetize
       }
       tiktak.body = text;
+      await tiktak.save();
       await tiktokapis.quoraVideo(tiktak, 1080, 1920);
       res.status(201).json(tiktak);
     } catch (err) {

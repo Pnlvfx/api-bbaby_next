@@ -4,34 +4,80 @@ import ffmpeg from '../ffmpeg/ffmpeg';
 import googleapis from '../googleapis/googleapis';
 import telegramapis from '../telegramapis/telegramapis';
 import tiktokquora from './route/tiktokquora';
-import openaiapis from '../openaiapis/openaiapis';
 import pexelsapi from '../pexelsapi/pexelsapi';
 import * as TextToImage from 'text-to-image';
 import util from 'util';
 import fs from 'fs';
-import { catchErrorWithTelegram } from '../../config/common';
 import { TiktakProps } from '../../models/types/tiktak';
+import path from 'path';
+
+const getPexelsVideosBySize = (videos: PexelsVideo[], width: number, height: number) => {
+  let videoSource: PexelsVideo['video_files'] = [];
+  videos.map((video) => {
+    const videoFiles = video.video_files;
+    const filtered2 = videoFiles.filter((file) => file.width === width && file.height === height);
+    if (filtered2.length === 0) return;
+    videoSource = filtered2;
+  });
+  return videoSource;
+};
+
+const findClosestVideoSize = (width: number, height: number, videoFiles: PexelsVideo['video_files']) => {
+  let closest = videoFiles[0];
+  let closestDiff = Number.MAX_SAFE_INTEGER;
+  for (let file of videoFiles) {
+    let diff = Math.abs(file.width - width) + Math.abs(file.height - height);
+    if (diff < closestDiff) {
+      closest = file;
+      closestDiff = diff;
+    }
+  }
+  return closest
+};
+
+type Selected = {
+  video: PexelsVideo;
+  duration: number;
+};
 
 const getPexelsVideo = async (synthetize: string, output: string, min_duration: number, width: number, height: number) => {
   try {
-    const orientation = width >= 1920 ? 'landscape' : 'portrait'
-    const pexelsVideos = await pexelsapi.getVideo(synthetize, {per_page: 80, orientation});
-    console.log({pexelsVideo: pexelsVideos.length, min_duration});
+    const orientation = width >= 1920 ? 'landscape' : 'portrait';
+    const pexelsVideos = await pexelsapi.getVideo(synthetize, { per_page: 80, orientation });
+    console.log({ pexelsVideo: pexelsVideos.length, min_duration });
     if (pexelsVideos.length === 0) throw new Error('pexels research return 00 videos');
-    const filtered1 = pexelsVideos.filter((video) => video.duration > min_duration)
-    console.log({filtered1: filtered1.length})
-    if (filtered1.length === 0) throw new Error('pexels research return 000 videos');
-    let videoSource: PexelsVideo['video_files'] = []
-    filtered1.map((video) => {
-      const videoFiles = video.video_files;
-      const filtered2 = videoFiles.filter((file) => file.width === width && file.height === height);
-      if (filtered2.length === 0) return;
-      videoSource = filtered2
-    })
-    console.log({videoSource: videoSource.length})
-    if (videoSource.length === 0) throw new Error('pexels research return 0000 videos');
-    const backgroundVideo = await pexelsapi.downloadVideo(videoSource[0].link, output);
+    pexelsVideos.sort((a, b) => (
+      b.duration - a.duration
+    ))
+    let selected: Selected[] = [];
+    let current = 0;
+    pexelsVideos.map((video) => {
+      if (current > min_duration) return;
+      selected.push({ video, duration: video.duration });
+      current += video.duration;
+    });
+    const sources = selected.map((select) => {
+      return findClosestVideoSize(width, height, select.video.video_files)
+    });
+    const folder = path.dirname(output);
+    const backgroundVideos = await Promise.all(
+      sources.map(async (source, index) => {
+        const sourceOutput = `${folder}/video_${index}.mp4`;
+        const backgroundVideo = await pexelsapi.downloadVideo(source.link, sourceOutput);
+        return backgroundVideo;
+      })
+    )
+    const backgroundVideo = await ffmpeg.concatenateVideos(backgroundVideos, output);
     return backgroundVideo;
+    // console.log(pexelsVideos[0])
+    // const filtered1 = pexelsVideos.filter((video) => video.duration > min_duration)
+    // console.log({filtered1: filtered1.length})
+    // if (filtered1.length === 0) throw new Error('pexels research return 000 videos');
+    // const videoSource = getPexelsVideosBySize(filtered1, width, height)
+    // console.log({videoSource: videoSource.length})
+    // if (videoSource.length === 0) throw new Error('pexels research return 0000 videos');
+    // const backgroundVideo = await pexelsapi.downloadVideo(videoSource[0].link, output);
+    // return backgroundVideo;
   } catch (err) {
     throw catchError(err);
   }
@@ -65,11 +111,12 @@ const tiktokapis = {
       const folder = coraline.useStatic(`tiktak/${tiktak._id}`);
       const audio_path = `${folder}/audio_final.mp3`;
       const pitch = -8;
-      const full_audio = await googleapis.textToSpeech(tiktak.body, pitch);
-      tiktak.audio =  await coraline.media.saveAudio(full_audio.audioContent, audio_path);
+      // const full_audio = await googleapis.textToSpeech(tiktak.body, pitch);
+      // tiktak.audio =  await coraline.media.saveAudio(full_audio.audioContent, audio_path);
       tiktak.duration = await ffmpeg.getDuration(audio_path);
-      const backgroundPath = `${folder}/background_video.mp4`
+      const backgroundPath = `${folder}/background_video.mp4`;
       const backgroundVideo = await getPexelsVideo(tiktak.synthetize, backgroundPath, tiktak.duration, width, height);
+      return;
       tiktak.background_video = coraline.media.getUrlFromPath(backgroundPath);
       const textArray = tiktokquora.splitText(tiktak.body, 150);
       const bgColor = 'rgba(0,0,0,0';

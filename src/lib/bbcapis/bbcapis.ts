@@ -1,6 +1,7 @@
 import { catchError } from '../../coraline/cor-route/crlerror';
 import { getLinks, getSomeNews, saveBBCnewstodb } from './hook/bbchooks';
 import coraline from '../../coraline/coraline';
+import { catchErrorWithTelegram } from '../../config/common';
 
 const bbcapis = {
   start: async () => {
@@ -18,7 +19,7 @@ const bbcapis = {
       coraline.performanceEnd(start, 'getting new BBCnews');
       return true;
     } catch (err) {
-      throw catchError(err);
+      catchErrorWithTelegram(err)
     }
   },
 };
