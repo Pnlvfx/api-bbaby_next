@@ -190,11 +190,14 @@ const ffmpeg = {
       });
     });
   },
-  concatenateVideos: (videos: string[], output: string) => {
+  concatenateVideos: (videos: string[], width: number, height: number, output: string) => {
     return new Promise<string>((resolve, reject) => {
-      const inputs = videos.map((path) => ['-i', path])
-      .reduce((a, b) => a.concat(b), []);
-      const concatFilter = `[0:v][1:v][2:v]concat=n=3:v=1:a=0[outv]`;
+      const inputs = videos.map((path) => ['-i', path]).reduce((a, b) => a.concat(b), []);
+      let concatFilter = '';
+      for (let i = 0; i < videos.length; i++) {
+        concatFilter += `[${i}:v]`;
+      }
+      concatFilter += `concat=n=${videos.length}:v=1:a=0[outv]`;
 
       const ffmpeg = spawn('ffmpeg', [
         '-y',
@@ -204,7 +207,7 @@ const ffmpeg = {
         '-map',
         '[outv]',
         '-s',
-        '1080x1920',
+        `${width}x${height}`,
         '-c:v',
         'libx264',
         '-c:a',
@@ -225,7 +228,7 @@ const ffmpeg = {
       });
 
       ffmpeg.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
+        if (code === 0) resolve(output);
       });
     });
   },

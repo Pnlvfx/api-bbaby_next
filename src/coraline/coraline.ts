@@ -40,7 +40,7 @@ const coraline = {
   },
   createPermalink: (text: string) => {
     let permalink = text.trim().replace(/ /g, '_');
-    permalink = permalink.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().substring(0, 50)
+    permalink = permalink.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().substring(0, 50).trimEnd();
     return permalink
   },
   use: (document: string) => {

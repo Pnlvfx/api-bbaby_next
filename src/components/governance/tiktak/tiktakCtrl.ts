@@ -44,7 +44,7 @@ const tiktakCtrl = {
   getTiktaks: async (userRequest: Request, res: Response) => {
     try {
       const req = userRequest as UserRequest;
-      const tiktaks = await Tiktak.find({}).sort({ createdAt: -1 });
+      const tiktaks = await Tiktak.find({}).sort({ createdAt: -1 }).limit(4);
       res.status(200).json(tiktaks);
     } catch (err) {
       catchErrorCtrl(err, res);
