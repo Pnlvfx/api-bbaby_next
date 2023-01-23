@@ -12,6 +12,8 @@ import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import openaiapis from '../../lib/openaiapis/openaiapis';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
 import telegramapis from '../../lib/telegramapis/telegramapis';
+import { TwitterApi } from 'twitter-api-v2';
+import twitterapis from '../../lib/twitterapis/twitterapis';
 
 const governanceCtrl = {
   createImage: async (expressRequest: Request, res: Response) => {
@@ -187,6 +189,22 @@ const governanceCtrl = {
         const text = `${savedNews.title + ' ' + url}`;
         const chat_id = '@bbabystyle1';
         await telegramapis.sendMessage(chat_id, text);
+      }
+      if (sharePostToTwitter) {
+        try {
+          const twitterText = savedNews.title.substring(0, 300 - url.length - 10) + ' ' + url;
+          const twitterUser = new TwitterApi({
+            appKey: config.TWITTER_CONSUMER_KEY,
+            appSecret: config.TWITTER_CONSUMER_SECRET,
+            accessToken: config.BBABYITALIA_ACCESS_TOKEN,
+            accessSecret: config.BBABYITALIA_ACCESS_TOKEN_SECRET,
+          });
+          const twimage = await twitterapis.uploadMedia(twitterUser, Buffer.from(newImage.filename));
+          await twitterapis.tweet(twitterUser, twitterText, twimage);
+        } catch (err) {
+          await savedNews.delete()
+          throw catchError(err);
+        }
       }
       res.status(201).json(savedNews);
     } catch (err) {

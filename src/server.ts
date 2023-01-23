@@ -41,7 +41,7 @@ const staticPath = coraline.useStatic();
 bbabyapis.initialize();
 
 app.get('/', (req, res) => {
-  res.send('This is Bbabystyle API');
+  res.send('This is bbabystyle API');
 });
 
 app.get('/sitemaps', async (req, res) => {

@@ -1,4 +1,4 @@
-import { TokensProps } from '../../@types/user';
+import { TokensProps } from '../../models/types/user';
 import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import coraline from '../../coraline/coraline';

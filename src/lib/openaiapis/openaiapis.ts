@@ -75,6 +75,29 @@ const openaiapis = {
       throw catchError(err);
     }
   },
+  request: async (prompt: string) => {
+    try {
+      const url = 'https://api.openai.com/v1/completions';
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: 'text-davinci-003',
+          prompt,
+          temperature: 0.7,
+          max_tokens: 3000,
+          top_p: 1.0,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(`Unable to syntethize text: ${res.statusText + ' ' + res.status}`);
+      return data.choices[0].text.replace('\n\n', '') as string;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
 };
 
 export default openaiapis;

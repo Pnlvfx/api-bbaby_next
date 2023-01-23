@@ -1,27 +1,43 @@
 import type {Request, Response} from 'express';
 import News from '../../models/News';
+import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import { UserRequest } from '../../@types/express';
 
 const newsCtrl = {
-    getNews: async (req: Request, res: Response) => {
+    getArticles: async (req: Request, res: Response) => {
         try {
             const news = await News.find({}).sort({createdAt: -1})
             res.status(200).json(news);
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message});
+            catchErrorCtrl(err, res)
         }
     },
-    getOneNews: async (req: Request, res: Response) => {
+    getArticle: async (req: Request, res: Response) => {
         try {
             const {permalink: req_permalink} = req.params;
             const permalink = `/news/${req_permalink}`;
             const news = await News.findOne({permalink});
             res.status(200).json(news);
         } catch (err) {
-            if (err instanceof Error)
-            res.status(500).json({msg: err.message});
+            catchErrorCtrl(err, res)
         }
     },
+    editNews: async (userRequest: Request, res: Response) => {
+        try {
+            const req = userRequest as UserRequest;
+            const {title, description} = req.body
+            const {permalink: req_permalink} = req.params
+            const permalink = `/news/${req_permalink}`;
+            const news = await News.findOne({permalink});
+            if (!news) return res.status(400).json({msg: "This news doesn't exist!"})
+            news.title = title
+            news.description = description
+            await news.save()
+            res.status(200).json(true)
+        } catch (err) {
+            catchErrorCtrl(err, res)
+        }
+    }
 }
 
 export default newsCtrl;

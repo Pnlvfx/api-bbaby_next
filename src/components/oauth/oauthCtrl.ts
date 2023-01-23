@@ -1,12 +1,12 @@
 import type { CookieOptions, Request, Response } from 'express';
 import config from '../../config/config';
 import User from '../../models/User';
-import { createActivationToken, login } from '../user/user-functions/userFunctions';
+import { login } from '../user/user-functions/userFunctions';
 import bcrypt from 'bcrypt';
-import sendEMail from '../user/user-functions/sendMail';
 import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
+import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 
 const { COOKIE_DOMAIN } = config;
 
@@ -14,32 +14,7 @@ const oauthCtrl = {
   register: async (req: Request, res: Response) => {
     try {
       const { email, username, password } = req.body;
-      const {country, countryCode, city, region, lat, lon} = await userapis.getIP();
-      if (!username || !email || !password) return res.status(400).json({ msg: 'Please fill in all fields' });
-      if (!userapis.validateEmail(email)) return res.status(400).json({ msg: 'Not a valid email address' });
-      const existingEmail = await User.findOne({ email });
-      if (existingEmail) return res.status(400).json({ msg: 'This email already exist!' });
-      if (password.length < 8) return res.status(400).json({ msg: 'Password must be at least 8 characters long.' });
-      const passwordHash = bcrypt.hashSync(password, 10);
-
-      const existingUser = await User.findOne({ username });
-      if (existingUser) return res.status(400).json({ msg: 'This username already exist!' });
-
-      const user = new User({
-        email,
-        username,
-        password: passwordHash,
-        country,
-        countryCode,
-        city,
-        region,
-        lat,
-        lon,
-      });
-      const activation_token = createActivationToken(user);
-      const url = `${req.headers.origin}/activation/${activation_token}`;
-      sendEMail(email, url, 'Verify your email address');
-      const savedUser = await user.save();
+      const user = await bbabyapis.newUser(email, username, password);
       login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);

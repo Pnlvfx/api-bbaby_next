@@ -1,6 +1,6 @@
 import { Types, Document } from "mongoose"
 
-interface IUser extends Document {
+export interface IUser extends Document {
     email: string
     username: string
     password: string
@@ -19,6 +19,7 @@ interface IUser extends Document {
     externalAccounts: ExternalAccountsProps[]
     subscribed?: string[]
     last_post: Types.ObjectId[]
+    is_bot?: boolean
 }
 
 export type TokensProps = {

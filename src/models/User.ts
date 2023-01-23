@@ -1,5 +1,5 @@
 import {Schema, model} from "mongoose";
-import { IUser } from "../@types/user";
+import { IUser } from "./types/user";
 
 const UserSchema = new Schema<IUser>({
     email: {
@@ -68,7 +68,8 @@ const UserSchema = new Schema<IUser>({
     },
     last_post: {
         type: [Schema.Types.ObjectId]
-    }
+    },
+    is_bot: Boolean
 }, {
     timestamps: true
 });

@@ -82,21 +82,21 @@ const PostCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { user } = req;
-      const { title, body, community, communityIcon, selectedFile, isImage, isVideo, height, width, sharePostToTG, sharePostToTwitter } = req.body;
+      const { title, community, body, selectedFile, isImage, isVideo, height, width, sharePostToTG, sharePostToTwitter } = req.body;
       if (!title) return res.status(500).json({ msg: 'Title is required.' });
+      if (!community) return res.status(500).json({ msg: 'Please select a valid community.' });
       if (user.role !== 1 && title.toString().length > 300) return res.status(400).json({ msg: 'Title needs to be 300 words maximum.' });
-      if (!community || !communityIcon) return res.status(500).json({ msg: 'Please select a valid community.' });
       const communityInfo = await Community.findOne({ name: community });
       if (!communityInfo) return res.status(500).json({ msg: 'Please select a valid community.' });
-      // const exists = await Post.exists({ title, author: user.username, isImage, isVideo, community  });
-      // if (exists) return res.status(400).json({ msg: 'This post already exist.' });
+      const exists = await Post.exists({ title, author: user.username, isImage, isVideo, community  });
+      if (exists) return res.status(400).json({ msg: 'This post already exist.' });
       const post = new Post({
         author: user?.username,
         authorAvatar: user?.avatar,
         title,
         body,
         community,
-        communityIcon,
+        communityIcon: communityInfo.communityAvatar,
       });
       if (isImage) {
         const image = await cloudinary.v2.uploader.upload(selectedFile, {
@@ -126,7 +126,7 @@ const PostCtrl = {
         const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
         await telegramapis.sendMessage(chat_id, text);
       }
-      const updateComNumber = communityInfo.$inc('number_of_posts', 1);
+      communityInfo.$inc('number_of_posts', 1);
       user.last_post = communityInfo._id;
       user.save();
       res.status(201).json(savedPost);
