@@ -189,7 +189,7 @@ const PostCtrl = {
       //     await cloudinary.v2.uploader.destroy(`posts/${post._id.toString()}`);
       // }
       const childComments = await Comment.deleteMany({ rootId: id });
-      res.json({ msg: 'Deleted success' });
+      res.json(true);
     } catch (err) {
       res.status(500).json({ msg: 'Something went wrong' });
     }

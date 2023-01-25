@@ -9,7 +9,7 @@ import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 const USER_AGENT = `bbabysyle/1.0.0 (www.bbabytyle.com)`;
 
 const redditCtrl = {
-  redditLogin: async (expressRequest: Request, res: Response) => {
+  login: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;
       const { user } = req;
@@ -55,7 +55,7 @@ const redditCtrl = {
       if (err instanceof Error) res.status(500).json({ msg: err.message });
     }
   },
-  redditLogout: async (expressRequest: Request, res: Response) => {
+  logout: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;
       const { user } = req;
@@ -69,51 +69,20 @@ const redditCtrl = {
       if (err instanceof Error) res.status(403).json({ msg: err.message });
     }
   },
-  redditPostsWithToken: async (expressRequest: Request, res: Response) => {
+  getPosts: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;
       const { user } = req;
       const { after, count } = req.query;
-      const now = new Date();
       const redditTokens = user?.tokens?.find((provider) => provider.provider === 'reddit');
-      if (!redditTokens) return res.status(500).json({ msg: 'You are not authorized to see this content.' });
-      if (!redditTokens.access_token_expiration) return res.status(500).json({ msg: 'You are not authorized to see this content.' });
+      if (!redditTokens?.access_token_expiration || !redditTokens.access_token) return res.status(500).json({ msg: 'You are not authorized to see this content.' });
       const registrationDate = new Date(redditTokens.access_token_expiration);
+      const now = new Date();
       if (now >= registrationDate) {
         const token = await redditapis.getNewToken(redditTokens);
       }
-      const posts = await redditapis.getPosts(after?.toString(), count?.toString(), redditTokens.access_token as string);
+      const posts = await redditapis.getPostsWithToken(redditTokens.access_token, after?.toString(), count?.toString());
       res.status(200).json(posts);
-    } catch (err) {
-      catchErrorCtrl(err, res);
-    }
-  },
-  getRedditPosts: async (expressRequest: Request, res: Response) => {
-    try {
-      const response = await fetch('https://api.reddit.com', {
-        method: 'get',
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        res.status(400).json({ msg: text });
-      }
-      const data = await response.json();
-      res.status(200).json(data);
-    } catch (err) {
-      catchErrorCtrl(err, res);
-    }
-  },
-  getRedditPostsFromCommunity: async (expressRequest: Request, res: Response) => {
-    try {
-      const response = await fetch('https://api.reddit.com/r/bbabystyle', {
-        method: 'get',
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        res.status(400).json({ msg: text });
-      }
-      const data = await response.json();
-      res.status(200).json(data);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

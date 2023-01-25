@@ -18,6 +18,7 @@ import Post from '../../models/Post';
 import { IUser } from '../../models/types/user';
 import cloudinary from '../../config/cloudinary';
 import postapis from '../../components/post/postapis';
+import redditapis from '../redditapis/redditapis';
 
 const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://290b-91-206-70-33.eu.ngrok.io';
 
@@ -33,7 +34,7 @@ const bbabyapis = {
       ]);
       const timeinterval = coraline.date.hourToms(1);
       setInterval(bbcapis.start, timeinterval);
-      await bbabyapis.answer()
+      //await bbabyapis.answer()
     } catch (err) {
       console.log(err);
       catchErrorWithTelegram(err);

@@ -130,9 +130,9 @@ const oauthCtrl = {
       if (!req.headers.origin) return res.status(400).json({ msg: 'API enabled only for valid client!' });
       const { eu_cookie } = req.cookies;
       if (eu_cookie) return res.status(200).json(null);
-      const maxAge = 63072000000 / 2;
+      const maxAge = 63072000000 / 2; // 1 year
       const cookieOptions: CookieOptions = {
-        maxAge, // 1 years, to check
+        maxAge, 
         httpOnly: true,
         sameSite: true,
       };
@@ -142,7 +142,7 @@ const oauthCtrl = {
       }
       const { status } = req.body;
       const value = `{%22nonessential:${status}%2C%22opted:true}`;
-      res.status(201).cookie('eu_cookie', value, cookieOptions).json(value);
+      res.status(201).cookie('eu_cookie', value, cookieOptions).json(true);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

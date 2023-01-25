@@ -166,7 +166,7 @@ const coraline = {
       const logs_group_id = '-1001649395850';
       await telegramapis.sendMessage(logs_group_id, message);
     } catch (err) {
-      
+      throw catchError(err);
     }
   },
   performanceEnd: (start: number, api: string) => {

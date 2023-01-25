@@ -13,7 +13,7 @@ const tiktakCtrl = {
     try {
       const req = userRequest as UserRequest;
       const { text } = req.body;
-      if (!text) return res.status(400).json({ msg: 'Please add you text in the input.' });
+      if (!text) return res.status(400).json({ msg: 'Please add your text to the input.' });
       const { lang } = req.query;
       if (!lang) return res.status(400).json({ msg: 'Add the source language in your query url.' });
       const to = lang.toString() === 'en' ? 'it' : 'en';

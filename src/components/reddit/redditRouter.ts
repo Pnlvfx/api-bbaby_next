@@ -4,14 +4,10 @@ import redditCtrl from './redditCtrl';
 
 const redditRouter = Router(); //used with governance Router
 
-redditRouter.get('/login',  redditCtrl.redditLogin);
+redditRouter.get('/login',  redditCtrl.login);
 
-redditRouter.get('/logout', redditCtrl.redditLogout);
+redditRouter.get('/logout', redditCtrl.logout);
 
-redditRouter.get('/public_posts', redditCtrl.getRedditPosts);
-
-redditRouter.get('/posts', limiter, redditCtrl.redditPostsWithToken);
-
-redditRouter.get('/community_posts', redditCtrl.getRedditPostsFromCommunity);
+redditRouter.get('/posts', limiter, redditCtrl.getPosts);
 
 export default redditRouter;
