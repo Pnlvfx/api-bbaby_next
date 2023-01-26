@@ -32,7 +32,7 @@ export const login = (id: string, res: Response) => {
     httpOnly: true,
     maxAge,
   };
-  if (config.CLIENT_URL.startsWith('http://192')) {
+  if (!config.CLIENT_URL.startsWith('http://192')) {
     const domain = userapis.getCookieDomain(config.CLIENT_URL)
     cookieOptions.domain = domain
     cookieOptions.secure = true;

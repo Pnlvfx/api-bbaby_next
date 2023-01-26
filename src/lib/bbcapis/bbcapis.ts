@@ -17,15 +17,15 @@ const bbcapis = {
       if (links.length !== 0) {
         const news = await getSomeNews(puppeteer.browser, links);
         await puppeteer.browser.close();
-        // news.map((_, i) => {
-        //   setTimeout(async () => {
-        //     try {
-        //       await bbcapis.toTweet(_)
-        //     } catch (err) {
-        //       catchErrorWithTelegram(err)
-        //     }
-        //   }, i * 20 * 60 * 1000)
-        // })
+        news.map((_, i) => {
+          setTimeout(async () => {
+            try {
+              await bbcapis.toTweet(_)
+            } catch (err) {
+              catchErrorWithTelegram(err)
+            }
+          }, i * 1 * 60 * 1000)
+        })
         await saveBBCnewstodb(news);
       }
       coraline.performanceEnd(start, 'BBC')
@@ -50,7 +50,11 @@ const bbcapis = {
       } else {
         user = await bbabyapis.newBot()
       }
-      const post = await bbabyapis.post.newPost(user, question, 'News')
+      const share = process.env.NODE_ENV === 'production' ? true : false
+      const post = await bbabyapis.post.newPost(user, question, 'News', {
+        sharePostToTG: share,
+        sharePostToTwitter: share
+      })
       return post;
       //const req = `Please transform in italian this news: ${question}`
       // const translate = await openaiapis.request(req)

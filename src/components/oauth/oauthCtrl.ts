@@ -56,12 +56,12 @@ const oauthCtrl = {
         return res.status(422).json({ msg: 'Invalid username or password' });
       }
     } catch (err) {
-      if (err instanceof Error) res.status(500).json({ msg: err.message });
+      catchErrorCtrl(err, res)
     }
   },
   logout: async (req: Request, res: Response) => {
     try {
-      if (req?.headers?.origin?.startsWith('http://192.168')) {
+      if (req?.headers?.origin?.startsWith('http://192')) {
         res
           .clearCookie('token', {
             httpOnly: true,

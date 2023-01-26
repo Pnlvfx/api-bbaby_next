@@ -9,6 +9,7 @@ import { catchError } from '../../coraline/cor-route/crlerror';
 import userapis from '../userapis/userapis';
 import bbabypost from './route/bbabypost/bbabypost';
 import { Chance } from 'chance';
+import BBC from '../../models/BBC';
 
 const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://290b-91-206-70-33.eu.ngrok.io';
 
@@ -24,6 +25,8 @@ const bbabyapis = {
       ]);
       const timeinterval = coraline.date.hourToms(1);
       setInterval(bbcapis.start, timeinterval);
+      await BBC.deleteMany({})
+      await bbcapis.start()
     } catch (err) {
       catchErrorWithTelegram(err);
     }
