@@ -25,7 +25,6 @@ const bbabyapis = {
       const timeinterval = coraline.date.hourToms(1);
       setInterval(bbcapis.start, timeinterval);
     } catch (err) {
-      console.log(err);
       catchErrorWithTelegram(err);
     }
   },

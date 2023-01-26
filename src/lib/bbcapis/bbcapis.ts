@@ -49,11 +49,13 @@ const bbcapis = {
       } else {
         user = await bbabyapis.newBot()
       }
-      await bbabyapis.post.newPost(user, question, 'News')
+      const post = await bbabyapis.post.newPost(user, question, 'News')
+      return post;
       //const req = `Please transform in italian this news: ${question}`
       // const translate = await openaiapis.request(req)
       // await bbabyapis.post.newPost(user, translate, 'News')
     } catch (err) {
+      console.log(err)
       throw catchError(err)
     }
   }

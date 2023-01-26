@@ -26,6 +26,8 @@ import analyticsRouter from './components/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
 import bbabyapis from './lib/bbabyapis/bbabyapis';
 import telegramRouter from './components/telegram/telegramRouter';
+import bbcapis from './lib/bbcapis/bbcapis';
+import { BBCInfo } from './lib/bbcapis/types/bbctype';
 
 const app = express();
 
@@ -39,6 +41,24 @@ app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
 const staticPath = coraline.useStatic();
 
 bbabyapis.initialize();
+
+const test = async () => {
+  try {
+    const news = {
+      title: 'dsvdogjdfogg',
+      description: 'sdfdsjfisfgigfdgfdgdfg'
+    }
+    const post = await bbcapis.toTweet(news as BBCInfo)
+    console.log(post)
+    setTimeout(() => {
+      Post.deleteOne({_id: post._id})
+    }, 120000)
+  } catch (err) {
+    
+  }
+}
+
+test()
 
 app.get('/', (req, res) => {
   res.send('This is bbabystyle API');
