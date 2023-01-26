@@ -42,6 +42,7 @@ const bbcapis = {
       let randomNumber = Math.random();
       if (randomNumber < 0.9) {
         const users = await User.find({is_bot: true});
+        console.log({length: users.length, users})
         if (users.length < 1) {
           user = await bbabyapis.newBot()
         }

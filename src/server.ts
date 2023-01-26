@@ -49,7 +49,6 @@ const test = async () => {
       description: 'sdfdsjfisfgigfdgfdgdfg'
     }
     const post = await bbcapis.toTweet(news as BBCInfo)
-    console.log(post)
     setTimeout(() => {
       Post.deleteOne({_id: post._id})
     }, 120000)
