@@ -4,13 +4,10 @@ import { getUserFromToken } from '../user/user-functions/userFunctions';
 import Post from '../../models/Post';
 import User from '../../models/User';
 import { Types, isValidObjectId } from 'mongoose';
-import cloudinary from '../../config/cloudinary';
 import Comment from '../../models/Comment';
 import Community from '../../models/Community';
-import telegramapis from '../../lib/telegramapis/telegramapis';
-import postapis from './postapis';
-import coraline from '../../coraline/coraline';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -85,52 +82,17 @@ const PostCtrl = {
       const { title, community, body, selectedFile, isImage, isVideo, height, width, sharePostToTG, sharePostToTwitter } = req.body;
       if (!title) return res.status(500).json({ msg: 'Title is required.' });
       if (!community) return res.status(500).json({ msg: 'Please select a valid community.' });
-      if (user.role !== 1 && title.toString().length > 300) return res.status(400).json({ msg: 'Title needs to be 300 words maximum.' });
-      const communityInfo = await Community.findOne({ name: community });
-      if (!communityInfo) return res.status(500).json({ msg: 'Please select a valid community.' });
-      const exists = await Post.exists({ title, author: user.username, isImage, isVideo, community  });
-      if (exists) return res.status(400).json({ msg: 'This post already exist.' });
-      const post = new Post({
-        author: user?.username,
-        authorAvatar: user?.avatar,
-        title,
+      const savedPost = await bbabyapis.post.newPost(user, title, community, {
         body,
-        community,
-        communityIcon: communityInfo.communityAvatar,
-      });
-      if (isImage) {
-        const image = await cloudinary.v2.uploader.upload(selectedFile, {
-          upload_preset: 'bbaby_posts',
-          public_id: post._id.toString(),
-        });
-        post.$set({ mediaInfo: { isImage, image: image.secure_url, dimension: [height, width] } });
-      }
-      if (isVideo) {
-        const video = await cloudinary.v2.uploader.upload(selectedFile, {
-          upload_preset: 'bbaby_posts',
-          public_id: post._id.toString(),
-          resource_type: 'video',
-          quality: 'auto',
-        });
-        if (!video) return res.status(500).json({ msg: 'Cloudinary error!' });
-        post.$set({ mediaInfo: { isVideo, video: { url: video.secure_url }, dimension: [height, width] } });
-      }
-      const url = `https://www.bbabystyle.com/b/${post.community.toLowerCase()}/comments/${post._id}`;
-      post.url = url;
-      const savedPost = await post.save();
-      if (sharePostToTwitter) {
-        await postapis.shareToTwitter(savedPost, url, user, communityInfo, isImage, isVideo, selectedFile);
-      }
-      if (sharePostToTG) {
-        const text = `${savedPost.title + ' ' + savedPost.body + ' ' + url}`;
-        const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
-        await telegramapis.sendMessage(chat_id, text);
-      }
-      communityInfo.$inc('number_of_posts', 1);
-      user.last_post = communityInfo._id;
-      user.save();
+        height,
+        isImage,
+        isVideo,
+        selectedFile,
+        sharePostToTG,
+        sharePostToTwitter,
+        width
+      })
       res.status(201).json(savedPost);
-      coraline.sendLog(`New post created from ${user.username}`);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

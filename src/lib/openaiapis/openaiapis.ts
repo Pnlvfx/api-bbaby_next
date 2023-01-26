@@ -84,8 +84,8 @@ const openaiapis = {
         body: JSON.stringify({
           model: 'text-davinci-003',
           prompt,
-          temperature: 0.7,
-          max_tokens: 3000,
+          temperature: .5,
+          max_tokens: 300,
           top_p: 1.0,
           frequency_penalty: 0.0,
           presence_penalty: 0.0,
@@ -93,7 +93,7 @@ const openaiapis = {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(`Unable to syntethize text: ${res.statusText + ' ' + res.status}`);
-      return data.choices[0].text.replace('\n\n', '') as string;
+      return data.choices[0].text.trim().replace('\n\n', '') as string;
     } catch (err) {
       throw catchError(err);
     }

@@ -44,7 +44,6 @@ const getPexelsVideo = async (synthetize: string, output: string, min_duration: 
   try {
     const orientation = width >= 1920 ? 'landscape' : 'portrait';
     const pexelsVideos = await pexelsapi.getVideo(synthetize, { per_page: 80, orientation });
-    console.log({ pexelsVideo: pexelsVideos.length, min_duration });
     if (pexelsVideos.length === 0) throw new Error('pexels research return 00 videos');
     pexelsVideos.sort((a, b) => (
       b.duration - a.duration
@@ -118,7 +117,8 @@ const tiktokapis = {
       const backgroundVideo = await getPexelsVideo(tiktak.synthetize, backgroundPath, tiktak.duration, width, height);
       tiktak.background_video = coraline.media.getUrlFromPath(backgroundPath);
       const textArray = tiktokquora.splitText(tiktak.body, 150);
-      const bgColor = 'rgba(0,0,0,0';
+      const bgColor = 'rgba(0,0,0,0.25';
+      const textColor = coraline.colors.getDarkColor()
       let images: FFmpegImage[] = [];
       await Promise.all(
         textArray.map(async (text, index) => {
@@ -132,7 +132,7 @@ const tiktokapis = {
             const textData = await TextToImage.generate(text, {
               maxWidth: width,
               bgColor,
-              textColor: 'white',
+              textColor,
               fontFamily: 'Helvetica',
               customHeight: height,
               fontSize: 72,

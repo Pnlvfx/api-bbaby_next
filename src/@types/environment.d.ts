@@ -16,7 +16,6 @@ namespace NodeJS {
         MAILING_SERVICE_CLIENT_SECRET: string
         MAILING_SERVICE_REFRESH_TOKEN: string
         SENDER_EMAIL_ADDRESS: string
-        COOKIE_DOMAIN: string
         GOOGLE_SECRET: string
         ANON_ACCESS_TOKEN: string
         ANON_ACCESS_TOKEN_SECRET: string

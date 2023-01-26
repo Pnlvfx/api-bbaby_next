@@ -6,15 +6,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
-import bbabyapis from '../../lib/bbabyapis/bbabyapis';
-
-const { COOKIE_DOMAIN } = config;
 
 const oauthCtrl = {
   register: async (req: Request, res: Response) => {
     try {
       const { email, username, password } = req.body;
-      const user = await bbabyapis.newUser(email, username, password);
+      const user = await userapis.newUser(email, username, password);
       login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -64,24 +61,21 @@ const oauthCtrl = {
   },
   logout: async (req: Request, res: Response) => {
     try {
-      const { NODE_ENV } = config;
-      if (NODE_ENV === 'development') {
+      if (req?.headers?.origin?.startsWith('http://192.168')) {
         res
           .clearCookie('token', {
             httpOnly: true,
-          })
-          .send();
+          }).send();
       } else {
-        res
-          .clearCookie('token', {
+        const domain = userapis.getCookieDomain(config.CLIENT_URL)
+        res.clearCookie('token', {
             httpOnly: true,
-            domain: COOKIE_DOMAIN,
+            domain,
             secure: true,
-          })
-          .send();
+          }).send();
       }
     } catch (err) {
-      if (err instanceof Error) res.status(500).json({ msg: 'Cannot proceed to logout, please retry' });
+      catchErrorCtrl(err, res)
     }
   },
   googleLogin: async (req: Request, res: Response) => {
@@ -104,7 +98,7 @@ const oauthCtrl = {
         if (!match) return res.status(400).json({ msg: 'Password is incorrect.' });
         login(user._id.toString(), res);
       } else {
-        const {country, countryCode, city, region, lat, lon} = await userapis.getIP();
+        const { country, countryCode, city, region, lat, lon } = await userapis.getIP();
         const username = await name.replace(/\s/g, '');
         const _user = new User({
           username,
@@ -125,19 +119,19 @@ const oauthCtrl = {
       if (err instanceof Error) res.status(500).json({ msg: err.message });
     }
   },
-  eu_cookie: async (req: Request, res: Response) => {
+  saveEUCookie: async (req: Request, res: Response) => {
     try {
       if (!req.headers.origin) return res.status(400).json({ msg: 'API enabled only for valid client!' });
       const { eu_cookie } = req.cookies;
       if (eu_cookie) return res.status(200).json(null);
       const maxAge = 63072000000 / 2; // 1 year
       const cookieOptions: CookieOptions = {
-        maxAge, 
+        maxAge,
         httpOnly: true,
         sameSite: true,
       };
-      if (!req.headers.origin.includes('192.168.1.22')) {
-        cookieOptions.domain = COOKIE_DOMAIN;
+      if (!req?.headers?.origin?.startsWith('http://192.168')) {
+        cookieOptions.domain = userapis.getCookieDomain(config.CLIENT_URL)
         cookieOptions.secure = true;
       }
       const { status } = req.body;
@@ -147,5 +141,13 @@ const oauthCtrl = {
       catchErrorCtrl(err, res);
     }
   },
+  getEUCookie: async (req: Request, res: Response) => {
+    try {
+      const {eu_cookie} = req.cookies;
+      res.status(200).json(eu_cookie ? true : false)
+    } catch (err) {
+      catchErrorCtrl(err, res)
+    }
+  }
 };
 export default oauthCtrl;

@@ -1,10 +1,10 @@
-import { ExternalNews } from '../../../@types/external-news';
-import { apiconfig } from '../../../config/APIconfig';
-import { catchError } from '../../../coraline/cor-route/crlerror';
-import coraline from '../../../coraline/coraline';
-import BBC from '../../../models/BBC';
-import openaiapis from '../../openaiapis/openaiapis';
-import telegramapis from '../../telegramapis/telegramapis';
+import { ExternalNews } from '../../../../../@types/external-news';
+import { apiconfig } from '../../../../../config/APIconfig';
+import { catchError } from '../../../../../coraline/cor-route/crlerror';
+import coraline from '../../../../../coraline/coraline';
+import BBC from '../../../../../models/BBC';
+import openaiapis from '../../../../openaiapis/openaiapis';
+import telegramapis from '../../../../telegramapis/telegramapis';
 
 const bbabynews = {
   getShortestNews: async () => {

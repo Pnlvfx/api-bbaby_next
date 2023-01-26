@@ -5,20 +5,25 @@ import _oauth from '../../lib/twitter-oauth/twitter_oauth';
 import User from '../../models/User';
 import twitterapis from '../../lib/twitterapis/twitterapis';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import userapis from '../../lib/userapis/userapis';
 const COOKIE_NAME = 'oauth_token';
 let tokens: any = {};
 
 const TwitterCtrl = {
-    twitterReqToken: async (expressRequest: Request,res: Response) => {
+    twitterReqToken: async (userRequest: Request,res: Response) => {
         try {
+            const req = userRequest as UserRequest
+            if (!req.headers.origin) return res.status(400).json('You need to access this endpoint from a client!')
+            if (req.headers.origin.startsWith('http://192')) return res.status(400).json('Invalid origin, use https or localhost if you are in development');
             const {oauth_token, oauth_token_secret} = await twitterapis.oauth.getOAuthRequestToken();
             if (!oauth_token) return res.status(500).json({msg: 'Twitter error.'})
+            const domain = userapis.getCookieDomain(req.headers.origin)
             res.cookie(COOKIE_NAME, oauth_token, {
                 maxAge: 15 * 60 * 1000, // 15 minutes
                 secure: true,
                 httpOnly: true,
                 sameSite: true,
-                domain: config.COOKIE_DOMAIN
+                domain
             })
             tokens[oauth_token] = {oauth_token_secret}
             res.status(200).json({oauth_token})

@@ -60,6 +60,7 @@ export const getLinks = async () => {
     let links = await puppeteer.page.evaluate(() =>
       Array.from(document.querySelectorAll('a.media__link') as NodeListOf<HTMLAnchorElement>).map((link) => link.href),
     );
+    links = Array.from(new Set(links)); // remove duplicates
     const existing = await BBC.find({ original_link: links });
     const existingLinks = existing.map((_) => _.original_link);
     links = [...links].filter((link) => !existingLinks.includes(link));

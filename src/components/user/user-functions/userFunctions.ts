@@ -3,8 +3,9 @@ import jwt from 'jsonwebtoken';
 import config from '../../../config/config';
 import User from '../../../models/User';
 import { catchError } from '../../../coraline/cor-route/crlerror';
+import userapis from '../../../lib/userapis/userapis';
 
-const { SECRET, COOKIE_DOMAIN, ACTIVATION_TOKEN_SECRET, NODE_ENV } = config;
+const { SECRET, ACTIVATION_TOKEN_SECRET } = config;
 
 interface JwtPayload {
   id: string;
@@ -31,8 +32,9 @@ export const login = (id: string, res: Response) => {
     httpOnly: true,
     maxAge,
   };
-  if (NODE_ENV === 'production') {
-    cookieOptions.domain = COOKIE_DOMAIN;
+  if (config.CLIENT_URL.startsWith('http://192')) {
+    const domain = userapis.getCookieDomain(config.CLIENT_URL)
+    cookieOptions.domain = domain
     cookieOptions.secure = true;
   }
   res.cookie('token', token, cookieOptions).json({ msg: 'Successfully logged in!' });

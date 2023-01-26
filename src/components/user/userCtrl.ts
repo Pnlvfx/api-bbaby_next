@@ -5,11 +5,12 @@ import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../config/cloudinary';
 import coraline from '../../coraline/coraline';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import userapis from '../../lib/userapis/userapis';
 
 const userCtrl = {
   user: async (req: Request, res: Response) => {
     try {
-      const { token, eu_cookie } = req.cookies;
+      const { token } = req.cookies;
       const { useragent } = req;
       const mobile = useragent?.isMobile;
       if (!token)
@@ -18,7 +19,6 @@ const userCtrl = {
           device: {
             mobile,
           },
-          eu_cookie,
         });
       const user = await getUserFromToken(token);
       if (!user) {
@@ -27,7 +27,6 @@ const userCtrl = {
           device: {
             mobile,
           },
-          eu_cookie,
         });
       } else {
         res.status(200).json({
@@ -39,7 +38,6 @@ const userCtrl = {
           device: {
             mobile,
           },
-          eu_cookie,
         });
       }
     } catch (err) {
@@ -76,7 +74,7 @@ const userCtrl = {
       if (!_changeAvatar) return res.status(500).json({ msg: 'Something went wrong with this image, please try again or change image' });
       res.json({ success: 'Avatar updated successfully' });
     } catch (err) {
-      catchErrorCtrl(err, res)
+      catchErrorCtrl(err, res);
     }
   },
   forgotPassword: async (expressRequest: Request, res: Response) => {
@@ -91,12 +89,23 @@ const userCtrl = {
       const { token } = req.cookies;
       const user = token ? await getUserFromToken(token) : null;
       const { useragent } = req;
-      if (useragent?.isBot) {
-        coraline.sendLog(`New bot` + ' ' + 'Useragent:' + useragent?.source);
+      if (useragent?.isBot || useragent?.browser === 'unknown') {
+        //coraline.sendLog(`New bot ` + 'Useragent: ' + useragent?.source);
       } else {
-        coraline.sendLog(`New session: ${user?.username || ''}` + ' ' + 'Browser:' + useragent?.browser + ' ' + 'platform:' + ' ' + useragent?.platform + 'source:' + ' ' + useragent?.source);
+        const info = await userapis.getIP();
+        coraline.sendLog(
+          `New session: ${user?.username.toLowerCase() || 'unknown user'}` +
+            ', Country: ' +
+            info.country.toLowerCase() +
+            ', City: ' +
+            info.city.toLowerCase() +
+            ', Browser: ' +
+            useragent?.browser.toLowerCase() +
+            ', Platform: ' +
+            useragent?.platform.toLowerCase(),
+        );
       }
-      res.status(200).json('ok');
+      res.status(200).json(true);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
