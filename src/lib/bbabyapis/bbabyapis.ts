@@ -61,8 +61,8 @@ const bbabyapis = {
       const password = coraline.generateRandomId(10);
       const username = coraline.createPermalink(chance.name() + chance.year({min: 1964, max: 2000}))
       const user = await userapis.newUser(email, username, password);
-      user.$set({is_bot: true})
-      console.log(user, 'from bbabyapis.newBot')
+      user.is_bot = true
+      await user.save();
       return user;
     } catch (err) {
       throw catchError(err)
