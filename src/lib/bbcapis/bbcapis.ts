@@ -17,15 +17,15 @@ const bbcapis = {
       if (links.length !== 0) {
         const news = await getSomeNews(puppeteer.browser, links);
         await puppeteer.browser.close();
-        news.map((_, i) => {
-          setTimeout(async () => {
-            try {
-              await bbcapis.toTweet(_)
-            } catch (err) {
-              catchErrorWithTelegram(err)
-            }
-          }, i * 1 * 60 * 1000)
-        })
+        // news.map((_, i) => {
+        //   setTimeout(async () => {
+        //     try {
+        //       await bbcapis.toTweet(_)
+        //     } catch (err) {
+        //       catchErrorWithTelegram(err)
+        //     }
+        //   }, i * 1 * 60 * 1000)
+        // })
         await saveBBCnewstodb(news);
       }
       coraline.performanceEnd(start, 'BBC')
