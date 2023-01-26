@@ -53,7 +53,6 @@ const pexelsapi = {
             return;
           }
           if (res.statusCode !== 200) {
-            console.log(res.statusMessage, 'error', res.statusCode);
             res.resume();
             reject('Something went wrong when downloading a video from Pexels');
           }

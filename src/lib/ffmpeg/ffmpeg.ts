@@ -27,7 +27,6 @@ const ffmpeg = {
       });
 
       ffmpeg.on('close', (code) => {
-        console.log('ffmpeg video converted successfully to audio!', { code });
         return resolve(output as string);
       });
     });

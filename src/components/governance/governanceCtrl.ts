@@ -57,9 +57,6 @@ const governanceCtrl = {
       const audio_path = `${folder}/final.mp3`;
       audioconcat(audio)
         .concat(`${folder}/final.mp3`)
-        .on('start', (command: string) => {
-          console.log('ffmpeg process started:', command);
-        })
         .on('error', (err: string, stdout: string, stderr: string) => {
           return res.status(500).json(`${err}, ${stderr}, ${stdout}`);
         })
@@ -200,6 +197,7 @@ const governanceCtrl = {
             accessSecret: config.BBABYITALIA_ACCESS_TOKEN_SECRET,
           });
           const twimage = await twitterapis.uploadMedia(twitterUser, Buffer.from(newImage.filename));
+          coraline.sendLog('twimage saved');
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {
           await savedNews.delete()

@@ -85,7 +85,6 @@ const getPexelsVideo = async (synthetize: string, output: string, min_duration: 
 const tiktokapis = {
   createVideo: async (fileId: string, uniqueFileId: string) => {
     try {
-      console.log('tiktok started');
       const folder = coraline.use('lib/telegram');
       const video = await telegramapis.downloadFile(fileId, (ext) => {
         return `${folder}/${uniqueFileId}.${ext}`;
