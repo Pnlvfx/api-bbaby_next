@@ -58,16 +58,18 @@ const puppeteerapis = {
       page.setDefaultNavigationTimeout(150000);
       await page.goto(url);
       await page.waitForNetworkIdle();
-      page.on('console', async (msg) => {
-        try {
-          const msgArgs = msg.args();
-          for (let i = 0; i < msgArgs.length; ++i) {
-            console.log(await msgArgs[i].jsonValue());
+      if (process.env.NODE_ENV === 'development') {
+        page.on('console', async (msg) => {
+          try {
+            const msgArgs = msg.args();
+            for (let i = 0; i < msgArgs.length; ++i) {
+              console.log(await msgArgs[i].jsonValue());
+            }
+          } catch (err) {
+            console.log('Error when console.log on puppeteer');
           }
-        } catch (err) {
-          console.log('Error when console log on puppeteer');
-        }
-      });
+        });
+      }
       return page;
     } catch (err) {
       throw catchError(err);
@@ -100,7 +102,6 @@ const puppeteerapis = {
       const maxCPUUsage = os.cpus().length * 100 * 1000;
       const maxMem = os.totalmem();
       const startCPU = process.cpuUsage();
-      const startMem = process.memoryUsage();
       const startTime = Date.now();
 
       // call your custom function here
