@@ -161,10 +161,10 @@ const coraline = {
   generateRandomId: (max: number) => {
     return crypto.randomBytes(max / 2).toString('hex');
   },
-  sendLog: async (message: string) => {
+  sendLog: async (message: string, options?: SendMessageOptions) => {
     try {
       const logs_group_id = '-1001649395850';
-      await telegramapis.sendMessage(logs_group_id, message);
+      await telegramapis.sendMessage(logs_group_id, message, options);
     } catch (err) {
       throw catchError(err);
     }

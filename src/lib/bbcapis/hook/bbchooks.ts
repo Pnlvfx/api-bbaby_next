@@ -70,7 +70,7 @@ export const getLinks = async () => {
   }
 };
 
-export const getSomeNews = async (link: string) => {
+export const getNews = async (link: string) => {
   try {
     let news: BBCInfo
     try {

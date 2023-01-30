@@ -4,6 +4,7 @@ import { apiconfig } from '../../config/APIconfig';
 import { checkUpdateType } from '../../lib/telegramapis/hooks/telegramhooks';
 import coraline from '../../coraline/coraline';
 import tiktokapis from '../../lib/tiktokapis/tiktokapis';
+import bbcapis from '../../lib/bbcapis/bbcapis';
 
 const TTFullbotID = 420309635;
 const isTiktokUrl = (url: string) => {
@@ -30,10 +31,10 @@ const telegramCtrl = {
     try {
       const data = req.body as TelegramUpdate;
       const msg = data.message as TelegramMessage;
-      if (msg.chat.id !== apiconfig.telegram.my_chat_id) return;
       const check = checkUpdateType(data);
       if (conversationState.state > 0) {
       } else if (check === 'message') {
+        if (msg.chat.id !== apiconfig.telegram.my_chat_id) return;
         if (msg.text) {
           if (msg.text?.match('/start')) {
             await telegramapis.sendMessage(msg.chat.id, 'Hello');
@@ -59,7 +60,8 @@ const telegramCtrl = {
       } else {
         //when using a button
         const info = data.callback_query as TelegramCallbackQuery;
-        if (info.data === 'translate') {
+        if (info.data === 'post' && info.message.text) {
+         
         }
       }
       res.sendStatus(200);

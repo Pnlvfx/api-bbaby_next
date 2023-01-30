@@ -25,7 +25,7 @@ const openaiapis = {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Unable to translate text: ${res.statusText + ' ' + res.status}`);
+      if (!res.ok) throw new Error(data?.error.message);
       return data.choices[0].text.trimStart() as string;
     } catch (err) {
       throw catchError(err);
@@ -69,7 +69,7 @@ const openaiapis = {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Unable to syntethize text: ${res.statusText + ' ' + res.status}`);
+      if (!res.ok) throw new Error(data?.error.message);
       return data.choices[0].text.replace('\n\n', '') as string;
     } catch (err) {
       throw catchError(err);
@@ -92,7 +92,7 @@ const openaiapis = {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Unable to syntethize text: ${res.statusText + ' ' + res.status}`);
+      if (!res.ok) throw new Error(data?.error.message);
       return data.choices[0].text.trim().replace('\n\n', '') as string;
     } catch (err) {
       throw catchError(err);

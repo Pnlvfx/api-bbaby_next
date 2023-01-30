@@ -124,9 +124,9 @@ const governanceCtrl = {
       const to = lang.toString() === 'en' ? 'it' : 'en';
       let translation;
       try {
-        translation = await openaiapis.translate(text, lang.toString(), to);
-      } catch (err) {
         translation = await googleapis.translate(text, lang.toString(), to);
+      } catch (err) {
+        translation = await openaiapis.translate(text, lang.toString(), to);
       }
       res.status(200).json(translation);
     } catch (err) {

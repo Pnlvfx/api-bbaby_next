@@ -1,4 +1,4 @@
-import { getLinks, getSomeNews, saveBBCnewstodb } from './hook/bbchooks';
+import { getLinks, getNews, saveBBCnewstodb } from './hook/bbchooks';
 import coraline from '../../coraline/coraline';
 import { catchErrorWithTelegram } from '../../config/common';
 import openaiapis from '../openaiapis/openaiapis';
@@ -11,28 +11,25 @@ import { catchError } from '../../coraline/cor-route/crlerror';
 const bbcapis = {
   start: async () => {
     try {
-      console.log('BBC started');
       const { links } = await getLinks();
       let index = 0;
       if (links.length !== 0) {
         const interval = setInterval(async () => {
           try {
             if (index === links.length - 1) {
-              console.log('finished');
               clearInterval(interval);
             }
             const link = links[index];
-            const news = await getSomeNews(link);
+            const news = await getNews(link);
             await saveBBCnewstodb(news);
             index += 1
-            console.log('new news saved')
-            setTimeout(async () => {
-              try {
-                await bbcapis.toTweet(news);
-              } catch (err) {
-                catchErrorWithTelegram(err);
-              }
-            }, index * 20 * 60 * 1000);
+            // // setTimeout(async () => {
+            // //   try {
+            // //     await bbcapis.toPost(news);
+            // //   } catch (err) {
+            // //     catchErrorWithTelegram(err);
+            // //   }
+            // // }, index * 20 * 60 * 1000);
           } catch (err) {
             index += 1
             catchErrorWithTelegram(err);
@@ -44,13 +41,13 @@ const bbcapis = {
       catchErrorWithTelegram(err);
     }
   },
-  toTweet: async (news: BBCInfo) => {
+  toPost: async (news: BBCInfo) => {
     try {
       const question = await openaiapis.request(
         `Please explain in a tweet of maximum 300 words, this news, please respect the limit of 300 words or it will be invalid: ${news.title} \n\n ${news.description}`,
       );
       let user: IUser | null = null;
-      let randomNumber = Math.random();
+      const randomNumber = Math.random();
       if (randomNumber < 0.9) {
         const users = await User.find({ is_bot: true });
         if (users.length < 1) {
