@@ -23,13 +23,13 @@ const bbcapis = {
             const news = await getNews(link);
             await saveBBCnewstodb(news);
             index += 1
-            // // setTimeout(async () => {
-            // //   try {
-            // //     await bbcapis.toPost(news);
-            // //   } catch (err) {
-            // //     catchErrorWithTelegram(err);
-            // //   }
-            // // }, index * 20 * 60 * 1000);
+            setTimeout(async () => {
+              try {
+                await bbcapis.toPost(news);
+              } catch (err) {
+                catchErrorWithTelegram(err);
+              }
+            }, index * 20 * 60 * 1000);
           } catch (err) {
             index += 1
             catchErrorWithTelegram(err);

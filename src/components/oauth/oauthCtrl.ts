@@ -98,7 +98,8 @@ const oauthCtrl = {
         if (!match) return res.status(400).json({ msg: 'Password is incorrect.' });
         login(user._id.toString(), res);
       } else {
-        const { country, countryCode, city, region, lat, lon } = await userapis.getIP();
+        const clientIp = userapis.getIP(req)
+        const { country, countryCode, city, region, lat, lon } = await userapis.getIPinfo(clientIp);
         const username = await name.replace(/\s/g, '');
         const _user = new User({
           username,
@@ -116,7 +117,7 @@ const oauthCtrl = {
         login(_user._id.toString(), res);
       }
     } catch (err) {
-      if (err instanceof Error) res.status(500).json({ msg: err.message });
+      catchErrorCtrl(err, res)
     }
   },
   saveEUCookie: async (req: Request, res: Response) => {

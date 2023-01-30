@@ -92,7 +92,10 @@ const userCtrl = {
       if (useragent?.isBot || useragent?.browser === 'unknown') {
         //coraline.sendLog(`New bot ` + 'Useragent: ' + useragent?.source);
       } else {
-        const info = await userapis.getIP();
+        const xForwardedFor = req.headers['x-forwarded-for']
+        const clientIp = xForwardedFor && xForwardedFor.length > 0 ? xForwardedFor[0] : req.connection.remoteAddress;
+        if (!clientIp) return res.status(200)
+        const info = await userapis.getIPinfo(clientIp);
         coraline.sendLog(
           `New session: ${user?.username.toLowerCase() || 'unknown user'}` +
             ', Country: ' +
