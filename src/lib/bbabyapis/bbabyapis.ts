@@ -3,30 +3,27 @@ import config from '../../config/config';
 import { catchErrorWithTelegram } from '../../config/common';
 import bbcapis from '../bbcapis/bbcapis';
 import coraline from '../../coraline/coraline';
-import telegramapis from '../telegramapis/telegramapis';
 import bbabynews from './route/bbabynews/bbabypost/bbabynews';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import userapis from '../userapis/userapis';
 import bbabypost from './route/bbabypost/bbabypost';
 import { Chance } from 'chance';
-import BBC from '../../models/BBC';
-
-const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://290b-91-206-70-33.eu.ngrok.io';
 
 const bbabyapis = {
   initialize: async () => {
     try {
       const db = process.env.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle'; // local;
+      mongoose.set('strictQuery', true);
       await mongoose.connect(db);
+      //const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://290b-91-206-70-33.eu.ngrok.io';
       // await telegramapis.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
       // await telegramapis.setMyCommands([
       //   { command: 'start', description: 'Start the bot' },
       //   { command: 'quora', description: 'Quora' },
       // ]);
-      //const timeinterval = coraline.date.hourToms(1);
-      //setInterval(bbcapis.start, timeinterval);
-      await BBC.deleteMany({})
-      //await bbcapis.start()
+      const timeinterval = coraline.date.hourToms(1);
+      setInterval(bbcapis.start, timeinterval);
+      await bbcapis.start()
     } catch (err) {
       catchErrorWithTelegram(err);
     }

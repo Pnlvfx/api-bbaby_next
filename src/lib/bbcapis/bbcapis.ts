@@ -11,25 +11,34 @@ import { catchError } from '../../coraline/cor-route/crlerror';
 const bbcapis = {
   start: async () => {
     try {
-      const start = performance.now()
-      console.log('BBC started')
-      const { puppeteer, links } = await getLinks();
+      console.log('BBC started');
+      const { links } = await getLinks();
+      let index = 0;
       if (links.length !== 0) {
-        const news = await getSomeNews(puppeteer.browser, links);
-        await puppeteer.browser.close();
-        news.map((_, i) => {
-          setTimeout(async () => {
-            try {
-              await bbcapis.toTweet(_)
-            } catch (err) {
-              catchErrorWithTelegram(err)
+        const interval = setInterval(async () => {
+          try {
+            if (index === links.length - 1) {
+              console.log('finished');
+              clearInterval(interval);
             }
-          }, i * 1 * 60 * 1000)
-        })
-        await saveBBCnewstodb(news);
+            const link = links[index];
+            const news = await getSomeNews(link);
+            await saveBBCnewstodb(news);
+            index += 1
+            console.log('new news saved')
+            setTimeout(async () => {
+              try {
+                await bbcapis.toTweet(news);
+              } catch (err) {
+                catchErrorWithTelegram(err);
+              }
+            }, index * 20 * 60 * 1000);
+          } catch (err) {
+            index += 1
+            catchErrorWithTelegram(err);
+          }
+        }, 25000);
       }
-      coraline.performanceEnd(start, 'BBC')
-      //await bbabyapis.news.send();
       return true;
     } catch (err) {
       catchErrorWithTelegram(err);
@@ -37,32 +46,34 @@ const bbcapis = {
   },
   toTweet: async (news: BBCInfo) => {
     try {
-      const question = await openaiapis.request(`Please explain in a tweet of maximum 300 words, this news, please respect the limit of 300 words or it will be invalid: ${news.title} \n\n ${news.description}`)
-      let user: IUser | null = null
+      const question = await openaiapis.request(
+        `Please explain in a tweet of maximum 300 words, this news, please respect the limit of 300 words or it will be invalid: ${news.title} \n\n ${news.description}`,
+      );
+      let user: IUser | null = null;
       let randomNumber = Math.random();
       if (randomNumber < 0.9) {
-        const users = await User.find({is_bot: true});
+        const users = await User.find({ is_bot: true });
         if (users.length < 1) {
-          user = await bbabyapis.newBot()
+          user = await bbabyapis.newBot();
         } else {
-          user = users[coraline.getRandomInt(users.length -1)]
+          user = users[coraline.getRandomInt(users.length - 1)];
         }
       } else {
-        user = await bbabyapis.newBot()
+        user = await bbabyapis.newBot();
       }
-      const share = process.env.NODE_ENV === 'production' ? true : false
+      const share = process.env.NODE_ENV === 'production' ? true : false;
       const post = await bbabyapis.post.newPost(user, question, 'News', {
         sharePostToTG: share,
-        sharePostToTwitter: share
-      })
+        sharePostToTwitter: share,
+      });
       return post;
       //const req = `Please transform in italian this news: ${question}`
       // const translate = await openaiapis.request(req)
       // await bbabyapis.post.newPost(user, translate, 'News')
     } catch (err) {
-      throw catchError(err)
+      throw catchError(err);
     }
-  }
+  },
 };
 
 export default bbcapis;

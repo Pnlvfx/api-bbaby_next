@@ -96,7 +96,7 @@ const communityCtrl = {
       let communities = await Community.find({ name: user?.subscribed }).limit(_limit);
       const ids = Array.from(communities.map((_) => _.id))
       if (communities.length < _limit) {
-        const newCommunities = await Community.find({_id: {$ne: ids}}).limit(_limit - communities.length).sort({createdAt: -1})
+        const newCommunities = await Community.find({_id: {$nin: ids}}).limit(_limit - communities.length).sort({createdAt: -1})
         communities = communities.concat(newCommunities)
       }
       res.json(communities);
