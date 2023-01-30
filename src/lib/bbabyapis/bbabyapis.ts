@@ -21,9 +21,9 @@ const bbabyapis = {
       //   { command: 'start', description: 'Start the bot' },
       //   { command: 'quora', description: 'Quora' },
       // ]);
-      const timeinterval = coraline.date.hourToms(1);
-      setInterval(bbcapis.start, timeinterval);
-      await bbcapis.start()
+      //const timeinterval = coraline.date.hourToms(1);
+      //setInterval(bbcapis.start, timeinterval);
+      //await bbcapis.start()
     } catch (err) {
       catchErrorWithTelegram(err);
     }
