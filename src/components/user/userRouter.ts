@@ -6,7 +6,7 @@ const userRouter = Router()
 
 userRouter.get('/', userCtrl.user);
 
-userRouter.get('/analytics', userCtrl.analytics);
+//userRouter.get('/analytics', userCtrl.analytics);
 
 userRouter.use(auth);
 
