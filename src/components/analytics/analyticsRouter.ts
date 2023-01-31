@@ -1,5 +1,5 @@
-import { Router } from "express";
-import analyticsCtrl from "./analyticsCtrl";
+import { Router } from 'express';
+import analyticsCtrl from './analyticsCtrl';
 
 const analyticsRouter = Router();
 

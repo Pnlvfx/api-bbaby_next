@@ -4,6 +4,7 @@ import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import User from '../../models/User';
 import bcrypt from 'bcrypt';
+import { UserIpInfoProps } from './types';
 
 const userapis = {
   getIP: async () => {
@@ -21,12 +22,12 @@ const userapis = {
   },
   validateEmail: (email: string) => {
     const re =
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
   },
   newUser: async (email: string, username: string, password: string, IPinfo: UserIpInfoProps) => {
     try {
-      const { country, countryCode, city, region, lat, lon } = IPinfo
+      const { country, countryCode, city, region, lat, lon } = IPinfo;
       if (!username || !email || !password) throw new Error('Please fill in all fields!');
       if (!userapis.validateEmail(email)) throw new Error('Not a valid email address!');
       const existingEmail = await User.findOne({ email });
@@ -60,7 +61,7 @@ const userapis = {
   getCookieDomain: (url: string) => {
     const hostname = new URL(url).hostname;
     const domain = hostname.split('.').slice(-2).join('.');
-    if (domain === 'localhost') return domain
+    if (domain === 'localhost') return domain;
     return `.${domain}`;
   },
 };

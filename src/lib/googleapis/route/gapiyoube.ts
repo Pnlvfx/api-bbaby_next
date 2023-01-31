@@ -1,6 +1,5 @@
 import { youtube_v3 } from 'googleapis';
 import { catchError } from '../../../coraline/cor-route/crlerror';
-import coraline from '../../../coraline/coraline';
 import googleapis from '../googleapis';
 import config from '../../../config/config';
 
@@ -10,9 +9,9 @@ const gapiyoutube = {
       const base_url = `https://youtube.googleapis.com/youtube/v3/videos`;
       const query = `part=snippet&part=status&key=${config.YOUTUBE_CLIENT_ID}`;
       const url = `${base_url}?${query}`;
-      const youtubeFolder = coraline.use('youtube');
-      const videoFilePath = `${youtubeFolder}/video1.mp4`;
-      const thumbFilePath = `${youtubeFolder}/image0.webp`;
+      //const youtubeFolder = coraline.use('youtube');
+      // const videoFilePath = `${youtubeFolder}/video1.mp4`;
+      // const thumbFilePath = `${youtubeFolder}/image0.webp`;
       const credentials = await googleapis.OAuth2.checkTokenValidity();
       const headers = {
         Authorization: `Bearer ${credentials.access_token}`,

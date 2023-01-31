@@ -1,10 +1,10 @@
-import { Router } from 'express'
-import commentCtrl from './commentCtrl'
+import { Router } from 'express';
+import commentCtrl from './commentCtrl';
 
-const commentRouter = Router()
+const commentRouter = Router();
 
-commentRouter.post('/', commentCtrl.createComment)
+commentRouter.post('/', commentCtrl.createComment);
 
-commentRouter.get('/root/:rootId', commentCtrl.childComments)
+commentRouter.get('/root/:rootId', commentCtrl.childComments);
 
 export default commentRouter;

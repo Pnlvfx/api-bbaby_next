@@ -72,9 +72,9 @@ export const getLinks = async () => {
 
 export const getNews = async (link: string) => {
   try {
-    let news: BBCInfo
+    let news: BBCInfo;
     try {
-      const {browser, page} = await puppeteerapis.connect(link)
+      const { browser, page } = await puppeteerapis.connect(link);
       let info = await page.evaluate(() => {
         try {
           const article = document.body.querySelector('article');
@@ -108,7 +108,7 @@ export const getNews = async (link: string) => {
             (descr) => `${descr.innerText}\n\n`,
           );
           if (description.length < 1) description.push('Not found');
-          let date = (article.querySelector('time') as HTMLTimeElement | null)?.dateTime;
+          const date = (article.querySelector('time') as HTMLTimeElement | null)?.dateTime;
           return [
             {
               description: description.join(''),
@@ -117,10 +117,10 @@ export const getNews = async (link: string) => {
           ];
         }
       });
-      await browser.close()
+      await browser.close();
       if (typeof info === 'string') {
         console.log('still missed', info);
-        throw new Error('bbc news missed')
+        throw new Error('bbc news missed');
       } else {
         if (Array.isArray(info)) {
           const metadata = await bbabyapis.getLinkPreview(link);
@@ -133,11 +133,11 @@ export const getNews = async (link: string) => {
           };
         }
       }
-      news = info
+      news = info;
     } catch (err) {
       throw catchError(err);
     }
-    return news
+    return news;
   } catch (err) {
     throw catchError(err);
   }

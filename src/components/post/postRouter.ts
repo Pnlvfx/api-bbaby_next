@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import auth from '../../middleware/auth';
 import PostCtrl from './postCtrl';
 

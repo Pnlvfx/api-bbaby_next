@@ -1,5 +1,5 @@
-import { Schema, model } from "mongoose";
-import { NewsProps } from "../@types/news";
+import { Schema, model } from 'mongoose';
+import { NewsProps } from '../@types/news';
 
 const NewsSchema = new Schema<NewsProps>(
   {
@@ -8,26 +8,26 @@ const NewsSchema = new Schema<NewsProps>(
       required: true,
     },
     title: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     description: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     permalink: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     mediaInfo: {
-        type: Object
-    }
+      type: Object,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
-const News = model("News", NewsSchema);
+const News = model('News', NewsSchema);
 
 export default News;

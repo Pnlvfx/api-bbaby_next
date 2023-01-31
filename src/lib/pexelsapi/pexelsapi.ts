@@ -27,7 +27,7 @@ const pexelsapi = {
     try {
       let url = `https://api.pexels.com/videos/search?query=${text}`;
       if (options) {
-        const usedOptions = Object.entries(options).filter(([key, value]) => value !== undefined);
+        const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
         usedOptions.forEach(([key, value]) => {
           url += `&${key}=${value}`;
         });

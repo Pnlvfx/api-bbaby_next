@@ -92,12 +92,14 @@ const communityCtrl = {
       const { user } = req;
       const { limit } = req.query;
       if (!limit) return res.status(400).json({ msg: 'Please add a limit field into your query request.' });
-      const _limit = Number(limit.toString())
+      const _limit = Number(limit.toString());
       let communities = await Community.find({ name: user?.subscribed }).limit(_limit);
-      const ids = Array.from(communities.map((_) => _.id))
+      const ids = Array.from(communities.map((_) => _.id));
       if (communities.length < _limit) {
-        const newCommunities = await Community.find({_id: {$nin: ids}}).limit(_limit - communities.length).sort({createdAt: -1})
-        communities = communities.concat(newCommunities)
+        const newCommunities = await Community.find({ _id: { $nin: ids } })
+          .limit(_limit - communities.length)
+          .sort({ createdAt: -1 });
+        communities = communities.concat(newCommunities);
       }
       res.json(communities);
     } catch (err) {
@@ -122,9 +124,9 @@ const communityCtrl = {
           language,
           region,
         });
-        const sub = user.subscribed?.push(community.name);
+        user.subscribed?.push(community.name);
         await user.save();
-        const savedCommunity = await community.save();
+        await community.save();
         res.status(201).json({ msg: 'You have successfully created a new community' });
       }
     } catch (err) {
@@ -162,10 +164,10 @@ const communityCtrl = {
       const block = user.username === communityInfo?.communityAuthor ? true : false;
       if (block) return res.status(400).json({ msg: 'You cannot unsubscribe from your own communities!' });
       if (check) {
-        const unsubscribe = await User.findOneAndUpdate({ username: user.username }, { $pull: { subscribed: community } });
+        await User.findOneAndUpdate({ username: user.username }, { $pull: { subscribed: community } });
         communityInfo.subscribers -= 1;
       } else {
-        const subscribe = await User.findOneAndUpdate({ username: user.username }, { $push: { subscribed: community } });
+        await User.findOneAndUpdate({ username: user.username }, { $push: { subscribed: community } });
         communityInfo.subscribers += 1;
       }
       res.status(200).json(true);
@@ -184,7 +186,7 @@ const communityCtrl = {
       if (!check) {
         return res.status(500).json({ msg: 'You need to be a moderator to do this action!' });
       } else {
-        const update = await Community.findOneAndUpdate({ name }, { category });
+        await Community.findOneAndUpdate({ name }, { category });
         res.json(true);
       }
     } catch (err) {

@@ -84,7 +84,7 @@ const openaiapis = {
         body: JSON.stringify({
           model: 'text-davinci-003',
           prompt,
-          temperature: .5,
+          temperature: 0.5,
           max_tokens: 300,
           top_p: 1.0,
           frequency_penalty: 0.0,

@@ -17,10 +17,10 @@ const tiktakCtrl = {
       const { lang } = req.query;
       if (!lang) return res.status(400).json({ msg: 'Add the source language in your query url.' });
       const to = lang.toString() === 'en' ? 'it' : 'en';
-      const exist = await Tiktak.findOne({original_body: text});
+      const exist = await Tiktak.findOne({ original_body: text });
       if (exist) return res.status(200).json(exist);
       const permalink = `/governance/tiktak/${coraline.createPermalink(text)}`;
-      const exist2 = await Tiktak.findOne({permalink});
+      const exist2 = await Tiktak.findOne({ permalink });
       if (exist2) return res.status(200).json(exist2);
       let translation;
       try {
@@ -33,7 +33,7 @@ const tiktakCtrl = {
         original_body: text,
         body: translation,
         permalink,
-        magick_word: synthetize
+        magick_word: synthetize,
       });
       await tiktak.save();
       res.status(201).json(tiktak);
@@ -43,7 +43,6 @@ const tiktakCtrl = {
   },
   getTiktaks: async (userRequest: Request, res: Response) => {
     try {
-      const req = userRequest as UserRequest;
       const tiktaks = await Tiktak.find({}).sort({ createdAt: -1 }).limit(4);
       res.status(200).json(tiktaks);
     } catch (err) {
@@ -55,7 +54,7 @@ const tiktakCtrl = {
       const req = userRequest as UserRequest;
       const { permalink } = req.params;
       const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
-      if (!tiktak) return res.status(400).json({msg: "There is no a tiktak with this id!"});
+      if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
       res.status(200).json({ tiktak });
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -70,7 +69,7 @@ const tiktakCtrl = {
       const tiktak = await Tiktak.findOne({ permalink });
       if (!tiktak) return res.status(400).json({ msg: 'This tiktak does not exist!' });
       if (synthetize) {
-        tiktak.synthetize = synthetize
+        tiktak.synthetize = synthetize;
       }
       tiktak.body = text;
       await tiktak.save();

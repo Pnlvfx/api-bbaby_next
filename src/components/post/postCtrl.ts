@@ -31,7 +31,7 @@ const PostCtrl = {
       let posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       if (posts.length < _limit && !author && !communityName) {
         //home
-        filters = {}
+        filters = {};
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       }
       if (token) {
@@ -52,7 +52,7 @@ const PostCtrl = {
       const { id } = req.params;
       const check = isValidObjectId(id);
       if (!check) return res.status(400).json({ msg: 'This post not exists.' });
-      let post = await Post.findById(id);
+      const post = await Post.findById(id);
       if (!post) return res.status(400).json({ msg: 'This post not exists.' });
       if (token) {
         const user = await getUserFromToken(token);
@@ -63,6 +63,7 @@ const PostCtrl = {
         if (!userUpVoted) {
           const userDownVoted = await User.exists(votedDown);
           if (!userDownVoted) {
+            //
           } else {
             post.liked = false;
           }
@@ -90,8 +91,8 @@ const PostCtrl = {
         selectedFile,
         sharePostToTG,
         sharePostToTwitter,
-        width
-      })
+        width,
+      });
       res.status(201).json(savedPost);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -144,13 +145,12 @@ const PostCtrl = {
   deletePost: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;
-      const { user } = req;
       const { id } = req.params;
-      const post = await Post.findByIdAndDelete(id);
+      await Post.findByIdAndDelete(id);
       // if (post?.mediaInfo) {
       //     await cloudinary.v2.uploader.destroy(`posts/${post._id.toString()}`);
       // }
-      const childComments = await Comment.deleteMany({ rootId: id });
+      await Comment.deleteMany({ rootId: id });
       res.json(true);
     } catch (err) {
       res.status(500).json({ msg: 'Something went wrong' });

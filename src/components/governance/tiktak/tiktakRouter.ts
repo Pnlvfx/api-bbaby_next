@@ -1,5 +1,5 @@
-import { Router } from "express";
-import tiktakCtrl from "./tiktakCtrl";
+import { Router } from 'express';
+import tiktakCtrl from './tiktakCtrl';
 
 const tiktakRouter = Router();
 

@@ -1,1 +1,1 @@
-declare module 'audioconcat'
+declare module 'audioconcat';

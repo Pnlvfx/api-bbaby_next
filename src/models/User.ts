@@ -1,78 +1,79 @@
-import {Schema, model} from "mongoose";
-import { IUser } from "./types/user";
+import { Schema, model } from 'mongoose';
+import { IUser } from './types/user';
 
-const UserSchema = new Schema<IUser>({
+const UserSchema = new Schema<IUser>(
+  {
     email: {
-        type: String,
-        unique: true,
-        required: [true, "Please enter your email!"],
-        trim: true,
+      type: String,
+      unique: true,
+      required: [true, 'Please enter your email!'],
+      trim: true,
     },
     username: {
-        type: String,
-        unique: true,
-        required: [true, "can't be blank"],
-        trim: true
+      type: String,
+      unique: true,
+      required: [true, "can't be blank"],
+      trim: true,
     },
     password: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     role: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     avatar: {
-        type: String,
-        default: "https://res.cloudinary.com/bbabystyle/image/upload/v1655209740/default/avatar_txt7me.webp"
+      type: String,
+      default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1655209740/default/avatar_txt7me.webp',
     },
     country: {
-        type: String,
+      type: String,
     },
     countryCode: {
-        type: String,
+      type: String,
     },
     city: {
-        type: String,
+      type: String,
     },
     region: {
-        type: String,
+      type: String,
     },
     lat: {
-        type: String,
+      type: String,
     },
     lon: {
-        type: String,
+      type: String,
     },
     upVotes: {
-        type: [Schema.Types.ObjectId],
+      type: [Schema.Types.ObjectId],
     },
     downVotes: {
-        type: [Schema.Types.ObjectId],
+      type: [Schema.Types.ObjectId],
     },
     tokens: {
-        type: [
-            
-        ]
+      type: [],
     },
     hasExternalAccount: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     externalAccounts: {
-        type: []
+      type: [],
     },
     subscribed: {
-        type: [String],
-        default: null
+      type: [String],
+      default: null,
     },
     last_post: {
-        type: [Schema.Types.ObjectId]
+      type: [Schema.Types.ObjectId],
     },
-    is_bot: Boolean
-}, {
-    timestamps: true
-});
+    is_bot: Boolean,
+  },
+  {
+    timestamps: true,
+  },
+);
 const User = model('User', UserSchema);
 
 export default User;

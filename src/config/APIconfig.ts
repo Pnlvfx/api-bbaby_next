@@ -1,9 +1,5 @@
 export const apiconfig = {
-    telegram: {
-        my_chat_id: 420309635,
-    }
-
-}
-
-
-
+  telegram: {
+    my_chat_id: 420309635,
+  },
+};

@@ -12,9 +12,10 @@ const telegramapis = {
       let query = `chat_id=${chatId}&text=${text}`;
       if (options) {
         if (options.reply_markup) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           options.reply_markup = JSON.stringify(options.reply_markup) as any;
         }
-        const usedOptions = Object.entries(options).filter(([key, value]) => value !== undefined);
+        const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
         usedOptions.forEach(([key, value]) => {
           query += `&${key}=${value}`;
         });
@@ -37,9 +38,10 @@ const telegramapis = {
       form.append('chat_id', chatId);
       if (options) {
         if (options.reply_markup) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           options.reply_markup = JSON.stringify(options.reply_markup) as any;
         }
-        const usedOptions = Object.entries(options).filter(([key, value]) => value !== undefined);
+        const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
         usedOptions.forEach(([key, value]) => {
           form.append(key, value);
         });
@@ -60,9 +62,10 @@ const telegramapis = {
         data = `photo=${photo}&chat_id=${chatId}`;
         if (options) {
           if (options.reply_markup) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             options.reply_markup = JSON.stringify(options.reply_markup) as any;
           }
-          const usedOptions = Object.entries(options).filter(([key, value]) => value !== undefined);
+          const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
             data += `&${key}=${value}`;
           });
@@ -81,7 +84,9 @@ const telegramapis = {
         res.on('data', (chunk) => {
           resolve(JSON.parse(chunk) as SendPhotoResponse);
         });
-        res.on('end', () => {});
+        // res.on('end', () => {
+
+        // });
       });
       req.on('error', (error) => {
         rejects(`Error: ${error.message}`);

@@ -15,7 +15,7 @@ const coralineMedia = {
   videos: coralineVideos,
   getUrlFromPath: (folder: string) => {
     const extra_path = folder.split('/static/');
-    const url = `${process.env.SERVER_URL}/static/${extra_path[1]}`
+    const url = `${process.env.SERVER_URL}/static/${extra_path[1]}`;
     return url;
   },
   saveAudio: async (audio: string, output: string) => {
@@ -44,7 +44,7 @@ const coralineMedia = {
         if (res.statusCode === 302) {
           //redirect
           media_url = res.headers.location as string;
-          coraline.media.getMediaFromUrl(media_url, public_id, type)
+          coraline.media.getMediaFromUrl(media_url, public_id, type);
           return;
         }
         const format = res.headers['content-type']?.split('/')[1];
@@ -90,16 +90,16 @@ const coralineMedia = {
   },
   splitBySize: async (file: string, size: number) => {
     try {
-       const {buffer} = await fs.promises.readFile(file);
+      const { buffer } = await fs.promises.readFile(file);
 
-       for (let i = 0; i < buffer.byteLength; i += size) {
+      for (let i = 0; i < buffer.byteLength; i += size) {
         const chunk = buffer.slice(i, i + size);
         await fs.promises.writeFile(`${file}_part${i}.flac`, Buffer.from(chunk));
-       }
+      }
     } catch (err) {
       throw catchError(err);
     }
-  }
+  },
 };
 
 export default coralineMedia;

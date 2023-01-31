@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 interface VideoOptions {
   fps?: string | number;
   transition?: boolean;
@@ -12,12 +13,12 @@ interface VideoOptions {
 }
 
 interface FFmpegImage {
-  path: string
-  loop: number
+  path: string;
+  loop: number;
 }
 
-interface FFmpegCaption { 
-  text: string 
-  start: number
-  duration: number 
+interface FFmpegCaption {
+  text: string;
+  start: number;
+  duration: number;
 }

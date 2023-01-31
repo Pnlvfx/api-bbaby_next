@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 interface BotCommands {
   command: string;
   description: string;
@@ -5,7 +6,7 @@ interface BotCommands {
 
 interface ReplyMarkup {
   inline_keyboard?: InlineKeyboard[][];
-  force_reply?: boolean
+  force_reply?: boolean;
 }
 
 interface SendPhotoOptions {
@@ -23,19 +24,18 @@ interface InlineKeyboard {
   callback_data: string;
 }
 
-
 interface SendMessageOptions {
-  reply_to_message_id?: string | number
-  reply_markup?: ReplyMarkup
+  reply_to_message_id?: string | number;
+  reply_markup?: ReplyMarkup;
 }
 
 interface SendPhotoResponse {
-  ok: boolean
+  ok: boolean;
   result: {
-    message_id: number
-    from: TelegramMessageFrom
-    chat: TelegramMessageChat
-    date: number
-    photo: TelegramMessageMediaInfo[]
-  }
+    message_id: number;
+    from: TelegramMessageFrom;
+    chat: TelegramMessageChat;
+    date: number;
+    photo: TelegramMessageMediaInfo[];
+  };
 }

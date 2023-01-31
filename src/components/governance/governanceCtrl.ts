@@ -35,9 +35,9 @@ const governanceCtrl = {
       if (!news) return res.status(400).json({ msg: 'Invalid request, this article does not exist.' });
       description.reverse().push(news.title);
       description.reverse();
-      let images: string[] = [];
-      let localImages: any = [];
-      let audio: string[] = [];
+      const images: string[] = [];
+      const localImages: FFmpegImage[] = [];
+      const audio: string[] = [];
       const { width, height } = news.mediaInfo;
       const folder = coraline.useStatic('youtube');
       await Promise.all(
@@ -60,7 +60,7 @@ const governanceCtrl = {
         .on('error', (err: string, stdout: string, stderr: string) => {
           return res.status(500).json(`${err}, ${stderr}, ${stdout}`);
         })
-        .on('end', (output: string) => {
+        .on('end', () => {
           const audio_url = coraline.media.getUrlFromPath(audio_path);
           res.json({
             title: news.title,
@@ -106,7 +106,7 @@ const governanceCtrl = {
         .on('error', function (err: string, stdout: string, stderr: string) {
           return res.status(500).json({ msg: `Some error occured ${err ? err : stdout ? stdout : stderr}` });
         })
-        .on('end', (output: string) => {
+        .on('end', () => {
           const url = coraline.media.getUrlFromPath(videoPath);
           return res.status(201).json({ msg: 'Video created successfully', video: url });
         });
@@ -200,7 +200,7 @@ const governanceCtrl = {
           coraline.sendLog('twimage saved');
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {
-          await savedNews.delete()
+          await savedNews.delete();
           throw catchError(err);
         }
       }

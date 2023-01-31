@@ -22,7 +22,7 @@ const bbcapis = {
             const link = links[index];
             const news = await getNews(link);
             await saveBBCnewstodb(news);
-            index += 1
+            index += 1;
             // setTimeout(async () => {
             //   try {
             //     await bbcapis.toPost(news);
@@ -31,7 +31,7 @@ const bbcapis = {
             //   }
             // }, index * 20 * 60 * 1000);
           } catch (err) {
-            index += 1
+            index += 1;
             catchErrorWithTelegram(err);
           }
         }, 25000);

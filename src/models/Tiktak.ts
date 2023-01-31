@@ -1,46 +1,49 @@
-import {Schema, model} from "mongoose";
-import { TiktakProps } from "./types/tiktak";
+import { Schema, model } from 'mongoose';
+import { TiktakProps } from './types/tiktak';
 
-const TiktakSchema = new Schema<TiktakProps>({
+const TiktakSchema = new Schema<TiktakProps>(
+  {
     original_body: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     body: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     permalink: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     audio: {
-        type: String
+      type: String,
     },
     duration: {
-        type: Number
+      type: Number,
     },
     background_video: {
-        type: String
+      type: String,
     },
-    images: [{
+    images: [
+      {
         path: String,
-        loop: Number
-    }],
+        loop: Number,
+      },
+    ],
     audios: [String],
     video: {
-        type: String
+      type: String,
     },
     synthetize: {
-        type: String,
-    }
-},
-{
-    timestamps: true
-}
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  },
 );
 const Tiktak = model('Tiktak', TiktakSchema);
 

@@ -1,7 +1,7 @@
 const tiktokquora = {
   splitText: (text: string, max: number) => {
     const textArray = text.split(' ');
-    let parts = [];
+    const parts = [];
     let part = '';
     for (let i = 0; i < textArray.length; i++) {
       if (part.length + textArray[i].length + 1 <= max) {

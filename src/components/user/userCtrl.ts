@@ -3,9 +3,7 @@ import type { UserRequest } from '../../@types/express';
 import User from '../../models/User';
 import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../config/cloudinary';
-import coraline from '../../coraline/coraline';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
-import userapis from '../../lib/userapis/userapis';
 
 const userCtrl = {
   user: async (req: Request, res: Response) => {
@@ -79,7 +77,7 @@ const userCtrl = {
   },
   forgotPassword: async (expressRequest: Request, res: Response) => {
     try {
-      const req = expressRequest as UserRequest;
+      console.log('ok');
     } catch (err) {
       if (err instanceof Error) res.status(500).json({ msg: err.message });
     }

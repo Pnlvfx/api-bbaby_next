@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 interface PostOptions {
   body?: string;
   selectedFile?: string;

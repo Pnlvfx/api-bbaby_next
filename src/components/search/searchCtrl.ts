@@ -18,11 +18,11 @@ const searchCtrl = {
   searchTrend: async (req: Request, res: Response) => {
     try {
       const startOfDay = coraline.date.startOfDay(new Date());
-      const endOfDay = coraline.date.endOfDay(new Date())
+      const endOfDay = coraline.date.endOfDay(new Date());
       const posts = await Post.find({ createdAt: { $gte: startOfDay, $lt: endOfDay } }).sort({ ups: -1 });
       res.json(posts);
     } catch (err) {
-      catchErrorCtrl(err, res)
+      catchErrorCtrl(err, res);
     }
   },
 };

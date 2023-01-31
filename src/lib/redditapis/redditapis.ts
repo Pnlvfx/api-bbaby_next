@@ -19,13 +19,13 @@ const redditapis = {
       const expiration = coraline.addHours(1, date);
       redditTokens.access_token = body.access_token;
       redditTokens.access_token_expiration = expiration;
-      return body.access_token as string
+      return body.access_token as string;
     } catch (err) {
       throw catchError(err);
     }
   },
   getPostsWithToken: async (access_token: string, after?: string, count?: string) => {
-    return new Promise(async (resolve, reject) => {
+    try {
       const url = `https://oauth.reddit.com/best?sr_detail=true`;
       const query = after ? `after=${after}&count=${count}` : null;
       const finalUrl = query ? `${url}&${query}` : url;
@@ -33,10 +33,12 @@ const redditapis = {
         method: 'GET',
         headers: { authorization: `bearer ${access_token}`, 'User-Agent': USER_AGENT },
       });
-      if (!response.ok) return reject(response.status + response.statusText);
-      const posts = await response.json() as RedditResponse
-      resolve(posts);
-    });
+      if (!response.ok) throw new Error(response.status + response.statusText);
+      const posts = (await response.json()) as RedditResponse;
+      return posts;
+    } catch (err) {
+      throw catchError(err);
+    }
   },
   getPostsFromCommunity: async (community: string) => {
     try {
@@ -44,10 +46,10 @@ const redditapis = {
         method: 'get',
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.message)
-      return data as RedditResponse
+      if (!res.ok) throw new Error(data?.message);
+      return data as RedditResponse;
     } catch (err) {
-      throw catchError(err)
+      throw catchError(err);
     }
   },
   getPosts: async () => {
@@ -56,9 +58,9 @@ const redditapis = {
         method: 'get',
       });
       const data = await res.json();
-      return data as RedditResponse
+      return data as RedditResponse;
     } catch (err) {
-      throw catchError(err)
+      throw catchError(err);
     }
   },
 };

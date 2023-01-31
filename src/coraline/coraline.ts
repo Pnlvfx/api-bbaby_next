@@ -12,7 +12,7 @@ import { catchError, catchErrorCtrl } from './cor-route/crlerror';
 
 const coraline = {
   stringify: (data: unknown) => {
-    if (typeof data === "string") {
+    if (typeof data === 'string') {
       return data;
     }
     return JSON.stringify(data);
@@ -22,7 +22,7 @@ const coraline = {
     date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
     return date;
   },
-  arrayMove: (arr: any[], fromIndex: number, toIndex: number) => {
+  arrayMove: (arr: [], fromIndex: number, toIndex: number) => {
     const element = arr[fromIndex];
     arr.splice(fromIndex, 1);
     arr.splice(toIndex, 0, element);
@@ -30,18 +30,17 @@ const coraline = {
   getRandomInt: (max: number) => {
     return Math.floor(Math.random() * max);
   },
-  validateEmail: (email: string) => {
-    const res =
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return res.test(email);
-  },
-  getUniqueArray: (arr: any[], key: string) => {
+  getUniqueArray: (arr: [], key: string) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
   },
   createPermalink: (text: string) => {
     let permalink = text.trim().replace(/ /g, '_');
-    permalink = permalink.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().substring(0, 50).trimEnd();
-    return permalink
+    permalink = permalink
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      .toLowerCase()
+      .substring(0, 50)
+      .trimEnd();
+    return permalink;
   },
   use: (document: string) => {
     const isStatic = document.match('images') ? true : document.match('videos') ? true : false;
@@ -57,7 +56,7 @@ const coraline = {
     }
   },
   useStatic: (document?: string) => {
-    const extra_path = document ? path.join('static', document) : 'static'
+    const extra_path = document ? path.join('static', document) : 'static';
     const isAbsolute = path.isAbsolute(extra_path);
     const folder = isAbsolute ? path.join(coraline_path, projectName, extra_path) : path.resolve(coraline_path, projectName, extra_path);
     const exist = fs.existsSync(folder);
@@ -67,7 +66,7 @@ const coraline = {
       return coralinemkDir(folder);
     }
   },
-  saveFile: async (filename: string, file: any) => {
+  saveFile: async (filename: string, file: unknown) => {
     try {
       const string = coraline.stringify(file);
       await fsPromises.writeFile(filename, string);
@@ -101,7 +100,7 @@ const coraline = {
     return JSON.parse(find.toString());
   },
   isUrl: (text: string) => {
-    var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    const urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
     return text.match(urlRegex) ? true : false;
   },
   deleteFile: async (filename: string) => {

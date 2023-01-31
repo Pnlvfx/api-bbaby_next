@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 interface RedditResponse {
   kind: string;
   data: {
@@ -50,13 +51,13 @@ interface RedditPostsProps {
 }
 
 type PreviewImagesProps = {
-    id?: string
-    source: {
-      height: number
-      url: string
-      width: number
-    }
-  }
+  id?: string;
+  source: {
+    height: number;
+    url: string;
+    width: number;
+  };
+};
 
 type RedditMediaProps = {
   reddit_video: {

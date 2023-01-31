@@ -31,7 +31,7 @@ const redditCtrl = {
       });
       if (!response.ok)
         return res.status(500).json({ msg: 'For some reason reddit have refused your credentials. Please try to contact reddit support.' });
-      let body = await response.json();
+      const body = await response.json();
       const access_token_expiration = coraline.addHours(1);
       const saveToken = await User.findOneAndUpdate(
         { username: user.username },
@@ -42,8 +42,8 @@ const redditCtrl = {
         method: 'GET',
         headers: { authorization: `bearer ${body.access_token}`, 'User-Agent': USER_AGENT },
       });
-      let redditUser = await response.json();
-      const { verified, name, icon_img } = redditUser;
+      const redditUser = await response.json();
+      const { verified, name } = redditUser;
       if (!verified) return res.status(400).json({ msg: 'You need to verify your Reddit account to continue!' });
       const updateUser = await User.findOneAndUpdate(
         { username: user.username },
@@ -75,11 +75,12 @@ const redditCtrl = {
       const { user } = req;
       const { after, count } = req.query;
       const redditTokens = user?.tokens?.find((provider) => provider.provider === 'reddit');
-      if (!redditTokens?.access_token_expiration || !redditTokens.access_token) return res.status(500).json({ msg: 'You are not authorized to see this content.' });
+      if (!redditTokens?.access_token_expiration || !redditTokens.access_token)
+        return res.status(500).json({ msg: 'You are not authorized to see this content.' });
       const registrationDate = new Date(redditTokens.access_token_expiration);
       const now = new Date();
       if (now >= registrationDate) {
-        const token = await redditapis.getNewToken(redditTokens);
+        await redditapis.getNewToken(redditTokens);
       }
       const posts = await redditapis.getPostsWithToken(redditTokens.access_token, after?.toString(), count?.toString());
       res.status(200).json(posts);

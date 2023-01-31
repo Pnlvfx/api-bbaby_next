@@ -78,11 +78,11 @@ const puppeteerapis = {
   scrollToEnd: async (page: Page) => {
     try {
       await page.evaluate(async () => {
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
           let totalHeight = 0;
           const distance = 100;
-          var timer = setInterval(() => {
-            var scrollHeight = document.body.scrollHeight;
+          const timer = setInterval(() => {
+            const scrollHeight = document.body.scrollHeight;
             window.scrollBy(0, distance);
             totalHeight += distance;
 
@@ -97,7 +97,7 @@ const puppeteerapis = {
       throw catchError(err);
     }
   },
-  performanceWrapper: async (callback: () => Promise<any>) => {
+  performanceWrapper: async (callback: () => Promise<unknown>) => {
     try {
       const maxCPUUsage = os.cpus().length * 100 * 1000;
       const maxMem = os.totalmem();

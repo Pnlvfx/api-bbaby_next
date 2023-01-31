@@ -17,7 +17,7 @@ const youtubeCtrl = {
       const { origin } = req.headers;
       const redirect_uri = `${origin}/governance`;
       if (!code) return res.status(400).json({ msg: 'No code find in your query.' });
-      await googleapis.OAuth2.getAccessToken('authorization_code', code.toString(), redirect_uri );
+      await googleapis.OAuth2.getAccessToken('authorization_code', code.toString(), redirect_uri);
       res.status(200).json({ msg: 'Token stored successfully' });
     } catch (err) {
       catchErrorCtrl(err, res);

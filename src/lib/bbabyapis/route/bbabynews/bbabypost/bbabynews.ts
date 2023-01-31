@@ -28,7 +28,7 @@ const bbabynews = {
         await telegramapis.sendMessage(apiconfig.telegram.my_chat_id, 'No news to get!');
         return;
       } else {
-        let short = filter.sort((a, b) => a.description.length - b.description.length)[0];
+        const short = filter.sort((a, b) => a.description.length - b.description.length)[0];
         return short;
       }
     } catch (err) {
@@ -45,12 +45,16 @@ const bbabynews = {
       const tgPhoto = await telegramapis.sendPhoto(apiconfig.telegram.my_chat_id, short.image, {
         protect_content: true,
       });
-      const message = await telegramapis.sendMessage(apiconfig.telegram.my_chat_id, text, {
+      await telegramapis.sendMessage(apiconfig.telegram.my_chat_id, text, {
         reply_to_message_id: tgPhoto.result.message_id,
-        reply_markup: {inline_keyboard: [[
-          {text: 'Edit', callback_data: 'edit'},
-          {text: 'Create', callback_data: 'create'}
-        ]]}
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: 'Edit', callback_data: 'edit' },
+              { text: 'Create', callback_data: 'create' },
+            ],
+          ],
+        },
       });
       short.notified = true;
       await short.save();

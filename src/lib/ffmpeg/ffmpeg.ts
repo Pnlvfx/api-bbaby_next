@@ -14,7 +14,7 @@ const ffmpeg = {
         output = `${folder}/${coraline.generateRandomId(10)}.mp3`;
       }
       const ffmpeg = spawn('ffmpeg', ['-i', video, output]);
-      ffmpeg.stdout.on('data', (data) => {
+      ffmpeg.stdout.on('data', () => {
         //
       });
 
@@ -22,11 +22,11 @@ const ffmpeg = {
         return rejects(`ffmpeg: ${err}`);
       });
 
-      ffmpeg.stderr.on('data', (data) => {
+      ffmpeg.stderr.on('data', () => {
         console.log('ffmpeg converting');
       });
 
-      ffmpeg.on('close', (code) => {
+      ffmpeg.on('close', () => {
         return resolve(output as string);
       });
     });
@@ -36,14 +36,14 @@ const ffmpeg = {
       const full_duration = await ffmpeg.getDuration(audio);
       const segments = Math.floor(full_duration / Number(duration));
       const outputDir = path.dirname(audio);
-      let outputs = [];
+      const outputs = [];
       let startTime = 0;
       for (let i = 1; i <= segments; i++) {
         const outputFile = `${outputDir}/output${i}.flac`;
         const ffmpeg = spawn('ffmpeg', ['-y', '-i', audio, '-ss', startTime.toString(), '-t', duration.toString(), outputFile]);
         startTime += Number(duration);
 
-        ffmpeg.stderr.on('data', (data) => {
+        ffmpeg.stderr.on('data', () => {
           //
         });
         outputs.push(
@@ -127,11 +127,12 @@ const ffmpeg = {
 
       ffmpeg.on('close', (code) => {
         if (code === 0) resolve(output);
+        reject('Error when trying to convert this image!');
       });
     });
   },
   textToVideo: (captions: FFmpegCaption[], background: string, audio: string, output: string) => {
-    let filters = captions.map((caption) => {
+    const filters = captions.map((caption) => {
       return `drawtext=fontfile=Arial.ttf:text='${caption.text}':fontcolor=white:fontsize=72: x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,${
         caption.start
       },${caption.start + caption.duration})':line_spacing=20:box=1:boxcolor=black@0.5:boxborderw=5`;
@@ -151,13 +152,13 @@ const ffmpeg = {
   },
   overlayImageToVideo: (images: FFmpegImage[], video: string, audio: string, output: string, duration: number) => {
     return new Promise((resolve, reject) => {
-      let args = ['-y', '-i', video];
+      const args = ['-y', '-i', video];
       for (let i = 0; i < images.length; i++) {
         args.push('-i', images[i].path);
       }
       args.push('-i', audio);
       args.push('-filter_complex');
-      let filtergraph = [];
+      const filtergraph = [];
       let start_time = 0;
       for (let i = 0; i < images.length; i++) {
         if (i === 0) {
@@ -228,6 +229,7 @@ const ffmpeg = {
 
       ffmpeg.on('close', (code) => {
         if (code === 0) resolve(output);
+        reject('Error when trying to concatenate this videos!');
       });
     });
   },

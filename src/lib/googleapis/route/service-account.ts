@@ -53,7 +53,10 @@ const requestNew = async (type: TokenType) => {
     const access_token = `${access_token_folder}/${type}_token.json`;
     await coraline.saveFile(access_token, data);
     //delete after 1 hour
-    coraline.runAtSpecificTime(1, 0, async () => {
+    coraline.runAtSpecificTime(
+      1,
+      0,
+      async () => {
         await coraline.deleteFile(access_token);
       },
       false,

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { limiter } from '../../config/common';
 import searchCtrl from './searchCtrl';
 
-const searchRouter = Router()
+const searchRouter = Router();
 
 searchRouter.get('/', searchCtrl.search);
 

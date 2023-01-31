@@ -1,8 +1,8 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import auth from '../../middleware/auth';
 import userCtrl from './userCtrl';
 
-const userRouter = Router()
+const userRouter = Router();
 
 userRouter.get('/', userCtrl.user);
 

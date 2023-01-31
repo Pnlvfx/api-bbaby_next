@@ -1,5 +1,5 @@
-import { Router } from "express";
-import telegramCtrl from "./telegramCtrl";
+import { Router } from 'express';
+import telegramCtrl from './telegramCtrl';
 
 const telegramRouter = Router();
 

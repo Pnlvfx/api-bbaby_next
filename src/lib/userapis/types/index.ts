@@ -1,17 +1,17 @@
-interface UserIpInfoProps {
-    businessName: string;
-    businessWebsite: string;
-    city: string;
-    continent: string;
-    country: string;
-    countryCode: string;
-    ipName: string;
-    ipType: string;
-    isp: string;
-    lat: string;
-    lon: string;
-    org: string;
-    query: string;
-    region: string;
-    status: string;
+export interface UserIpInfoProps {
+  businessName: string;
+  businessWebsite: string;
+  city: string;
+  continent: string;
+  country: string;
+  countryCode: string;
+  ipName: string;
+  ipType: string;
+  isp: string;
+  lat: string;
+  lon: string;
+  org: string;
+  query: string;
+  region: string;
+  status: string;
 }

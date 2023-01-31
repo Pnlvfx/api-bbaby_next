@@ -1,10 +1,10 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import { limiter } from '../../config/common';
 import governanceCtrl from './governanceCtrl';
 import youtubeRouter from './youtube/youtubeRouter';
 import tiktakRouter from './tiktak/tiktakRouter';
 
-const governanceRouter = Router()
+const governanceRouter = Router();
 
 governanceRouter.use('/youtube', youtubeRouter);
 

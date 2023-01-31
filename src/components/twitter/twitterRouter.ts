@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import { limiter } from '../../config/common';
 import TwitterCtrl from './twitterCtrl';
 

@@ -33,8 +33,8 @@ export const login = (id: string, res: Response) => {
     maxAge,
   };
   if (!config.CLIENT_URL.startsWith('http://192')) {
-    const domain = userapis.getCookieDomain(config.CLIENT_URL)
-    cookieOptions.domain = domain
+    const domain = userapis.getCookieDomain(config.CLIENT_URL);
+    cookieOptions.domain = domain;
     cookieOptions.secure = true;
   }
   res.cookie('token', token, cookieOptions).json({ msg: 'Successfully logged in!' });

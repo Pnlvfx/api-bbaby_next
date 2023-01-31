@@ -1,3 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+interface TelegramUpdate {
+  update_id: number;
+  message?: TelegramMessage;
+  callback_query?: TelegramCallbackQuery;
+}
+
 type TelegramMessageFrom = {
   id: number;
   is_bot: false;
@@ -24,13 +31,13 @@ type TelegramMessageChat = {
 interface TelegramMessage {
   message_id: number;
   from: TelegramMessageFrom;
-  chat: TelegramMessageChat
+  chat: TelegramMessageChat;
   date: number;
   text?: string;
   photo?: TelegramMessageMediaInfo[];
-  caption?: string
-  reply_markup?: ReplyMarkup
-  has_protected_content?: boolean
+  caption?: string;
+  reply_markup?: ReplyMarkup;
+  has_protected_content?: boolean;
   video?: {
     duration: number;
     width: number;
@@ -44,16 +51,10 @@ interface TelegramMessage {
   };
 }
 
-interface TelegramUpdate {
-  update_id: number;
-  message?: TelegramMessage;
-  callback_query?: TelegramCallbackQuery;
-}
-
 interface TelegramCallbackQuery {
   id: string;
   from: TelegramMessageFrom;
-  message: TelegramMessage
-  chat_instance: string
-  data: string
+  message: TelegramMessage;
+  chat_instance: string;
+  data: string;
 }

@@ -35,8 +35,8 @@ const gapisspeechtotext = async (file: string) => {
             body,
           });
           const data = (await res.json()) as SpeechToTextResponse;
-          if (!res.ok) throw new Error(data.error?.message)
-          let text: string[] = [];
+          if (!res.ok) throw new Error(data.error?.message);
+          const text: string[] = [];
           data.results.map((_) => {
             _.alternatives.map((__) => {
               text.push(__.transcript);

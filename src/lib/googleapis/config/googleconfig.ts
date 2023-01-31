@@ -1,4 +1,4 @@
-import { GoogleCredentials } from "../types/credentials";
+import { GoogleCredentials } from '../types/credentials';
 
 export const getGoogleHeader = (credentials: GoogleCredentials) => {
   return {

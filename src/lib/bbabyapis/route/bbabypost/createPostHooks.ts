@@ -1,34 +1,32 @@
-import { PostProps } from "../../../../@types/post";
-import { IUser } from "../../../../models/types/user";
+import { PostProps } from '../../../../@types/post';
+import { IUser } from '../../../../models/types/user';
 import config from '../../../../config/config';
-import { TwitterApi } from "twitter-api-v2";
-import { catchError } from "../../../../coraline/cor-route/crlerror";
-import { CommunityProps } from "../../../../@types/community";
-import coraline from "../../../../coraline/coraline";
-import twitterapis from "../../../twitterapis/twitterapis";
+import { TwitterApi } from 'twitter-api-v2';
+import { catchError } from '../../../../coraline/cor-route/crlerror';
+import { CommunityProps } from '../../../../@types/community';
+import coraline from '../../../../coraline/coraline';
+import twitterapis from '../../../twitterapis/twitterapis';
 
 const chooseUser = (user: IUser, post: PostProps, language: 'it' | 'en') => {
   try {
-    const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
-    if (!twitter) throw new Error('You need to authorize the twitter API in the User Settings page.');
-    const { oauth_access_token, oauth_access_token_secret } = twitter;
-    const accessToken =
-      user.role === 0
-        ? oauth_access_token
-        : post.community === 'Italy'
-        ? config.ANON_ACCESS_TOKEN
-        : language === 'it'
-        ? config.BBABYITALIA_ACCESS_TOKEN
-        : config.BBABY_ACCESS_TOKEN;
-    const accessSecret =
-      user.role === 0
-        ? oauth_access_token_secret
-        : post.community === 'Italy'
-        ? config.ANON_ACCESS_TOKEN_SECRET
-        : language === 'it'
-        ? config.BBABYITALIA_ACCESS_TOKEN_SECRET
-        : config.BBABY_ACCESS_TOKEN_SECRET;
-    if (!oauth_access_token) throw new Error('You need to access to your twitter account first');
+    let accessToken: string;
+    let accessSecret: string;
+    if (user.role === 0) {
+      const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
+      if (!twitter || !twitter.oauth_access_token || !twitter.oauth_access_token_secret)
+        throw new Error('You need to authorize the twitter API in the User Settings page.');
+      accessToken = twitter.oauth_access_token;
+      accessSecret = twitter.oauth_access_token_secret;
+    } else if (post.community === 'Italy') {
+      accessToken = config.ANON_ACCESS_TOKEN;
+      accessSecret = config.ANON_ACCESS_TOKEN_SECRET;
+    } else if (language === 'it') {
+      accessToken = config.BBABYITALIA_ACCESS_TOKEN;
+      accessSecret = config.BBABYITALIA_ACCESS_TOKEN_SECRET;
+    } else {
+      accessToken = config.BBABY_ACCESS_TOKEN;
+      accessSecret = config.BBABY_ACCESS_TOKEN_SECRET;
+    }
     const twitterClient = new TwitterApi({
       appKey: config.TWITTER_CONSUMER_KEY,
       appSecret: config.TWITTER_CONSUMER_SECRET,

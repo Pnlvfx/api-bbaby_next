@@ -1,1 +1,1 @@
-declare module 'videoshow'
+declare module 'videoshow';

@@ -7,6 +7,10 @@ import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
 
+interface JwtPayload {
+  email: string;
+}
+
 const oauthCtrl = {
   register: async (req: Request, res: Response) => {
     try {
@@ -32,13 +36,13 @@ const oauthCtrl = {
     try {
       const { activation_token } = req.body;
       const { ACTIVATION_TOKEN_SECRET } = config;
-      const user: any = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET);
+      const user = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET) as JwtPayload;
 
       const check = await User.findOne({ email: user.email });
       if (check) return res.status(400).json({ msg: 'This email already exists' });
       res.json({ msg: 'Success' });
     } catch (err) {
-      if (err instanceof Error) res.status(500).json({ msg: err.message });
+      catchErrorCtrl(err, res);
     }
   },
   login: async (req: Request, res: Response) => {
@@ -56,7 +60,7 @@ const oauthCtrl = {
         return res.status(422).json({ msg: 'Invalid username or password' });
       }
     } catch (err) {
-      catchErrorCtrl(err, res)
+      catchErrorCtrl(err, res);
     }
   },
   logout: async (req: Request, res: Response) => {
@@ -65,17 +69,20 @@ const oauthCtrl = {
         res
           .clearCookie('token', {
             httpOnly: true,
-          }).send();
+          })
+          .send();
       } else {
-        const domain = userapis.getCookieDomain(config.CLIENT_URL)
-        res.clearCookie('token', {
+        const domain = userapis.getCookieDomain(config.CLIENT_URL);
+        res
+          .clearCookie('token', {
             httpOnly: true,
             domain,
             secure: true,
-          }).send();
+          })
+          .send();
       }
     } catch (err) {
-      catchErrorCtrl(err, res)
+      catchErrorCtrl(err, res);
     }
   },
   googleLogin: async (req: Request, res: Response) => {
@@ -98,7 +105,7 @@ const oauthCtrl = {
         if (!match) return res.status(400).json({ msg: 'Password is incorrect.' });
         login(user._id.toString(), res);
       } else {
-        const { country, countryCode, city, region, lat, lon } = ipInfo
+        const { country, countryCode, city, region, lat, lon } = ipInfo;
         const username = await name.replace(/\s/g, '');
         const _user = new User({
           username,
@@ -131,7 +138,7 @@ const oauthCtrl = {
         sameSite: true,
       };
       if (!req?.headers?.origin?.startsWith('http://192.168')) {
-        cookieOptions.domain = userapis.getCookieDomain(config.CLIENT_URL)
+        cookieOptions.domain = userapis.getCookieDomain(config.CLIENT_URL);
         cookieOptions.secure = true;
       }
       const { status } = req.body;
@@ -143,11 +150,11 @@ const oauthCtrl = {
   },
   getEUCookie: async (req: Request, res: Response) => {
     try {
-      const {eu_cookie} = req.cookies;
-      res.status(200).json(eu_cookie ? true : false)
+      const { eu_cookie } = req.cookies;
+      res.status(200).json(eu_cookie ? true : false);
     } catch (err) {
-      catchErrorCtrl(err, res)
+      catchErrorCtrl(err, res);
     }
-  }
+  },
 };
 export default oauthCtrl;

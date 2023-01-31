@@ -1,68 +1,69 @@
-import {Schema, model} from "mongoose";
-import { CommunityProps } from "../@types/community";
+import { Schema, model } from 'mongoose';
+import { CommunityProps } from '../@types/community';
 
-const schema = new Schema<CommunityProps>({
+const schema = new Schema<CommunityProps>(
+  {
     name: {
-        type: String,
-        required:true,
+      type: String,
+      required: true,
     },
     communityAvatar: {
-        type: String,
-        default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1652738651/default/defaultCommunityAvatar_zdywvw.jpg'
+      type: String,
+      default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1652738651/default/defaultCommunityAvatar_zdywvw.jpg',
     },
     cover: {
-        type: String,
-        default:'https://res.cloudinary.com/bbabystyle/image/upload/v1652738627/default/defaultCommunityCover_h9scxu.jpg'
+      type: String,
+      default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1652738627/default/defaultCommunityCover_h9scxu.jpg',
     },
     communityAuthor: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     description: {
-        type: String,
-        default: 'Add description'
+      type: String,
+      default: 'Add description',
     },
     acceptFollowers: {
-        type: Boolean,
-        default: true
+      type: Boolean,
+      default: true,
     },
     subscribers: {
-        type: Number,
-        default: 1,
+      type: Number,
+      default: 1,
     },
     user_is_moderator: {
-        type: Boolean,
+      type: Boolean,
     },
     user_is_banned: {
-        type: Boolean,
+      type: Boolean,
     },
     user_is_contributor: {
-        type: Boolean,
+      type: Boolean,
     },
     user_is_subscriber: {
-        type: Boolean,
+      type: Boolean,
     },
     number_of_posts: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     language: {
-        type: String,
-        default: 'en'
+      type: String,
+      default: 'en',
     },
     region: {
-        type: String,
+      type: String,
     },
     category: {
-        type: String,
+      type: String,
     },
     sub_categories: {
-        type: [String]
-    }
-},
-{
-    timestamps:true
-}
+      type: [String],
+    },
+  },
+  {
+    timestamps: true,
+  },
 );
 
 const Community = model('Community', schema);

@@ -1,10 +1,27 @@
+import { IncomingMessage } from 'http';
 import config from '../../config/config';
 import OAuth from 'oauth';
 
 interface RequestToken {
   oauth_token: string;
   oauth_token_secret: string;
-  results: any;
+  results: {
+    oauth_callback_confirmed: string;
+  };
+}
+
+interface AccessToken {
+  oauth_access_token: string;
+  oauth_access_token_secret: string;
+  results: {
+    user_id: string;
+    screen_name: string;
+  };
+}
+
+interface getProtectedResource {
+  data: string | Buffer;
+  response: IncomingMessage | undefined;
 }
 
 export default (oauthCallback: string) => {
@@ -29,7 +46,7 @@ export default (oauthCallback: string) => {
       });
     },
     getOauthAccessToken: (oauth_token: string, oauth_token_secret: string, oauth_verifier: string) => {
-      return new Promise<any>((resolve, reject) => {
+      return new Promise<AccessToken>((resolve, reject) => {
         _oauth.getOAuthAccessToken(
           oauth_token,
           oauth_token_secret,
@@ -42,9 +59,10 @@ export default (oauthCallback: string) => {
       });
     },
     getProtectedResource: (url: string, method: string, oauth_access_token: string, oauth_access_token_secret: string) => {
-      return new Promise<any>((resolve, reject) => {
+      return new Promise<getProtectedResource>((resolve, reject) => {
         _oauth.getProtectedResource(url, method, oauth_access_token, oauth_access_token_secret, (error, data, response) => {
           if (error) reject(error);
+          if (!data) return reject('API response is invalid');
           resolve({ data, response });
         });
       });
