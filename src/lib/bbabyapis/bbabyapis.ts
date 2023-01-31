@@ -9,6 +9,7 @@ import bbabypost from './route/bbabypost/bbabypost';
 import { Chance } from 'chance';
 import bbcapis from '../bbcapis/bbcapis';
 import telegramapis from '../telegramapis/telegramapis';
+import User from '../../models/User';
 
 const bbabyapis = {
   initialize: async () => {
@@ -17,14 +18,15 @@ const bbabyapis = {
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://16eb-91-206-70-33.eu.ngrok.io';
-      await telegramapis.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
-      await telegramapis.setMyCommands([
-        { command: 'start', description: 'Start the bot' },
-        { command: 'quora', description: 'Quora' },
-      ]);
+      // await telegramapis.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
+      // await telegramapis.setMyCommands([
+      //   { command: 'start', description: 'Start the bot' },
+      //   { command: 'quora', description: 'Quora' },
+      // ]);
       const timeinterval = coraline.date.hourToms(1);
       setInterval(bbcapis.start, timeinterval);
       await bbcapis.start()
+      await User.deleteMany({is_bot: true})
     } catch (err) {
       catchErrorWithTelegram(err);
     }
@@ -61,7 +63,8 @@ const bbabyapis = {
       const email = chance.email()
       const password = coraline.generateRandomId(10);
       const username = coraline.createPermalink(chance.name() + chance.year({min: 1964, max: 2000}))
-      const user = await userapis.newUser(email, username, password);
+      const ipInfo = await userapis.getIP()
+      const user = await userapis.newUser(email, username, password, ipInfo);
       user.is_bot = true
       await user.save();
       return user;

@@ -10,8 +10,8 @@ import userapis from '../../lib/userapis/userapis';
 const oauthCtrl = {
   register: async (req: Request, res: Response) => {
     try {
-      const { email, username, password } = req.body;
-      const user = await userapis.newUser(email, username, password);
+      const { email, username, password, ipInfo } = req.body;
+      const user = await userapis.newUser(email, username, password, ipInfo);
       login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -80,7 +80,7 @@ const oauthCtrl = {
   },
   googleLogin: async (req: Request, res: Response) => {
     try {
-      const { tokenId } = req.body;
+      const { tokenId, ipInfo } = req.body;
       const { GOOGLE_SECRET } = config;
       const url = `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${tokenId}`;
       const response = await fetch(url, {
@@ -98,8 +98,7 @@ const oauthCtrl = {
         if (!match) return res.status(400).json({ msg: 'Password is incorrect.' });
         login(user._id.toString(), res);
       } else {
-        const clientIp = userapis.getIP(req)
-        const { country, countryCode, city, region, lat, lon } = await userapis.getIPinfo(clientIp);
+        const { country, countryCode, city, region, lat, lon } = ipInfo
         const username = await name.replace(/\s/g, '');
         const _user = new User({
           username,
@@ -117,7 +116,7 @@ const oauthCtrl = {
         login(_user._id.toString(), res);
       }
     } catch (err) {
-      catchErrorCtrl(err, res)
+      if (err instanceof Error) res.status(500).json({ msg: err.message });
     }
   },
   saveEUCookie: async (req: Request, res: Response) => {
