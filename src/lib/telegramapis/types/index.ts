@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 type METHODPROPS = 'sendMessage' | 'sendPhoto' | 'getUpdates' | 'setWebhook' | 'setMyCommands' | 'getFile';
 

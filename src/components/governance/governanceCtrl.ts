@@ -138,10 +138,13 @@ const governanceCtrl = {
       const req = expressRequest as UserRequest;
       const { limit, skip } = req.query;
       if (!limit || !skip) return res.status(400).json({ msg: 'This API require a pagination query params!' });
-      const news = await BBC.find({ description: { $ne: 'Not found' } })
+      const threeDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      const news = await BBC.find({ description: { $ne: 'Not found' }, date: { $gte: threeDaysAgo.toISOString(), $lt: now.toISOString() } })
         .sort({ date: -1 })
         .limit(Number(limit.toString()))
         .skip(Number(skip.toString()));
+      //news = news.sort((a, b) => a.description.length - b.description.length);
       res.status(200).json(news);
     } catch (err) {
       catchErrorCtrl(err, res);

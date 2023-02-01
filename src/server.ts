@@ -26,6 +26,9 @@ import analyticsRouter from './components/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
 import bbabyapis from './lib/bbabyapis/bbabyapis';
 import telegramRouter from './components/telegram/telegramRouter';
+import generalRouter from './components/general/generalRouter';
+import { catchErrorCtrl } from './coraline/cor-route/crlerror';
+import News from './models/News';
 
 const app = express();
 
@@ -47,15 +50,21 @@ app.get('/', (req, res) => {
 app.get('/sitemaps', async (req, res) => {
   try {
     const { type } = req.query;
-    if (!type) {
+    if (!type) return res.status(400).json({ msg: 'Invalid request!' });
+    if (type === 'post') {
       const posts = await Post.find({}).sort({ createdAt: -1 });
       res.status(200).json(posts);
-    } else {
+    } else if (type === 'community') {
       const communities = await Community.find({});
       res.status(200).json(communities);
+    } else if (type === 'news') {
+      const news = await News.find({});
+      res.status(200).json(news);
+    } else {
+      res.status(400).json({ msg: 'Invalid type!' });
     }
   } catch (err) {
-    if (err instanceof Error) res.status(500).json({ msg: err.message });
+    catchErrorCtrl(err, res);
   }
 });
 
@@ -70,6 +79,8 @@ app.use('/images', imageRouter);
 app.use('/videos', videoRouter);
 
 app.use('/', oauthRouter);
+
+app.use('/', generalRouter);
 
 app.use('/user', userRouter);
 

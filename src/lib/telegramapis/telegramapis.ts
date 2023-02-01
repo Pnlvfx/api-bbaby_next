@@ -11,13 +11,9 @@ const telegramapis = {
     try {
       let query = `chat_id=${chatId}&text=${text}`;
       if (options) {
-        if (options.reply_markup) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          options.reply_markup = JSON.stringify(options.reply_markup) as any;
-        }
         const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
         usedOptions.forEach(([key, value]) => {
-          query += `&${key}=${value}`;
+          query += `&${key}=${JSON.stringify(value)}`;
         });
       }
       const url = buildUrl('sendMessage', query);
@@ -37,13 +33,9 @@ const telegramapis = {
       const form = new FormData();
       form.append('chat_id', chatId);
       if (options) {
-        if (options.reply_markup) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          options.reply_markup = JSON.stringify(options.reply_markup) as any;
-        }
         const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
         usedOptions.forEach(([key, value]) => {
-          form.append(key, value);
+          form.append(key, JSON.stringify(value));
         });
       }
       let data = '';
@@ -67,7 +59,7 @@ const telegramapis = {
           }
           const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
-            data += `&${key}=${value}`;
+            data += `&${key}=${JSON.stringify(value)}`;
           });
         }
         req_options.headers = {
@@ -146,6 +138,7 @@ const telegramapis = {
       throw catchError(err);
     }
   },
+  // eslint-disable-next-line no-unused-vars
   downloadFile: (fileId: string, costumOutput?: (ext: string) => string) => {
     return new Promise<string>((resolve, rejects) => {
       const url = buildUrl('getFile', `file_id=${fileId}`);

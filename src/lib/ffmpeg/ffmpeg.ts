@@ -4,7 +4,6 @@ import path from 'path';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import videoshow from 'videoshow';
 import fs from 'fs';
-import fluent from 'fluent-ffmpeg';
 
 const ffmpeg = {
   videoToAudio: (video: string, output?: string) => {
@@ -129,25 +128,6 @@ const ffmpeg = {
         if (code === 0) resolve(output);
         reject('Error when trying to convert this image!');
       });
-    });
-  },
-  textToVideo: (captions: FFmpegCaption[], background: string, audio: string, output: string) => {
-    const filters = captions.map((caption) => {
-      return `drawtext=fontfile=Arial.ttf:text='${caption.text}':fontcolor=white:fontsize=72: x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,${
-        caption.start
-      },${caption.start + caption.duration})':line_spacing=20:box=1:boxcolor=black@0.5:boxborderw=5`;
-    });
-
-    const cmd = fluent()
-      .input(background)
-      .input(audio)
-      .videoFilters(filters)
-      .outputOptions('-map', '0:v', '-map', '1:a')
-      .outputOptions('-loglevel', 'debug')
-      .save(output);
-
-    cmd.on('debug', function (debug) {
-      console.log(debug);
     });
   },
   overlayImageToVideo: (images: FFmpegImage[], video: string, audio: string, output: string, duration: number) => {

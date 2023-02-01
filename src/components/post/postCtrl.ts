@@ -105,37 +105,36 @@ const PostCtrl = {
       const { id } = req.params;
       const _id = new Types.ObjectId(id);
       const { dir } = req.body;
-      const hasVotedUp = user.upVotes.find((vote) => vote.toString() === id);
-      const hasVotedDown = user.downVotes.find((vote) => vote.toString() === id);
       const post = await Post.findById(id);
       if (!post) return res.status(400).json({ msg: "This post doesn't exist!" });
+      const hasVotedUp = user.upVotes.find((vote) => vote.toString() === id);
+      const hasVotedDown = user.downVotes.find((vote) => vote.toString() === id);
       if (hasVotedUp) {
+        user.upVotes = user.upVotes.filter((_) => !_.equals(id));
         if (dir === 1) {
-          const deletePrevVote = await User.findOneAndUpdate({ upVotes: _id }, { $pull: { upVotes: _id } });
           post.ups -= 1;
         } else {
-          const deletePrevVote = await User.findOneAndUpdate({ upVotes: _id }, { $pull: { upVotes: _id } });
-          const userVote = await User.findOneAndUpdate({ username: user.username }, { $push: { downVotes: _id } });
+          user.downVotes.push(_id);
           post.ups -= 2;
         }
       } else if (hasVotedDown) {
+        user.downVotes = user.downVotes.filter((_) => !_.equals(id));
         if (dir === 1) {
-          const deletePrevVote = await User.findOneAndUpdate({ downVotes: _id }, { $pull: { downVotes: _id } });
-          const userVote = await User.findOneAndUpdate({ username: user.username }, { $push: { upVotes: _id } });
+          user.upVotes.push(_id);
           post.ups += 2;
         } else {
-          const deletePrevVote = await User.findOneAndUpdate({ downVotes: _id }, { $pull: { downVotes: _id } });
           post.ups += 1;
         }
       } else {
         if (dir === 1) {
-          const userVote = await User.findOneAndUpdate({ username: user.username }, { $push: { upVotes: _id } });
+          user.upVotes.push(_id);
           post.ups += 1;
         } else {
-          const userVote = await User.findOneAndUpdate({ username: user.username }, { $push: { downVotes: _id } });
+          user.downVotes.push(_id);
           post.ups -= 1;
         }
       }
+      await user.save();
       await post.save();
       res.status(200).json({ vote: post.ups });
     } catch (err) {
