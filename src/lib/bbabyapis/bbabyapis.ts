@@ -35,7 +35,7 @@ const bbabyapis = {
         } catch (err) {
           catchErrorWithTelegram(err);
         }
-      }, 30 * 60 * 1000);
+      }, 60 * 60 * 1000);
     } catch (err) {
       catchErrorWithTelegram(err);
     }
@@ -63,7 +63,7 @@ const bbabyapis = {
         } catch (err) {
           catchErrorWithTelegram(err);
         }
-      }, 20 * 60 * 1000);
+      }, 50 * 60 * 1000);
     } catch (err) {
       throw catchError(err);
     }
@@ -110,7 +110,6 @@ const bbabyapis = {
       } else {
         user = await bbabyapis.newBot();
       }
-      share = process.env.NODE_ENV === 'production' ? true : false;
       const post = await bbabyapis.post.newPost(user, title, community, {
         sharePostToTG: share,
         sharePostToTwitter: share,
