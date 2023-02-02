@@ -13,6 +13,10 @@ import openaiapis from '../openaiapis/openaiapis';
 import { IUser } from '../../models/types/user';
 import Post from '../../models/Post';
 import bbabycomment from './route/bbabycomment/bbabycomment';
+import bbabycommunity from './route/bbabycommunity/bbabycommunity';
+import Community from '../../models/Community';
+
+const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'];
 
 const bbabyapis = {
   initialize: async () => {
@@ -51,13 +55,24 @@ const bbabyapis = {
       throw new Error(`failed to get metadata info from this url: ${url}`);
     }
   },
-  answer: async (prompt = 'Ask me something about React without writing the response!') => {
+  answer: async (prompt?: string) => {
     try {
-      const post = await bbabyapis.AIpost(prompt, 'React');
+      const community = communities[coraline.getRandomInt(communities.length - 1)];
+      const check = await Community.exists({ name: new RegExp(`^${community}$`, 'i') });
+      if (!check) {
+        const owner = await User.findOne({ is_bot: true });
+        if (!owner) throw new Error('bbabyapis, missing owner in answer function!');
+        await bbabyapis.community.createCommunity(owner, community);
+      }
+      prompt = prompt || `Ask me something about ${community} without writing the response!`; //important;
+      const post = await bbabyapis.AIpost(prompt, community);
       if (!post) return;
       setTimeout(async () => {
         try {
-          const user = await bbabyapis.newBot();
+          let user = await User.findOne({ is_bot: true, username: { $ne: post.author } });
+          if (!user) {
+            user = await bbabyapis.newBot();
+          }
           const body = await openaiapis.request(post.title);
           await bbabyapis.comment.createComment(user, body, post._id, post._id);
         } catch (err) {
@@ -91,8 +106,8 @@ const bbabyapis = {
       console.log(title);
       const exist = await Post.findOne({ title, community });
       if (exist) {
-        if (!prompt.match(`and don't use this question:`)) {
-          prompt += ` and don't use this question:`;
+        if (!prompt.match(`and don't use this question or similar:`)) {
+          prompt += ` and don't use this question or similar:`;
         }
         prompt = `${prompt} \n ${title},`;
         await bbabyapis.answer(prompt);
@@ -122,6 +137,7 @@ const bbabyapis = {
   post: bbabypost,
   news: bbabynews,
   comment: bbabycomment,
+  community: bbabycommunity,
 };
 
 export default bbabyapis;

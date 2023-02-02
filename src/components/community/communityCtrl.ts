@@ -6,6 +6,7 @@ import Post from '../../models/Post';
 import User from '../../models/User';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 
 const communityCtrl = {
   getCommunities: async (req: Request, res: Response) => {
@@ -112,23 +113,8 @@ const communityCtrl = {
       const { user } = req;
       const { name } = req.body;
       if (!name) return res.status(500).json({ msg: 'A community name is required' });
-      const check = await Community.exists({ name: new RegExp(`^${name}$`, 'i') });
-      if (check) {
-        return res.status(401).json({ msg: `Sorry, b/${name} is taken. Try another.` });
-      } else {
-        const language = user.countryCode === 'IT' ? 'it' : 'en';
-        const { region } = user;
-        const community = new Community({
-          name,
-          communityAuthor: user.username,
-          language,
-          region,
-        });
-        user.subscribed?.push(community.name);
-        await user.save();
-        await community.save();
-        res.status(201).json({ msg: 'You have successfully created a new community' });
-      }
+      await bbabyapis.community.createCommunity(user, name);
+      res.status(201).json({ msg: 'You have successfully created a new community' });
     } catch (err) {
       catchErrorCtrl(err, res);
     }

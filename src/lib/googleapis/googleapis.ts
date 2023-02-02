@@ -1,6 +1,6 @@
 import serviceAccount from './route/service-account';
 import { catchError } from '../../coraline/cor-route/crlerror';
-import { getGoogleHeader } from './config/googleconfig';
+import { getGoogleHeader, getGoogleParent } from './config/googleconfig';
 import gapisspeechtotext from './route/gapisspeechtotext';
 import gapiyoutube from './route/gapiyoube';
 import gapiOAth from './route/gapiOAuth';
@@ -11,9 +11,7 @@ const googleapis = {
   serviceAccount,
   translate: async (text: string, from: string, to: string) => {
     try {
-      const projectId = 'bbabystyle';
-      const location = 'us-central1';
-      const parent = `projects/${projectId}/locations/${location}`;
+      const parent = getGoogleParent();
       const mimeType = 'text/plain';
       const sourceLanguageCode = from;
       const targetLanguageCode = to;
@@ -35,6 +33,28 @@ const googleapis = {
       for (const translation of data.translations) {
         return translation.translatedText as string;
       }
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  detectLanguage: async (text: string) => {
+    try {
+      const parent = getGoogleParent();
+      const mimeType = 'text/plain';
+      const url = `https://translate.googleapis.com/v3beta1/${parent}:detectLanguage`;
+      const body = JSON.stringify({
+        content: text,
+        mimeType,
+      });
+      const credentials = await googleapis.serviceAccount.getAccessToken('translate');
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: getGoogleHeader(credentials),
+        body,
+      });
+      const data = (await res.json()) as GoogleDetectLanguageResponse;
+      if (!res.ok) throw new Error(data.error?.message);
+      return data.languages[0].languageCode;
     } catch (err) {
       throw catchError(err);
     }

@@ -7,3 +7,10 @@ export const getGoogleHeader = (credentials: GoogleCredentials) => {
     Authorization: `Bearer ${credentials.access_token}`,
   };
 };
+
+export const getGoogleParent = () => {
+  const projectId = 'bbabystyle';
+  const location = 'us-central1';
+  const parent = `projects/${projectId}/locations/${location}`;
+  return parent;
+};

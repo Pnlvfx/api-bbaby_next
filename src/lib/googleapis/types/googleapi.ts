@@ -17,6 +17,14 @@ interface GoogleTranslateResponse {
   error?: GoogleError;
 }
 
+interface GoogleDetectLanguageResponse {
+  languages: {
+    languageCode: string;
+    confidence: number;
+  }[];
+  error?: GoogleError;
+}
+
 type GoogleError = {
   code: number;
   status: string;
