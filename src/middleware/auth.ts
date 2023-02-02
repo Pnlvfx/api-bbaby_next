@@ -7,7 +7,7 @@ const auth = async (expressRequest: Request, res: Response, next: NextFunction) 
   try {
     const req = expressRequest as UserRequest;
     const { token } = req.cookies;
-    const errorMessage = 'This API require user authentication';
+    const errorMessage = 'You need to login first!';
     if (!token) {
       res.statusMessage = errorMessage;
       return res.status(401).json({ msg: errorMessage });

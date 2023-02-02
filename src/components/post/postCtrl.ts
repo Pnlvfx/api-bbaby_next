@@ -8,6 +8,7 @@ import Comment from '../../models/Comment';
 import Community from '../../models/Community';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import bbabyapis from '../../lib/bbabyapis/bbabyapis';
+import cloudinary from '../../config/cloudinary';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -145,14 +146,16 @@ const PostCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { id } = req.params;
-      await Post.findByIdAndDelete(id);
-      // if (post?.mediaInfo) {
-      //     await cloudinary.v2.uploader.destroy(`posts/${post._id.toString()}`);
-      // }
+      const post = await Post.findById(id);
+      if (!post) return res.status(500).json({ msg: 'Something went wrong' });
+      if (post.mediaInfo) {
+        await cloudinary.v2.uploader.destroy(`posts/${post._id.toString()}`);
+      }
+      await post.delete();
       await Comment.deleteMany({ rootId: id });
       res.json(true);
     } catch (err) {
-      res.status(500).json({ msg: 'Something went wrong' });
+      catchErrorCtrl(err, res);
     }
   },
 };

@@ -75,7 +75,7 @@ const openaiapis = {
       throw catchError(err);
     }
   },
-  request: async (prompt: string) => {
+  request: async (prompt: string, temperature = 0.5) => {
     try {
       const url = 'https://api.openai.com/v1/completions';
       const res = await fetch(url, {
@@ -84,7 +84,7 @@ const openaiapis = {
         body: JSON.stringify({
           model: 'text-davinci-003',
           prompt,
-          temperature: 0.5,
+          temperature,
           max_tokens: 300,
           top_p: 1.0,
           frequency_penalty: 0.0,

@@ -9,6 +9,10 @@ import bbabypost from './route/bbabypost/bbabypost';
 import { Chance } from 'chance';
 import bbcapis from '../bbcapis/bbcapis';
 import User from '../../models/User';
+import openaiapis from '../openaiapis/openaiapis';
+import { IUser } from '../../models/types/user';
+import Post from '../../models/Post';
+import bbabycomment from './route/bbabycomment/bbabycomment';
 
 const bbabyapis = {
   initialize: async () => {
@@ -25,7 +29,13 @@ const bbabyapis = {
       const timeinterval = coraline.date.hourToms(1);
       setInterval(bbcapis.start, timeinterval);
       await bbcapis.start();
-      await User.deleteMany({ is_bot: true });
+      setInterval(async () => {
+        try {
+          await bbabyapis.answer();
+        } catch (err) {
+          catchErrorWithTelegram(err);
+        }
+      }, 30 * 60 * 1000);
     } catch (err) {
       catchErrorWithTelegram(err);
     }
@@ -41,17 +51,19 @@ const bbabyapis = {
       throw new Error(`failed to get metadata info from this url: ${url}`);
     }
   },
-  answer: async () => {
+  answer: async (prompt = 'Ask me something about React without writing the response!') => {
     try {
-      // const chance = new Chance()
-      // const email = chance.email()
-      // const password = coraline.generateRandomId(10);
-      // const username = coraline.createPermalink(chance.name() + chance.year({min: 1964, max: 2000}))
-      // const user = await bbabyapis.newUser(email, username, password, true);
-      // //const user = await User.findOne({is_bot: true});
-      // //if (!user) throw new Error('Missing user');
-      // const question = await openaiapis.request(`Ask me something about React without writing the response!`);
-      // await bbabyapis.newPost(user, question, 'React')
+      const post = await bbabyapis.AIpost(prompt, 'React');
+      if (!post) return;
+      setTimeout(async () => {
+        try {
+          const user = await bbabyapis.newBot();
+          const body = await openaiapis.request(post.title);
+          await bbabyapis.comment.createComment(user, body, post._id, post._id);
+        } catch (err) {
+          catchErrorWithTelegram(err);
+        }
+      }, 20 * 60 * 1000);
     } catch (err) {
       throw catchError(err);
     }
@@ -71,8 +83,46 @@ const bbabyapis = {
       throw catchError(err);
     }
   },
+  AIpost: async (prompt: string, community: string, share = false) => {
+    try {
+      console.log({ prompt });
+      const temperature = Math.random();
+      const title = await openaiapis.request(prompt, temperature);
+      console.log(title);
+      const exist = await Post.findOne({ title, community });
+      if (exist) {
+        if (!prompt.match(`and don't use this question:`)) {
+          prompt += ` and don't use this question:`;
+        }
+        prompt = `${prompt} \n ${title},`;
+        await bbabyapis.answer(prompt);
+        return;
+      }
+      let user: IUser;
+      const randomNumber = Math.random();
+      if (randomNumber < 0.9) {
+        const users = await User.find({ is_bot: true });
+        if (users.length < 1) {
+          user = await bbabyapis.newBot();
+        } else {
+          user = users[coraline.getRandomInt(users.length - 1)];
+        }
+      } else {
+        user = await bbabyapis.newBot();
+      }
+      share = process.env.NODE_ENV === 'production' ? true : false;
+      const post = await bbabyapis.post.newPost(user, title, community, {
+        sharePostToTG: share,
+        sharePostToTwitter: share,
+      });
+      return post;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
   post: bbabypost,
   news: bbabynews,
+  comment: bbabycomment,
 };
 
 export default bbabyapis;

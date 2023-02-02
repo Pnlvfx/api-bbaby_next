@@ -1,31 +1,17 @@
 import type { Request, Response } from 'express';
 import Comment from '../../models/Comment';
-import Post from '../../models/Post';
-import { getUserFromToken } from '../user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import { UserRequest } from '../../@types/express';
+import bbabycomment from '../../lib/bbabyapis/route/bbabycomment/bbabycomment';
 
 const commentCtrl = {
-  createComment: async (req: Request, res: Response) => {
+  createComment: async (userRequest: Request, res: Response) => {
     try {
-      const { token } = req.cookies;
-      if (!token) {
-        return res.status(401).json({ msg: 'You need to login first' });
-      }
-      const user = await getUserFromToken(token);
-      if (!user) return res.status(401).json({ msg: 'You need to login first' });
+      const req = userRequest as UserRequest;
+      const { user } = req;
       const { body, parentId, rootId } = req.body;
-      const comment = new Comment({
-        author: user.username,
-        authorAvatar: user.avatar,
-        body,
-        parentId,
-        rootId,
-      });
-      const savedComment = await comment.save();
-      if (!savedComment) return res.status(500).json({ msg: 'Something went wrong in our database, sorry for the inconvenience.' });
-      const postNumComments = await Post.findByIdAndUpdate(rootId, { $inc: { numComments: +1 } });
-      if (!postNumComments) return res.status(500).json({ msg: 'Something went wrong in our database, sorry for the inconvenience.' });
-      res.json(savedComment);
+      const comment = await bbabycomment.createComment(user, body, rootId, parentId);
+      res.json(comment);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
