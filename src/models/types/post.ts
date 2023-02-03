@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 
-interface PostProps extends Document {
+export interface PostProps extends Document {
   author: string;
   authorAvatar: string;
   title: string;
@@ -11,7 +11,7 @@ interface PostProps extends Document {
   ups: number;
   liked: null | boolean;
   numComments: number;
-  url: string;
+  permalink: string;
 }
 
 interface MediaInfoProps {

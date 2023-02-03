@@ -43,7 +43,7 @@ const communityCtrl = {
       } else {
         const user = await getUserFromToken(token);
         if (!user) return res.status(401).json({ msg: 'Your token is no more valid, please try to logout and login again.' });
-        const moderator = user.username === community.communityAuthor ? true : user.role === 1 ? true : false;
+        const moderator = user.username === community.author ? true : user.role === 1 ? true : false;
         const isSubscriber = user.subscribed?.find((sub) => sub === name) ? true : false;
         community.user_is_banned = false;
         community.user_is_contributor = false;
@@ -130,8 +130,9 @@ const communityCtrl = {
         crop: 'scale',
         upload_preset: 'bbaby_community',
       });
-      const community = await Community.findOneAndUpdate({ name }, { communityAvatar: response.secure_url });
-      if (!community) return res.status(500).json({ msg: 'Something went wrong with this image. Please try with another one' });
+      const community = await Community.findOne({ name });
+      if (!community) return res.status(500).json({ msg: 'Invalid community!' });
+      community.image = response.secure_url;
       const postThumb = await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });
       if (!postThumb) return res.status(500).json({ msg: 'Something went wrong with this image. Please try with another one' });
       res.json({ msg: 'Image updated successfully' });
@@ -147,7 +148,7 @@ const communityCtrl = {
       const check = user.subscribed?.find((sub) => sub === community);
       const communityInfo = await Community.findOne({ name: community });
       if (!communityInfo) return res.status(400).json({ msg: "Invalid community! This community doesn't exist or has been deleted!" });
-      const block = user.username === communityInfo?.communityAuthor ? true : false;
+      const block = user.username === communityInfo?.author ? true : false;
       if (block) return res.status(400).json({ msg: 'You cannot unsubscribe from your own communities!' });
       if (check) {
         await User.findOneAndUpdate({ username: user.username }, { $pull: { subscribed: community } });
@@ -168,7 +169,7 @@ const communityCtrl = {
       const { name } = req.params;
       const { category } = req.body;
       const c = await Community.findOne({ name });
-      const check = user.role === 1 ? true : user.username === c?.communityAuthor ? true : false;
+      const check = user.role === 1 ? true : user.username === c?.author ? true : false;
       if (!check) {
         return res.status(500).json({ msg: 'You need to be a moderator to do this action!' });
       } else {

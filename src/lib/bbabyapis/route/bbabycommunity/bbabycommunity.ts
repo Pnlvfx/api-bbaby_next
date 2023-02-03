@@ -10,7 +10,7 @@ const bbabycommunity = {
       const language = user.countryCode === 'IT' ? 'it' : 'en';
       const community = new Community({
         name,
-        communityAuthor: user.username,
+        author: user.username,
         language,
         region: user.region,
       });

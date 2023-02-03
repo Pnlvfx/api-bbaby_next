@@ -21,10 +21,10 @@ const bbabypost = {
         authorAvatar: user?.avatar,
         title,
         community,
-        communityIcon: communityInfo.communityAvatar,
+        communityIcon: communityInfo.image,
       });
       if (options?.body) {
-        post.body = options.body;
+        post.$set({ body: options.body });
       }
       if (options?.isImage && options?.selectedFile) {
         const image = await cloudinary.v2.uploader.upload(options.selectedFile, {
@@ -44,22 +44,22 @@ const bbabypost = {
         const { isVideo, height, width } = options;
         post.$set({ mediaInfo: { isVideo, video: { url: video.secure_url }, dimension: [height, width] } });
       }
-      const url = `${config.CLIENT_URL}/b/${post.community.toLowerCase()}/comments/${post._id}`;
-      post.url = url;
-      const savedPost = await post.save();
+      const permalink = `/b/${post.community.toLowerCase()}/comments/${post._id}`;
+      post.$set({ permalink });
+      const url = `${config.CLIENT_URL}${permalink}`;
       if (options?.sharePostToTwitter) {
-        await shareToTwitter(savedPost, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
+        await shareToTwitter(post, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
       }
       if (options?.sharePostToTG) {
-        const text = `${savedPost.title + ' ' + savedPost.body + ' ' + url}`;
-        const chat_id = savedPost.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
+        const text = `${post.title + ' ' + post.body + ' ' + url}`;
+        const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
         await telegramapis.sendMessage(chat_id, text);
       }
       communityInfo.$inc('number_of_posts', 1);
       user.last_post = communityInfo._id;
       await user.save();
-      await coraline.sendLog(`New post created from ${user.username}`);
-      return savedPost;
+      await coraline.sendLog(`New post created from ${user.username}: ${url}`);
+      return post;
     } catch (err) {
       throw catchError(err);
     }

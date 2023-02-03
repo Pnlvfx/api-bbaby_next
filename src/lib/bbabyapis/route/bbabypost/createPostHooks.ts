@@ -1,11 +1,11 @@
-import { PostProps } from '../../../../@types/post';
 import { IUser } from '../../../../models/types/user';
 import config from '../../../../config/config';
 import { TwitterApi } from 'twitter-api-v2';
 import { catchError } from '../../../../coraline/cor-route/crlerror';
-import { CommunityProps } from '../../../../@types/community';
 import coraline from '../../../../coraline/coraline';
 import twitterapis from '../../../twitterapis/twitterapis';
+import { PostProps } from '../../../../models/types/post';
+import { CommunityProps } from '../../../../models/types/community';
 
 const chooseUser = (user: IUser, post: PostProps, language: 'it' | 'en') => {
   try {

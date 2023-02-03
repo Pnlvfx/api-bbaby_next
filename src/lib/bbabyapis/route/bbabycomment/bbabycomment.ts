@@ -16,7 +16,7 @@ const bbabycomment = {
       });
       await comment.save();
       await Post.findByIdAndUpdate(rootId, { $inc: { numComments: +1 } });
-      coraline.sendLog(`New comment added from ${user.username}`);
+      coraline.sendLog(`New comment added from ${user.username}: ${comment.body}`);
       return comment;
     } catch (err) {
       throw catchError(err);

@@ -52,9 +52,12 @@ const redditapis = {
       throw catchError(err);
     }
   },
-  getPosts: async () => {
+  getPosts: async (after?: string, count?: string) => {
     try {
-      const res = await fetch('https://api.reddit.com', {
+      const url = 'https://api.reddit.com';
+      const query = after ? `after=${after}&count=${count}` : null;
+      const finalUrl = query ? `${url}?${query}` : url;
+      const res = await fetch(finalUrl, {
         method: 'get',
       });
       const data = await res.json();

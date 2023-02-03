@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { CommunityProps } from '../@types/community';
+import { CommunityProps } from './types/community';
 
 const schema = new Schema<CommunityProps>(
   {
@@ -7,7 +7,7 @@ const schema = new Schema<CommunityProps>(
       type: String,
       required: true,
     },
-    communityAvatar: {
+    image: {
       type: String,
       default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1652738651/default/defaultCommunityAvatar_zdywvw.jpg',
     },
@@ -15,9 +15,9 @@ const schema = new Schema<CommunityProps>(
       type: String,
       default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1652738627/default/defaultCommunityCover_h9scxu.jpg',
     },
-    communityAuthor: {
+    author: {
       type: String,
-      required: true,
+      //required: true,
     },
     description: {
       type: String,

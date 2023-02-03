@@ -1,10 +1,10 @@
 import { Document } from 'mongoose';
 
-interface CommunityProps extends Document {
+export interface CommunityProps extends Document {
   name: string;
-  communityAvatar: string;
+  image: string;
   cover: string;
-  communityAuthor: string;
+  author: string;
   description: string;
   acceptFollowers: boolean;
   subscribers: number;

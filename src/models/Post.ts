@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { PostProps } from '../@types/post';
+import { PostProps } from './types/post';
 
 const PostSchema = new Schema<PostProps>(
   {
@@ -54,7 +54,7 @@ const PostSchema = new Schema<PostProps>(
       type: Number,
       default: 0,
     },
-    url: {
+    permalink: {
       type: String,
     },
   },
