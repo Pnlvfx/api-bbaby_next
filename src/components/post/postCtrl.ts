@@ -2,7 +2,6 @@ import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 import Post from '../../models/Post';
-import User from '../../models/User';
 import { Types, isValidObjectId } from 'mongoose';
 import Comment from '../../models/Comment';
 import Community from '../../models/Community';
@@ -58,18 +57,12 @@ const PostCtrl = {
       if (token) {
         const user = await getUserFromToken(token);
         if (!user) return res.status(401).json({ msg: 'Your token is no more valid, please try to logout and login again.' });
-        const votedUp = { username: user?.username, upVotes: id };
-        const votedDown = { username: user?.username, downVotes: id };
-        const userUpVoted = await User.exists(votedUp);
-        if (!userUpVoted) {
-          const userDownVoted = await User.exists(votedDown);
-          if (!userDownVoted) {
-            //
-          } else {
-            post.liked = false;
-          }
-        } else {
+        if (user.upVotes.find((_) => _.equals(id))) {
           post.liked = true;
+        } else if (user.downVotes.find((_) => _.equals(id))) {
+          post.liked = false;
+        } else {
+          post.liked = null;
         }
       }
       res.json(post);

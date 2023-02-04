@@ -7,10 +7,6 @@ const PostSchema = new Schema<PostProps>(
       type: String,
       required: true,
     },
-    authorAvatar: {
-      type: String,
-      required: true,
-    },
     title: {
       type: String,
       required: true,
@@ -47,9 +43,7 @@ const PostSchema = new Schema<PostProps>(
       type: Number,
       default: 0,
     },
-    liked: {
-      type: Boolean || null,
-    },
+    liked: {},
     numComments: {
       type: Number,
       default: 0,

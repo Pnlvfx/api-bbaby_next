@@ -2,7 +2,6 @@ import { Document, Types } from 'mongoose';
 
 export interface PostProps extends Document {
   author: string;
-  authorAvatar: string;
   title: string;
   body: string;
   community: string;
