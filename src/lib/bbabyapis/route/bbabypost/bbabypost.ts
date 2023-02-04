@@ -24,7 +24,7 @@ const bbabypost = {
         communityIcon: communityInfo.image,
       });
       if (options?.body) {
-        post.$set({ body: options.body });
+        post.body = options.body;
       }
       if (options?.isImage && options?.selectedFile) {
         const image = await cloudinary.v2.uploader.upload(options.selectedFile, {
@@ -58,6 +58,7 @@ const bbabypost = {
       communityInfo.$inc('number_of_posts', 1);
       user.last_post = communityInfo._id;
       await user.save();
+      await post.save();
       await coraline.sendLog(`New post created from ${user.username}: ${url}`);
       return post;
     } catch (err) {
