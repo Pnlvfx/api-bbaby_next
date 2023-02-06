@@ -17,7 +17,7 @@ const PostCtrl = {
       const { community: communityName, author, limit, skip } = req.query;
       if (!limit || !skip) return res.status(500).json({ msg: 'Limit and Skip parameters are required for this API.' });
       const user_agent = req.useragent;
-      const _limit = user_agent?.isMobile && Number(skip.toString()) < 15 ? 7 : parseInt(limit.toString());
+      const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
       let filters = {};
       if (communityName) {
         filters = { community: new RegExp(`^${communityName.toString()}$`, 'i') };

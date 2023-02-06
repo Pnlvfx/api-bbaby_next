@@ -30,16 +30,16 @@ const bbabyapis = {
       //   { command: 'start', description: 'Start the bot' },
       //   { command: 'quora', description: 'Quora' },
       // ]);
-      const timeinterval = coraline.date.hourToms(1);
-      setInterval(bbcapis.start, timeinterval);
-      await bbcapis.start();
-      setInterval(async () => {
-        try {
-          await bbabyapis.answer();
-        } catch (err) {
-          catchErrorWithTelegram(err);
-        }
-      }, 60 * 60 * 1000);
+      // const timeinterval = coraline.date.hourToms(1);
+      // setInterval(bbcapis.start, timeinterval);
+      // await bbcapis.start();
+      // setInterval(async () => {
+      //   try {
+      //     await bbabyapis.answer();
+      //   } catch (err) {
+      //     catchErrorWithTelegram(err);
+      //   }
+      // }, 60 * 60 * 1000);
     } catch (err) {
       catchErrorWithTelegram(err);
     }
