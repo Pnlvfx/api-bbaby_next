@@ -7,7 +7,6 @@ import { catchError } from '../../coraline/cor-route/crlerror';
 import userapis from '../userapis/userapis';
 import bbabypost from './route/bbabypost/bbabypost';
 import { Chance } from 'chance';
-import bbcapis from '../bbcapis/bbcapis';
 import User from '../../models/User';
 import openaiapis from '../openaiapis/openaiapis';
 import { IUser } from '../../models/types/user';
