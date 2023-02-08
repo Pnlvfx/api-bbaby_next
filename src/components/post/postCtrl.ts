@@ -65,7 +65,9 @@ const PostCtrl = {
           post.liked = null;
         }
       }
-      res.json(post);
+      const community = await bbabyapis.community.getCommunity(token, post.community);
+      post.community_detail = community;
+      res.status(200).json(post);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

@@ -1,4 +1,5 @@
 import { Document, Types } from 'mongoose';
+import { CommunityProps } from './community';
 
 export interface PostProps extends Document {
   author: string;
@@ -6,6 +7,7 @@ export interface PostProps extends Document {
   body: string;
   community: string;
   communityIcon: string;
+  community_detail?: CommunityProps;
   mediaInfo: MediaInfoProps;
   ups: number;
   liked: null | boolean;

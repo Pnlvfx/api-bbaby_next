@@ -14,7 +14,7 @@ const TwitterCtrl = {
       const req = userRequest as UserRequest;
       if (!req.headers.origin) return res.status(400).json('You need to access this endpoint from a client!');
       if (req.headers.origin.startsWith('http://192'))
-        return res.status(400).json('Invalid origin, use https or localhost if you are in development');
+        return res.status(400).json({ msg: 'Invalid origin, use https or localhost if you are in development' });
       const { oauth_token, oauth_token_secret } = await twitterapis.oauth.getOAuthRequestToken();
       if (!oauth_token) return res.status(500).json({ msg: 'Twitter error.' });
       const domain = userapis.getCookieDomain(req.headers.origin);

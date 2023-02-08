@@ -22,6 +22,7 @@ const PostSchema = new Schema<PostProps>(
       type: String,
       required: true,
     },
+    community_detail: {},
     mediaInfo: {
       dimension: {
         type: Array,

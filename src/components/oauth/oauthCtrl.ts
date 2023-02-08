@@ -37,7 +37,6 @@ const oauthCtrl = {
       const { activation_token } = req.body;
       const { ACTIVATION_TOKEN_SECRET } = config;
       const user = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET) as JwtPayload;
-
       const check = await User.findOne({ email: user.email });
       if (check) return res.status(400).json({ msg: 'This email already exists' });
       res.json({ msg: 'Success' });

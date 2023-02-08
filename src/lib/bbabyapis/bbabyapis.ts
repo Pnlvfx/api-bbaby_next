@@ -58,7 +58,9 @@ const bbabyapis = {
   answer: async (prompt?: string) => {
     try {
       const community = communities[coraline.getRandomInt(communities.length - 1)];
-      const check = await Community.exists({ name: new RegExp(`^${community}$`, 'i') });
+      const check = await Community.exists({
+        name: new RegExp(`^${community}$`, 'i'),
+      });
       if (!check) {
         const owner = await User.findOne({ is_bot: true });
         if (!owner) throw new Error('bbabyapis, missing owner in answer function!');
@@ -69,7 +71,10 @@ const bbabyapis = {
       if (!post) return;
       setTimeout(async () => {
         try {
-          let user = await User.findOne({ is_bot: true, username: { $ne: post.author } });
+          let user = await User.findOne({
+            is_bot: true,
+            username: { $ne: post.author },
+          });
           if (!user) {
             user = await bbabyapis.newBot();
           }

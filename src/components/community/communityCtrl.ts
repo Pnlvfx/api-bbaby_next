@@ -32,24 +32,7 @@ const communityCtrl = {
     try {
       const { token } = req.cookies;
       const { name } = req.params;
-      const regex = new RegExp(`^${name}$`, 'i');
-      const community = await Community.findOne({ name: regex });
-      if (!community) return res.status(500).json({ msg: 'Something went wrong' });
-      if (!token) {
-        community.user_is_banned = false;
-        community.user_is_contributor = false;
-        community.user_is_moderator = false;
-        community.user_is_subscriber = false;
-      } else {
-        const user = await getUserFromToken(token);
-        if (!user) return res.status(401).json({ msg: 'Your token is no more valid, please try to logout and login again.' });
-        const moderator = user.username === community.author ? true : user.role === 1 ? true : false;
-        const isSubscriber = user.subscribed?.find((sub) => sub === name) ? true : false;
-        community.user_is_banned = false;
-        community.user_is_contributor = false;
-        community.user_is_moderator = moderator;
-        community.user_is_subscriber = isSubscriber;
-      }
+      const community = await bbabyapis.community.getCommunity(token, name);
       res.json(community);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -123,6 +106,7 @@ const communityCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { image } = req.body;
+      if (!image) return res.status(401).json({ msg: 'No image were provided!' });
       const { name } = req.params;
       const response = await cloudinary.v2.uploader.upload(image, {
         height: 256,
@@ -135,6 +119,7 @@ const communityCtrl = {
       community.image = response.secure_url;
       const postThumb = await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });
       if (!postThumb) return res.status(500).json({ msg: 'Something went wrong with this image. Please try with another one' });
+      await community.save();
       res.json({ msg: 'Image updated successfully' });
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -145,11 +130,11 @@ const communityCtrl = {
       const req = expressRequest as UserRequest;
       const { community } = req.body;
       const { user } = req;
-      const check = user.subscribed?.find((sub) => sub === community);
       const communityInfo = await Community.findOne({ name: community });
       if (!communityInfo) return res.status(400).json({ msg: "Invalid community! This community doesn't exist or has been deleted!" });
       const block = user.username === communityInfo?.author ? true : false;
       if (block) return res.status(400).json({ msg: 'You cannot unsubscribe from your own communities!' });
+      const check = user.subscribed?.find((sub) => sub === community);
       if (check) {
         await User.findOneAndUpdate({ username: user.username }, { $pull: { subscribed: community } });
         communityInfo.subscribers -= 1;
@@ -157,6 +142,7 @@ const communityCtrl = {
         await User.findOneAndUpdate({ username: user.username }, { $push: { subscribed: community } });
         communityInfo.subscribers += 1;
       }
+      await communityInfo.save();
       res.status(200).json(true);
     } catch (err) {
       catchErrorCtrl(err, res);
