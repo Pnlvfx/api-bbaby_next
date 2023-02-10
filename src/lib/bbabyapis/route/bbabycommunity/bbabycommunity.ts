@@ -40,7 +40,6 @@ const bbabycommunity = {
         if (!user) throw new Error('Your token is no more valid, please try to logout and login again.');
         const moderator = user.username === community.author ? true : user.role === 1 ? true : false;
         const isSubscriber = user.subscribed?.find((sub) => sub.toLowerCase() === name.toLowerCase()) ? true : false;
-        console.log(isSubscriber);
         community.user_is_banned = false;
         community.user_is_contributor = false;
         community.user_is_moderator = moderator;

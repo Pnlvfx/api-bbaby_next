@@ -4,10 +4,12 @@ import User from '../../models/User';
 import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../config/cloudinary';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
+import coraline from '../../coraline/coraline';
 
 const userCtrl = {
   user: async (req: Request, res: Response) => {
     try {
+      console.log('new request' + coraline.getRandomInt(1000));
       const { token } = req.cookies;
       const { useragent } = req;
       const mobile = useragent?.isMobile;
@@ -77,7 +79,7 @@ const userCtrl = {
   },
   forgotPassword: async (expressRequest: Request, res: Response) => {
     try {
-      console.log('ok');
+      //
     } catch (err) {
       if (err instanceof Error) res.status(500).json({ msg: err.message });
     }

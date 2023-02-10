@@ -40,7 +40,7 @@ export default (oauthCallback: string) => {
     getOAuthRequestToken: () => {
       return new Promise<RequestToken>((resolve, reject) => {
         _oauth.getOAuthRequestToken((error, oauth_token, oauth_token_secret, results) => {
-          if (error) reject(error);
+          if (error) reject(error.data);
           resolve({ oauth_token, oauth_token_secret, results });
         });
       });
@@ -52,7 +52,7 @@ export default (oauthCallback: string) => {
           oauth_token_secret,
           oauth_verifier,
           (error, oauth_access_token, oauth_access_token_secret, results) => {
-            if (error) reject(error);
+            if (error) reject(error.data);
             resolve({ oauth_access_token, oauth_access_token_secret, results });
           },
         );
@@ -61,7 +61,7 @@ export default (oauthCallback: string) => {
     getProtectedResource: (url: string, method: string, oauth_access_token: string, oauth_access_token_secret: string) => {
       return new Promise<getProtectedResource>((resolve, reject) => {
         _oauth.getProtectedResource(url, method, oauth_access_token, oauth_access_token_secret, (error, data, response) => {
-          if (error) reject(error);
+          if (error) reject(error.data);
           if (!data) return reject('API response is invalid');
           resolve({ data, response });
         });

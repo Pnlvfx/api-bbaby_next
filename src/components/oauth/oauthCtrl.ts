@@ -24,10 +24,10 @@ const oauthCtrl = {
   checkEmail: async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
-      if (!userapis.validateEmail(email)) return res.status(400).json({ msg: 'Not a valid email address' });
+      if (!userapis.validateEmail(email)) return res.status(200).json({ status: false, msg: 'Not a valid email address' });
       const existingEmail = await User.findOne({ email });
-      if (existingEmail) return res.status(400).json({ msg: 'This email already exist!' });
-      res.status(200).json(true);
+      if (existingEmail) return res.status(400).json({ status: false, msg: 'This email already exist!' });
+      res.status(200).json({ status: true, msg: 'Success' });
     } catch (err) {
       catchErrorCtrl(err, res);
     }

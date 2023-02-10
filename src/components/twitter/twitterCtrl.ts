@@ -6,7 +6,7 @@ import twitterapis from '../../lib/twitterapis/twitterapis';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
 const COOKIE_NAME = 'oauth_token';
-const tokens: any = {};
+let access_token_secret = '';
 
 const TwitterCtrl = {
   twitterReqToken: async (userRequest: Request, res: Response) => {
@@ -18,15 +18,17 @@ const TwitterCtrl = {
       const { oauth_token, oauth_token_secret } = await twitterapis.oauth.getOAuthRequestToken();
       if (!oauth_token) return res.status(500).json({ msg: 'Twitter error.' });
       const domain = userapis.getCookieDomain(req.headers.origin);
-      res.cookie(COOKIE_NAME, oauth_token, {
-        maxAge: 15 * 60 * 1000, // 15 minutes
-        secure: true,
-        httpOnly: true,
-        sameSite: true,
-        domain,
-      });
-      tokens[oauth_token] = { oauth_token_secret };
-      res.status(200).json({ oauth_token });
+      access_token_secret = oauth_token_secret;
+      res
+        .status(200)
+        .cookie(COOKIE_NAME, oauth_token, {
+          maxAge: 15 * 60 * 1000, // 15 minutes
+          secure: true,
+          httpOnly: true,
+          sameSite: true,
+          domain,
+        })
+        .json({ oauth_token });
     } catch (err) {
       res.status(403).json({ msg: err });
     }
@@ -37,7 +39,7 @@ const TwitterCtrl = {
       const { user } = req;
       const { oauth_token: req_oauth_token, oauth_verifier } = req.body;
       const oauth_token = req.cookies[COOKIE_NAME];
-      const oauth_token_secret = tokens[oauth_token].oauth_token_secret;
+      const oauth_token_secret = access_token_secret;
       if (oauth_token !== req_oauth_token) {
         return res.status(403).json({ msg: 'Request token do not match' });
       }
@@ -46,11 +48,8 @@ const TwitterCtrl = {
         oauth_token_secret,
         oauth_verifier,
       );
-      const saveTokens = await User.findOneAndUpdate(
-        { username: user.username },
-        { $push: { tokens: { oauth_access_token: oauth_access_token, oauth_access_token_secret: oauth_access_token_secret, provider: 'twitter' } } },
-      );
-      if (!saveTokens) return res.status(500).json({ msg: 'Something went wrong in bbaby database' });
+      user.tokens.push({ oauth_access_token, oauth_access_token_secret, provider: 'twitter' });
+      await user.save();
       res.status(200).json({ success: true });
     } catch (err) {
       if (err instanceof Error) res.status(403).json({ message: err.message });
@@ -80,7 +79,7 @@ const TwitterCtrl = {
         },
       );
       if (!info) return res.status(500).json({ msg: 'Something went wrong in bbaby database' });
-      res.json(JSON.parse(response.data.toString()));
+      res.json(user);
     } catch (error) {
       res.status(403).json({ message: error });
     }
