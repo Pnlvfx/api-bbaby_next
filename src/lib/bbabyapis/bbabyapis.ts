@@ -18,13 +18,18 @@ import Earthquake from '../../models/Earthquake';
 
 const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'];
 
+Community.findOne({ name: 'Hearthquake' }).then((c) => {
+  if (!c) return;
+  c.language = 'en';
+  c?.save();
+});
+
 const bbabyapis = {
   initialize: async () => {
     try {
       const db = process.env.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle'; // local;
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
-      await Earthquake.deleteMany({});
       const earthquakes = await earthquakeapis.get();
       earthquakes.features.map((earthquake) => {
         try {
@@ -174,13 +179,12 @@ const bbabyapis = {
       earthquakeData.features.map(async (earthquake) => {
         const exist = await Earthquake.findOne({ id: earthquake.id });
         if (exist) return;
-        if (earthquake.properties.place.includes('Italy')) {
-          await bbabyapis.earthquakePost(earthquake);
-        }
-        if (earthquake.properties.place.includes('Turkey')) {
-          await bbabyapis.earthquakePost(earthquake);
-        } else {
-          await bbabyapis.earthquakePost(earthquake);
+        if (earthquake.properties.mag >= 4) {
+          if (earthquake.properties.place.includes('Italy')) {
+            await bbabyapis.earthquakePost(earthquake);
+          } else {
+            await bbabyapis.earthquakePost(earthquake);
+          }
         }
         const dbEathquake = new Earthquake(earthquake);
         await dbEathquake.save();
@@ -202,7 +206,11 @@ const bbabyapis = {
         community = await bbabyapis.community.createCommunity(user, 'Earthquake');
       }
       //const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
-      await bbabyapis.post.newPost(user, post, community.name);
+      const share = process.env.NODE_ENV === 'production' ? true : false;
+      await bbabyapis.post.newPost(user, post, community.name, {
+        sharePostToTwitter: share,
+        sharePostToTG: share,
+      });
       await coraline.sendLog(post);
     } catch (err) {
       throw catchError(err);
