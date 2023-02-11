@@ -1,9 +1,8 @@
 import mongoose from 'mongoose';
 import config from '../../config/config';
-import { catchErrorWithTelegram } from '../../config/common';
 import coraline from '../../coraline/coraline';
 import bbabynews from './route/bbabynews/bbabypost/bbabynews';
-import { catchError } from '../../coraline/cor-route/crlerror';
+import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
 import userapis from '../userapis/userapis';
 import bbabypost from './route/bbabypost/bbabypost';
 import { Chance } from 'chance';
@@ -14,15 +13,18 @@ import Post from '../../models/Post';
 import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import Community from '../../models/Community';
+import earthquakeapis from '../earthquakeapis/earthquakeapis';
+import Earthquake from '../../models/Earthquake';
 
 const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'];
 
 const bbabyapis = {
   initialize: async () => {
     try {
-      //const db = process.env.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle'; // local;
+      const db = process.env.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle'; // local;
       mongoose.set('strictQuery', true);
-      await mongoose.connect(config.MONGO_URI);
+      await mongoose.connect(db);
+      setInterval(bbabyapis.earthquakeInfo, 60000 * 2);
       //const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://16eb-91-206-70-33.eu.ngrok.io';
       // await telegramapis.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
       // await telegramapis.setMyCommands([
@@ -87,17 +89,34 @@ const bbabyapis = {
       throw catchError(err);
     }
   },
-  newBot: async () => {
+  newBot: async (username?: string) => {
     try {
-      const chance = new Chance();
-      const email = chance.email();
-      const password = coraline.generateRandomId(10);
-      const username = coraline.createPermalink(chance.name() + chance.year({ min: 1964, max: 2000 }));
-      const ipInfo = await userapis.getIP();
-      const user = await userapis.newUser(email, username, password, ipInfo);
-      user.is_bot = true;
-      await user.save();
-      return user;
+      if (username) {
+        const exist = await User.findOne({ username });
+        if (exist) {
+          return exist;
+        } else {
+          const chance = new Chance();
+          const email = chance.email();
+          const password = coraline.generateRandomId(10);
+          const _username = coraline.createPermalink(username);
+          const ipInfo = await userapis.getIP();
+          const user = await userapis.newUser(email, _username, password, ipInfo);
+          user.is_bot = true;
+          await user.save();
+          return user;
+        }
+      } else {
+        const chance = new Chance();
+        const email = chance.email();
+        const password = coraline.generateRandomId(10);
+        const _username = coraline.createPermalink(chance.name() + chance.year({ min: 1964, max: 2000 }));
+        const ipInfo = await userapis.getIP();
+        const user = await userapis.newUser(email, _username, password, ipInfo);
+        user.is_bot = true;
+        await user.save();
+        return user;
+      }
     } catch (err) {
       throw catchError(err);
     }
@@ -134,6 +153,47 @@ const bbabyapis = {
         sharePostToTwitter: share,
       });
       return post;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  earthquakeInfo: async () => {
+    try {
+      console.log('new earthquake request');
+      const earthquakeData = await earthquakeapis.get();
+      earthquakeData.features.map(async (earthquake) => {
+        const exist = await Earthquake.findOne({ id: earthquake.id });
+        if (exist) return;
+        if (earthquake.properties.place.includes('Italy')) {
+          await bbabyapis.earthquakePost(earthquake);
+        }
+        if (earthquake.properties.place.includes('Turkey')) {
+          await bbabyapis.earthquakePost(earthquake);
+        } else {
+          await bbabyapis.earthquakePost(earthquake);
+        }
+        const dbEathquake = new Earthquake(earthquake);
+        await dbEathquake.save();
+      });
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  earthquakePost: async (earthquake: Earthquake) => {
+    try {
+      const user = await bbabyapis.newBot('earthquake');
+      const { properties } = earthquake;
+      const start = properties.mag >= 5.5 ? 'Breaking News: A massive earthquake' : 'News: An earthquake';
+      const post = `${start} with a magnitude of ${properties.mag} strikes ${properties.place}. The tremors were felt on ${new Date(
+        properties.time,
+      ).toLocaleString()}. Stay safe, folks! 🌎💔`;
+      let community = await Community.findOne({ name: 'Earthquake' });
+      if (!community) {
+        community = await bbabyapis.community.createCommunity(user, 'Earthquake');
+      }
+      //const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
+      await bbabyapis.post.newPost(user, post, community.name);
+      await coraline.sendLog(post);
     } catch (err) {
       throw catchError(err);
     }

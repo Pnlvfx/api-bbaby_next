@@ -7,9 +7,14 @@ import bcrypt from 'bcrypt';
 import { UserIpInfoProps } from './types';
 
 const userapis = {
-  getIP: async () => {
+  getIP: async (ip?: string) => {
     try {
-      const url = `https://extreme-ip-lookup.com/json?key=${config.IP_LOOKUP_API_KEY}`;
+      let url = 'https://extreme-ip-lookup.com/json';
+      if (ip) {
+        url += '/' + ip;
+      }
+      url += `?key=${config.IP_LOOKUP_API_KEY}`;
+      console.log(url);
       const res = await fetch(url, {
         method: 'get',
       });

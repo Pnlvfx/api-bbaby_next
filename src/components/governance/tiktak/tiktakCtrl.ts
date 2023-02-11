@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
-import { catchErrorCtrl } from '../../../coraline/cor-route/crlerror';
+import { catchErrorCtrl, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import { UserRequest } from '../../../@types/express';
 import openaiapis from '../../../lib/openaiapis/openaiapis';
 import googleapis from '../../../lib/googleapis/googleapis';
 import Tiktak from '../../../models/Tiktak';
 import coraline from '../../../coraline/coraline';
 import tiktokapis from '../../../lib/tiktokapis/tiktokapis';
-import { catchErrorWithTelegram } from '../../../config/common';
 
 const tiktakCtrl = {
   newTiktak: async (userRequest: Request, res: Response) => {

@@ -1,8 +1,7 @@
 import { getLinks, getNews, saveBBCnewstodb } from './hook/bbchooks';
-import { catchErrorWithTelegram } from '../../config/common';
 import bbabyapis from '../bbabyapis/bbabyapis';
 import { BBCInfo } from './types/bbctype';
-import { catchError } from '../../coraline/cor-route/crlerror';
+import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
 
 const bbcapis = {
   start: async () => {

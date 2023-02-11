@@ -38,7 +38,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(compression());
-app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
+app.use(cors({ origin: [config.CLIENT_URL, 'https://new.bbabystyle.com'], credentials: true }));
 const staticPath = coraline.useStatic();
 
 bbabyapis.initialize();
