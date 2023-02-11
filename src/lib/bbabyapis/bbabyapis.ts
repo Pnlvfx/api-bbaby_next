@@ -176,7 +176,7 @@ const bbabyapis = {
         await dbEathquake.save();
       });
     } catch (err) {
-      throw catchError(err);
+      catchErrorWithTelegram(err);
     }
   },
   earthquakePost: async (earthquake: Earthquake) => {

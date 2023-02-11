@@ -56,7 +56,7 @@ const bbabypost = {
         await telegramapis.sendMessage(chat_id, text);
       }
       communityInfo.$inc('number_of_posts', 1);
-      user.last_post = communityInfo._id;
+      user.last_post.push(communityInfo._id);
       await user.save();
       await post.save();
       await coraline.sendLog(`New post created from ${user.username}: ${url}`);
