@@ -18,12 +18,6 @@ import Earthquake from '../../models/Earthquake';
 
 const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'];
 
-Community.findOne({ name: 'Hearthquake' }).then((c) => {
-  if (!c) return;
-  c.language = 'en';
-  c?.save();
-});
-
 const bbabyapis = {
   initialize: async () => {
     try {
