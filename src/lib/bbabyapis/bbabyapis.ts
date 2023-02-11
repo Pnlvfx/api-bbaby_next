@@ -24,6 +24,16 @@ const bbabyapis = {
       const db = process.env.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle'; // local;
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
+      await Earthquake.deleteMany({});
+      const earthquakes = await earthquakeapis.get();
+      earthquakes.features.map((earthquake) => {
+        try {
+          const dbearthquake = new Earthquake(earthquake);
+          dbearthquake.save();
+        } catch (err) {
+          throw catchError(err);
+        }
+      });
       setInterval(bbabyapis.earthquakeInfo, 60000 * 2);
       //const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://16eb-91-206-70-33.eu.ngrok.io';
       // await telegramapis.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
