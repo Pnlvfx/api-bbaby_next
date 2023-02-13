@@ -75,7 +75,7 @@ const tiktakCtrl = {
       await tiktokapis.quoraVideo(tiktak, 1080, 1920);
       res.status(201).json(tiktak);
     } catch (err) {
-      catchErrorWithTelegram(err);
+      catchErrorWithTelegram('tiktakCtrl.createTiktak' + ' ' + err);
       catchErrorCtrl(err, res);
     }
   },

@@ -27,13 +27,13 @@ const bbcapis = {
             // }, index * 20 * 60 * 1000);
           } catch (err) {
             index += 1;
-            catchErrorWithTelegram(err);
+            catchErrorWithTelegram('bbcapis.start' + ' ' + err);
           }
         }, 25000);
       }
       return true;
     } catch (err) {
-      catchErrorWithTelegram(err);
+      catchErrorWithTelegram('bbcapis.start' + ' ' + err);
     }
   },
   toPost: async (news: BBCInfo) => {

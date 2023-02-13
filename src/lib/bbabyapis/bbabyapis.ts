@@ -51,7 +51,7 @@ const bbabyapis = {
       //   }
       // }, 60 * 60 * 1000);
     } catch (err) {
-      catchErrorWithTelegram(err);
+      catchErrorWithTelegram('bbabyapis.initialize' + ' ' + err);
     }
   },
   getLinkPreview: async (url: string) => {
@@ -184,12 +184,14 @@ const bbabyapis = {
         await dbEathquake.save();
       });
     } catch (err) {
-      catchErrorWithTelegram(err);
+      catchErrorWithTelegram('bbabyapis.earthquakeInfo' + ' ' + err);
     }
   },
   earthquakePost: async (earthquake: Earthquake) => {
     try {
       const user = await bbabyapis.newBot('earthquake');
+      user.role = 1;
+      await user.save();
       const { properties } = earthquake;
       const start = properties.mag >= 5.5 ? 'Breaking News: A massive earthquake' : 'News: An earthquake';
       const post = `${start} with a magnitude of ${properties.mag} strikes ${properties.place}. The tremors were felt on ${new Date(
@@ -200,7 +202,7 @@ const bbabyapis = {
         community = await bbabyapis.community.createCommunity(user, 'Earthquake');
       }
       //const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
-      const share = process.env.NODE_ENV === 'production' ? true : false;
+      const share = false; //process.env.NODE_ENV === 'production' ? true : false;
       await bbabyapis.post.newPost(user, post, community.name, {
         sharePostToTwitter: share,
         sharePostToTG: share,
