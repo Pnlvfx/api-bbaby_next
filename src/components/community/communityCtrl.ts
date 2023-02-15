@@ -33,7 +33,7 @@ const communityCtrl = {
       const { token } = req.cookies;
       const { name } = req.params;
       const community = await bbabyapis.community.getCommunity(token, name);
-      res.json(community);
+      res.status(200).json(community);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -54,7 +54,7 @@ const communityCtrl = {
       //     })
       //     return response;
       // }
-      res.json(communities);
+      res.status(200).json(communities);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -85,7 +85,7 @@ const communityCtrl = {
           .sort({ createdAt: -1 });
         communities = communities.concat(newCommunities);
       }
-      res.json(communities);
+      res.status(200).json(communities);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -120,7 +120,7 @@ const communityCtrl = {
       const postThumb = await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });
       if (!postThumb) return res.status(500).json({ msg: 'Something went wrong with this image. Please try with another one' });
       await community.save();
-      res.json({ msg: 'Image updated successfully' });
+      res.status(200).json({ msg: 'Image updated successfully' });
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -160,7 +160,7 @@ const communityCtrl = {
         return res.status(500).json({ msg: 'You need to be a moderator to do this action!' });
       } else {
         await Community.findOneAndUpdate({ name }, { category });
-        res.json(true);
+        res.status(200).json(true);
       }
     } catch (err) {
       catchErrorCtrl(err, res);

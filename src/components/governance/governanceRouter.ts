@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { limiter } from '../../config/common';
 import governanceCtrl from './governanceCtrl';
 import youtubeRouter from './youtube/youtubeRouter';
 import tiktakRouter from './tiktak/tiktakRouter';
@@ -22,6 +21,6 @@ governanceRouter.post('/news', governanceCtrl.postArticle);
 
 governanceRouter.get('/pexels', governanceCtrl.getPexelsImage);
 
-governanceRouter.get('/BBCnews', limiter, governanceCtrl.getBBCarticles);
+governanceRouter.get('/BBCnews', governanceCtrl.getBBCarticles);
 
 export default governanceRouter;
