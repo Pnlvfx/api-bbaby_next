@@ -54,6 +54,7 @@ const userCtrl = {
             username: user.username,
             avatar: user.avatar,
             role: user.role,
+            email_verified: user.email_verified,
           },
           device: {
             mobile,
@@ -69,15 +70,16 @@ const userCtrl = {
       const req = expressRequest as UserRequest;
       const { user } = req;
       const response = {
-        avatar: user?.avatar,
-        country: user?.country,
-        email: user?.email,
-        externalAccounts: user?.externalAccounts,
-        hasExternalAccount: user?.hasExternalAccount,
-        role: user?.role,
-        username: user?.username,
+        avatar: user.avatar,
+        country: user.country,
+        email: user.email,
+        email_verified: user.email_verified,
+        externalAccounts: user.externalAccounts,
+        hasExternalAccount: user.hasExternalAccount,
+        role: user.role,
+        username: user.username,
       };
-      res.json(response);
+      res.status(200).json(response);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

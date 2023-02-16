@@ -25,10 +25,10 @@ const bbabyapis = {
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       const earthquakes = await earthquakeapis.get();
-      earthquakes.features.map((earthquake) => {
+      earthquakes.features.map(async (earthquake) => {
         try {
           const dbearthquake = new Earthquake(earthquake);
-          dbearthquake.save();
+          await dbearthquake.save();
         } catch (err) {
           throw catchError(err);
         }

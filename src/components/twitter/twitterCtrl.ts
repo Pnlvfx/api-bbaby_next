@@ -9,6 +9,8 @@ const COOKIE_NAME = 'oauth_token';
 let access_token_secret = '';
 
 let tweets: TweetProps[];
+let italianTweets: TweetProps[];
+let englishTweets: TweetProps[];
 
 const TwitterCtrl = {
   twitterReqToken: async (userRequest: Request, res: Response) => {
@@ -130,20 +132,43 @@ const TwitterCtrl = {
         });
       const { oauth_access_token, oauth_access_token_secret } = twitter;
       if (!oauth_access_token || !oauth_access_token_secret) return res.status(400).json({ msg: 'Please, try to login to twitter again!' });
-      const { slug, owner_screen_name } = req.query;
+      const { limit, skip, slug, owner_screen_name } = req.query;
+      if (!limit || !skip) return res.status(400).json({ msg: 'You need to use pagination parameters for this API to work!' });
       if (!slug || !owner_screen_name)
         return res.status(400).json({
           msg: 'This API require a slug parameter and an owner_screen_name.',
         });
-      const response = await twitterapis.oauth.getProtectedResource(
-        `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
-        'GET',
-        oauth_access_token,
-        oauth_access_token_secret,
-      );
-      const data = JSON.parse(response.data.toString());
-      if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
-      res.json(data);
+      const _skip = Number(skip);
+      const _limit = Number(limit);
+      if (owner_screen_name === 'Bbabystyle') {
+        if ((process.env.NODE_ENV === 'production' && _limit === 15) || (process.env.NODE_ENV === 'development' && !italianTweets)) {
+          console.log('new request');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('In development new tweets get requested only after each restart, otherwise they stay always the same!');
+          }
+          const url = `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`;
+          const response = await twitterapis.oauth.getProtectedResource(url, 'GET', oauth_access_token, oauth_access_token_secret);
+          const data = JSON.parse(response.data.toString());
+          if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
+          italianTweets = data;
+        }
+        const tt = italianTweets.slice(_skip, _skip + _limit);
+        res.status(200).json(tt);
+      } else {
+        if ((process.env.NODE_ENV === 'production' && _limit === 15) || (process.env.NODE_ENV === 'development' && !englishTweets)) {
+          console.log('new request');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('In development new tweets get requested only after each restart, otherwise they stay always the same!');
+          }
+          const url = `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`;
+          const response = await twitterapis.oauth.getProtectedResource(url, 'GET', oauth_access_token, oauth_access_token_secret);
+          const data = JSON.parse(response.data.toString());
+          if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
+          englishTweets = data;
+        }
+        const tt = englishTweets.slice(_skip, _skip + _limit);
+        res.status(200).json(tt);
+      }
     } catch (error) {
       res.status(403).json({ message: error });
     }

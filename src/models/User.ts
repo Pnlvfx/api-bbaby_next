@@ -27,6 +27,10 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: 'https://res.cloudinary.com/bbabystyle/image/upload/v1655209740/default/avatar_txt7me.webp',
     },
+    email_verified: {
+      type: Boolean,
+      default: false,
+    },
     country: {
       type: String,
     },

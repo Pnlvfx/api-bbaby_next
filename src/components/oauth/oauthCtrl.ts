@@ -1,11 +1,13 @@
 import type { CookieOptions, Request, Response } from 'express';
 import config from '../../config/config';
 import User from '../../models/User';
-import { login } from '../user/user-functions/userFunctions';
+import { createActivationToken, login } from '../user/user-functions/userFunctions';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
+import { UserRequest } from '../../@types/express';
+import sendEMail from '../user/user-functions/sendMail';
 
 interface JwtPayload {
   email: string;
@@ -39,9 +41,9 @@ const oauthCtrl = {
       const user = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET) as JwtPayload;
       const check = await User.findOne({ email: user.email });
       if (check) return res.status(400).json({ msg: 'This email already exists' });
-      res.json({ msg: 'Success' });
+      res.status(200).json({ msg: 'Success' });
     } catch (err) {
-      catchErrorCtrl(err, res);
+      res.status(400).json({ msg: 'The email link you used is invalid!' });
     }
   },
   login: async (req: Request, res: Response) => {
@@ -151,6 +153,21 @@ const oauthCtrl = {
     try {
       const { eu_cookie } = req.cookies;
       res.status(200).json(eu_cookie ? true : false);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  sendVerificationEmail: async (userRequest: Request, res: Response) => {
+    try {
+      const req = userRequest as UserRequest;
+      const { user } = req;
+      if (user.email_verified) return res.status(200).json({ msg: 'This email is already verified, try to refresh the page!' });
+      const activation_token = createActivationToken(user);
+      const url = `${config.CLIENT_URL}/verification/${activation_token}`;
+      sendEMail(user.email, url, 'Verify Email Address');
+      res.status(200).json({
+        msg: `Bbabystyle sent a confimation email to: ${user.email}. Click the verify link in the email to secure your Bbabystyle account!`,
+      });
     } catch (err) {
       catchErrorCtrl(err, res);
     }

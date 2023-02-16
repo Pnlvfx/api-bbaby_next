@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import oauthCtrl from './oauthCtrl';
+import auth from '../../middleware/auth';
 
 const oauthRouter = Router();
 
@@ -18,5 +19,7 @@ oauthRouter.post('/google_login', oauthCtrl.googleLogin);
 oauthRouter.get('/eu_cookie', oauthCtrl.getEUCookie);
 
 oauthRouter.post('/eu_cookie', oauthCtrl.saveEUCookie);
+
+oauthRouter.get('/send_verification_email', auth, oauthCtrl.sendVerificationEmail);
 
 export default oauthRouter;
