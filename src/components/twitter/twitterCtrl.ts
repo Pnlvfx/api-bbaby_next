@@ -175,6 +175,7 @@ const TwitterCtrl = {
   },
   getHome: async (expressRequest: Request, res: Response) => {
     try {
+      console.log('new1');
       const req = expressRequest as UserRequest;
       const { user } = req;
       const twitter = user.tokens?.find((provider) => provider.provider === 'twitter');
@@ -184,7 +185,7 @@ const TwitterCtrl = {
         });
       if (!twitter.oauth_access_token || !twitter.oauth_access_token_secret)
         return res.status(400).json({ msg: 'Please, try to login to twitter again!' });
-      const { limit, skip } = req.query;
+      const { limit, skip, sort } = req.query;
       if (!limit || !skip) return res.status(400).json({ msg: 'You need to use pagination parameters for this API to work!' });
       const _skip = Number(skip);
       const _limit = Number(limit);
@@ -198,6 +199,11 @@ const TwitterCtrl = {
         const data = JSON.parse(response.data.toString()) as TweetProps[];
         if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
         tweets = data;
+      }
+      if (sort === 'recently') {
+        tweets = tweets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      } else if (sort === 'best') {
+        tweets = tweets.sort((a, b) => b.favorite_count - a.favorite_count);
       }
       const response = tweets.slice(_skip, _skip + _limit);
       res.status(200).json(response);
