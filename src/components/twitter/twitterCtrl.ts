@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { UserRequest } from '../../@types/express';
+import type { TwitterRequest, UserRequest } from '../../@types/express';
 import config from '../../config/config';
 import User from '../../models/User';
 import twitterapis from '../../lib/twitterapis/twitterapis';
@@ -9,9 +9,9 @@ import userapis from '../../lib/userapis/userapis';
 const COOKIE_NAME = 'oauth_token';
 let access_token_secret = '';
 
-let tweets: TweetProps[];
-let italianTweets: TweetProps[];
-let englishTweets: TweetProps[];
+let tweets: TweetProps[] | undefined;
+let italianTweets: TweetProps[] | undefined;
+let englishTweets: TweetProps[] | undefined;
 
 const TwitterCtrl = {
   twitterReqToken: async (userRequest: Request, res: Response) => {
@@ -56,51 +56,14 @@ const TwitterCtrl = {
         oauth_verifier,
       );
       user.tokens.push({
-        oauth_access_token,
-        oauth_access_token_secret,
+        access_token: oauth_access_token,
+        access_token_secret: oauth_access_token_secret,
         provider: 'twitter',
       });
       await user.save();
       res.status(200).json({ success: true });
     } catch (err) {
       if (err instanceof Error) res.status(403).json({ message: err.message });
-    }
-  },
-  twitterUserInfo: async (expressRequest: Request, res: Response) => {
-    try {
-      const req = expressRequest as UserRequest;
-      const internalUser = req.user;
-      const twitter = internalUser?.tokens?.find((provider) => provider.provider === 'twitter');
-      if (!twitter)
-        return res.status(500).json({
-          msg: "Sorry. We can't find your twitter account. Have you associated it in your User Settings page?",
-        });
-      const { oauth_access_token, oauth_access_token_secret } = twitter;
-      if (!oauth_access_token || !oauth_access_token_secret) return res.status(500).json({ msg: 'Please, try to login to twitter again!' });
-      const response = await twitterapis.oauth.getProtectedResource(
-        `https://api.twitter.com/1.1/account/verify_credentials.json`,
-        'GET',
-        oauth_access_token,
-        oauth_access_token_secret,
-      );
-      const user = JSON.parse(response.data.toString());
-      const info = await User.findOneAndUpdate(
-        { username: internalUser?.username },
-        {
-          $push: {
-            externalAccounts: {
-              username: user.screen_name,
-              provider: 'twitter',
-              link: `https://www.twitter.com/${user.screen_name}`,
-            },
-          },
-          hasExternalAccount: true,
-        },
-      );
-      if (!info) return res.status(500).json({ msg: 'Something went wrong in bbaby database' });
-      res.json(user);
-    } catch (error) {
-      res.status(403).json({ message: error });
     }
   },
   twitterLogout: async (expressRequest: Request, res: Response) => {
@@ -122,53 +85,75 @@ const TwitterCtrl = {
       if (err instanceof Error) res.status(403).json({ msg: err.message });
     }
   },
-  twitterGetUserPost: async (expressRequest: Request, res: Response) => {
+  twitterUserInfo: async (expressRequest: Request, res: Response) => {
     try {
-      const req = expressRequest as UserRequest;
-      const { user } = req;
-      const twitter = user.tokens?.find((provider) => provider.provider === 'twitter');
-      if (!twitter)
-        return res.status(401).json({
-          msg: 'You need to connect your twitter account to access this page!',
-        });
-      const { oauth_access_token, oauth_access_token_secret } = twitter;
-      if (!oauth_access_token || !oauth_access_token_secret) return res.status(400).json({ msg: 'Please, try to login to twitter again!' });
-      const { limit, skip, slug, owner_screen_name } = req.query;
-      if (!limit || !skip) return res.status(400).json({ msg: 'You need to use pagination parameters for this API to work!' });
+      const req = expressRequest as TwitterRequest;
+      const { user, twitter } = req;
+      const response = await twitterapis.oauth.getProtectedResource(
+        `https://api.twitter.com/1.1/account/verify_credentials.json`,
+        'GET',
+        twitter.access_token,
+        twitter.access_token_secret,
+      );
+      const twitterUser = JSON.parse(response.data.toString());
+      const info = await User.findOneAndUpdate(
+        { username: user?.username },
+        {
+          $push: {
+            externalAccounts: {
+              username: twitterUser.screen_name,
+              provider: 'twitter',
+              link: `https://www.twitter.com/${twitterUser.screen_name}`,
+            },
+          },
+          hasExternalAccount: true,
+        },
+      );
+      if (!info) return res.status(500).json({ msg: 'Something went wrong in bbaby database' });
+      res.status(200).json(twitterUser);
+    } catch (error) {
+      res.status(403).json({ message: error });
+    }
+  },
+  getList: async (expressRequest: Request, res: Response) => {
+    try {
+      const req = expressRequest as TwitterRequest;
+      const { twitter } = req;
+      const { slug, owner_screen_name } = req.query;
       if (!slug || !owner_screen_name)
         return res.status(400).json({
           msg: 'This API require a slug parameter and an owner_screen_name.',
         });
-      const _skip = Number(skip);
-      const _limit = Number(limit);
       if (owner_screen_name === 'Bbabystyle') {
-        if ((process.env.NODE_ENV === 'production' && _limit === 15) || (process.env.NODE_ENV === 'development' && !italianTweets)) {
-          console.log('new request');
-          if (process.env.NODE_ENV === 'development') {
-            console.log('In development new tweets get requested only after each restart, otherwise they stay always the same!');
-          }
-          const url = `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`;
-          const response = await twitterapis.oauth.getProtectedResource(url, 'GET', oauth_access_token, oauth_access_token_secret);
+        if (config.NODE_ENV === 'development' && italianTweets && italianTweets.length > 1) {
+          res.status(200).json(italianTweets);
+        } else {
+          const response = await twitterapis.oauth.getProtectedResource(
+            `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
+            'GET',
+            twitter.access_token,
+            twitter.access_token_secret,
+          );
           const data = JSON.parse(response.data.toString());
           if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
           italianTweets = data;
+          res.json(data);
         }
-        const tt = italianTweets.slice(_skip, _skip + _limit);
-        res.status(200).json(tt);
       } else {
-        if ((process.env.NODE_ENV === 'production' && _limit === 15) || (process.env.NODE_ENV === 'development' && !englishTweets)) {
-          console.log('new request');
-          if (process.env.NODE_ENV === 'development') {
-            console.log('In development new tweets get requested only after each restart, otherwise they stay always the same!');
-          }
-          const url = `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`;
-          const response = await twitterapis.oauth.getProtectedResource(url, 'GET', oauth_access_token, oauth_access_token_secret);
+        if (config.NODE_ENV === 'development' && englishTweets && englishTweets.length > 1) {
+          res.status(200).json(englishTweets);
+        } else {
+          const response = await twitterapis.oauth.getProtectedResource(
+            `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
+            'GET',
+            twitter.access_token,
+            twitter.access_token_secret,
+          );
           const data = JSON.parse(response.data.toString());
           if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
           englishTweets = data;
+          res.json(data);
         }
-        const tt = englishTweets.slice(_skip, _skip + _limit);
-        res.status(200).json(tt);
       }
     } catch (error) {
       res.status(403).json({ message: error });
@@ -176,37 +161,30 @@ const TwitterCtrl = {
   },
   getHome: async (expressRequest: Request, res: Response) => {
     try {
-      const req = expressRequest as UserRequest;
-      const { user } = req;
-      const twitter = user.tokens?.find((provider) => provider.provider === 'twitter');
-      if (!twitter)
-        return res.status(401).json({
-          msg: 'You need to connect your twitter account to access this page!',
-        });
-      if (!twitter.oauth_access_token || !twitter.oauth_access_token_secret)
-        return res.status(400).json({ msg: 'Please, try to login to twitter again!' });
-      const { limit, skip, sort } = req.query;
-      if (!limit || !skip) return res.status(400).json({ msg: 'You need to use pagination parameters for this API to work!' });
-      const _skip = Number(skip);
-      const _limit = Number(limit);
-      if ((process.env.NODE_ENV === 'production' && _limit === 15) || (process.env.NODE_ENV === 'development' && !tweets)) {
-        console.log('new request');
-        if (process.env.NODE_ENV === 'development') {
-          console.log('In development new tweets get requested only after each restart, otherwise they stay always the same!');
-        }
+      if (config.NODE_ENV === 'development' && tweets && tweets.length > 1) {
+        res.status(200).json(tweets);
+      } else {
         const url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended&count=100';
         const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET);
         const data = JSON.parse(response.data.toString()) as TweetProps[];
         if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
         tweets = data;
+        res.status(200).json(data);
       }
-      if (sort === 'recently') {
-        tweets = tweets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      } else if (sort === 'best') {
-        tweets = tweets.sort((a, b) => b.favorite_count - a.favorite_count);
-      }
-      const response = tweets.slice(_skip, _skip + _limit);
-      res.status(200).json(response);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  getUserTweets: async (expressRequest: Request, res: Response) => {
+    try {
+      const req = expressRequest as TwitterRequest;
+      const { twitter } = req;
+      const { screen_name } = req.params;
+      const url = `https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=${screen_name}&tweet_mode=extended&count=100`;
+      const response = await twitterapis.oauth.getProtectedResource(url, 'GET', twitter.access_token, twitter.access_token_secret);
+      const data = JSON.parse(response.data.toString()) as TweetProps[];
+      if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
+      res.status(200).json(data);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

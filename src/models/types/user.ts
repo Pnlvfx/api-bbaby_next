@@ -24,11 +24,10 @@ export interface IUser extends Document {
 }
 
 export type TokensProps = {
-  access_token?: string;
+  access_token: string;
+  access_token_secret: string;
   refresh_token?: string;
   provider: 'reddit' | 'twitter';
-  oauth_access_token?: string;
-  oauth_access_token_secret?: string;
   access_token_expiration?: Date;
 };
 

@@ -13,10 +13,10 @@ const chooseUser = (user: IUser, post: PostProps, language: 'it' | 'en') => {
     let accessSecret: string;
     if (user.role === 0) {
       const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
-      if (!twitter || !twitter.oauth_access_token || !twitter.oauth_access_token_secret)
+      if (!twitter || !twitter.access_token || !twitter.access_token_secret)
         throw new Error('You need to authorize the twitter API in the User Settings page.');
-      accessToken = twitter.oauth_access_token;
-      accessSecret = twitter.oauth_access_token_secret;
+      accessToken = twitter.access_token;
+      accessSecret = twitter.access_token_secret;
     } else if (post.community === 'Italy') {
       accessToken = config.ANON_ACCESS_TOKEN;
       accessSecret = config.ANON_ACCESS_TOKEN_SECRET;
