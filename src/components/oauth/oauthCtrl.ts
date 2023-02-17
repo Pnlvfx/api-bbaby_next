@@ -8,9 +8,10 @@ import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
 import { UserRequest } from '../../@types/express';
 import sendEMail from '../user/user-functions/sendMail';
+import { IUser } from '../../models/types/user';
 
 interface JwtPayload {
-  email: string;
+  _doc: IUser;
 }
 
 const oauthCtrl = {
@@ -38,9 +39,11 @@ const oauthCtrl = {
     try {
       const { activation_token } = req.body;
       const { ACTIVATION_TOKEN_SECRET } = config;
-      const user = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET) as JwtPayload;
-      const check = await User.findOne({ email: user.email });
-      if (check) return res.status(400).json({ msg: 'This email already exists' });
+      const jwtuser = jwt.verify(activation_token, ACTIVATION_TOKEN_SECRET) as JwtPayload;
+      const user = await User.findOne({ email: jwtuser._doc.email });
+      if (!user) return res.status(400).json({ msg: 'Something went wrong!' });
+      user.email_verified = true;
+      await user.save();
       res.status(200).json({ msg: 'Success' });
     } catch (err) {
       res.status(400).json({ msg: 'The email link you used is invalid!' });
@@ -164,7 +167,7 @@ const oauthCtrl = {
       if (user.email_verified) return res.status(200).json({ msg: 'This email is already verified, try to refresh the page!' });
       const activation_token = createActivationToken(user);
       const url = `${config.CLIENT_URL}/verification/${activation_token}`;
-      sendEMail(user.email, url, 'Verify Email Address');
+      sendEMail(user.email, url, 'Verify Email Address', user);
       res.status(200).json({
         msg: `Bbabystyle sent a confimation email to: ${user.email}. Click the verify link in the email to secure your Bbabystyle account!`,
       });

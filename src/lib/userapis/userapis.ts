@@ -56,7 +56,7 @@ const userapis = {
       });
       const activation_token = createActivationToken(user);
       const url = `${config.CLIENT_URL}/verification/${activation_token}`;
-      sendEMail(email, url, 'Verify Email Address');
+      sendEMail(email, url, 'Verify Email Address', user);
       await user.save();
       return user;
     } catch (err) {

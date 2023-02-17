@@ -5,6 +5,7 @@ import User from '../../models/User';
 import twitterapis from '../../lib/twitterapis/twitterapis';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
+
 const COOKIE_NAME = 'oauth_token';
 let access_token_secret = '';
 
@@ -175,7 +176,6 @@ const TwitterCtrl = {
   },
   getHome: async (expressRequest: Request, res: Response) => {
     try {
-      console.log('new1');
       const req = expressRequest as UserRequest;
       const { user } = req;
       const twitter = user.tokens?.find((provider) => provider.provider === 'twitter');
