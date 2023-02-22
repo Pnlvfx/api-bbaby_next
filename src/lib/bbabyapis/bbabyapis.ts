@@ -15,7 +15,7 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import Community from '../../models/Community';
 import earthquakeapis from '../earthquakeapis/earthquakeapis';
 import Earthquake from '../../models/Earthquake';
-
+import bbcapis from '../bbcapis/bbcapis';
 const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'];
 
 const bbabyapis = {
@@ -34,15 +34,15 @@ const bbabyapis = {
         }
       });
       setInterval(bbabyapis.earthquakeInfo, 60000 * 2);
-      //const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://16eb-91-206-70-33.eu.ngrok.io';
+      // const base_url = config.NODE_ENV === 'production' ? config.SERVER_URL : 'https://16eb-91-206-70-33.eu.ngrok.io';
       // await telegramapis.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
       // await telegramapis.setMyCommands([
       //   { command: 'start', description: 'Start the bot' },
       //   { command: 'quora', description: 'Quora' },
       // ]);
-      // const timeinterval = coraline.date.hourToms(1);
-      // setInterval(bbcapis.start, timeinterval);
-      // await bbcapis.start();
+      const timeinterval = coraline.date.hourToms(1);
+      setInterval(bbcapis.start, timeinterval);
+      await bbcapis.start();
       // setInterval(async () => {
       //   try {
       //     await bbabyapis.answer();

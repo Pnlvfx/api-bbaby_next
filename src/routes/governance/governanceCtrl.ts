@@ -153,9 +153,10 @@ const governanceCtrl = {
   getBBCarticle: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;
-      const { permalink } = req.body;
-      if (!permalink) return res.status(400).json({ msg: 'Missing redirect link parameters' });
-      const BBCnews = await BBC.findOne({ permalink });
+      const { permalink } = req.params;
+      if (!permalink) return res.status(400).json({ msg: 'Missing permalink parameters' });
+      const perma = `/governance/news/${permalink}`;
+      const BBCnews = await BBC.findOne({ permalink: perma });
       if (!BBCnews) return res.status(400).json({ msg: "This news doesn't exist!" });
       res.status(200).json(BBCnews);
     } catch (err) {

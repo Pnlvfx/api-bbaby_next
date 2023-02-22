@@ -13,8 +13,7 @@ const chooseUser = (user: IUser, post: PostProps, language: 'it' | 'en') => {
     let accessSecret: string;
     if (user.role === 0) {
       const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
-      if (!twitter || !twitter.access_token || !twitter.access_token_secret)
-        throw new Error('You need to authorize the twitter API in the User Settings page.');
+      if (!twitter) throw new Error('You need to authorize the twitter API in the User Settings page.');
       accessToken = twitter.access_token;
       accessSecret = twitter.access_token_secret;
     } else if (post.community === 'Italy') {
@@ -49,7 +48,8 @@ export const shareToTwitter = async (
   selectedFile?: string,
 ) => {
   try {
-    const govText = savedPost.title.substring(0, 300 - url.length - 10) + ' ' + url;
+    //const govText = savedPost.title.substring(0, 300 - url.length - 8) + ' ' + url;
+    const govText = savedPost.title.substring(0, 300);
     const twitterText = user.role === 0 ? url : govText;
     const twitterUser = chooseUser(user, savedPost, communityInfo.language);
     if (user.role === 1) {

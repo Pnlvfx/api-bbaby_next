@@ -13,7 +13,8 @@
     "lint": "eslint ./src",
     "dev": "tsc -w & nodemon .",
     "build": "rimraf dist && eslint ./src && tsc",
-    "start": "tsc & node ."
+    "start": "tsc & node .",
+    "inspect": "tsc && node --inspect ."
   },
   "dependencies": {
     "audioconcat": "^0.1.4",
@@ -32,7 +33,7 @@
     "mongoose": "^6.9.2",
     "nodemailer": "^6.9.1",
     "oauth": "^0.10.0",
-    "puppeteer": "^19.7.1",
+    "puppeteer": "^19.7.2",
     "sharp": "^0.31.3",
     "text-to-image": "^5.2.0",
     "twitter-api-v2": "^1.14.1",
@@ -51,8 +52,8 @@
     "@types/nodemailer": "^6.4.7",
     "@types/oauth": "^0.9.1",
     "@types/sharp": "^0.31.1",
-    "@typescript-eslint/eslint-plugin": "^5.52.0",
-    "@typescript-eslint/parser": "^5.52.0",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",

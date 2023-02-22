@@ -65,6 +65,26 @@ const userCtrl = {
       catchErrorCtrl(err, res);
     }
   },
+  userFromUsername: async (req: Request, res: Response) => {
+    try {
+      const { username } = req.params;
+      const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+      if (!user) return res.status(400).json({ msg: "This user doens't exist" });
+      const response = {
+        avatar: user.avatar,
+        country: user.country,
+        email: user.email,
+        email_verified: user.email_verified,
+        externalAccounts: user.externalAccounts,
+        hasExternalAccount: user.hasExternalAccount,
+        role: user.role,
+        username: user.username,
+      };
+      res.status(200).json(response);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
   userInfo: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as UserRequest;

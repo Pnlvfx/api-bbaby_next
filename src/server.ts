@@ -4,31 +4,28 @@ import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import compression from 'compression';
-import postRouter from './components/post/postRouter';
-import userRouter from './components/user/userRouter';
-import governanceRouter from './components/governance/governanceRouter';
-import communityRouter from './components/community/communityRouter';
-import twitterRouter from './components/twitter/twitterRouter';
-import commentRouter from './components/comment/commentRouter';
-import Post from './models/Post';
-import searchRouter from './components/search/searchRouter';
-import categoryRouter from './components/category/categoryRouter';
-import newsRouter from './components/news/newsRouter';
-import Community from './models/Community';
-import redditRouter from './components/reddit/redditRouter';
-import oauthRouter from './components/oauth/oauthRouter';
+import postRouter from './routes/post/postRouter';
+import userRouter from './routes/user/userRouter';
+import governanceRouter from './routes/governance/governanceRouter';
+import communityRouter from './routes/community/communityRouter';
+import twitterRouter from './routes/twitter/twitterRouter';
+import commentRouter from './routes/comment/commentRouter';
+import searchRouter from './routes/search/searchRouter';
+import categoryRouter from './routes/category/categoryRouter';
+import newsRouter from './routes/news/newsRouter';
+import redditRouter from './routes/reddit/redditRouter';
+import oauthRouter from './routes/oauth/oauthRouter';
 import auth from './middleware/auth';
 import governance from './middleware/governance';
 import contentType from './middleware/contentType';
 import videoRouter from './bbaby_static/videoRouter';
 import coraline from './coraline/coraline';
-import analyticsRouter from './components/analytics/analyticsRouter';
+import analyticsRouter from './routes/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
 import bbabyapis from './lib/bbabyapis/bbabyapis';
-import telegramRouter from './components/telegram/telegramRouter';
-import generalRouter from './components/general/generalRouter';
-import { catchErrorCtrl } from './coraline/cor-route/crlerror';
-import News from './models/News';
+import telegramRouter from './routes/telegram/telegramRouter';
+import generalRouter from './routes/general/generalRouter';
+import sitemapRouter from './routes/sitemap/sitemapRouter';
 
 const app = express();
 
@@ -44,29 +41,10 @@ const staticPath = coraline.useStatic();
 bbabyapis.initialize();
 
 app.get('/', (req, res) => {
-  res.send('This is bbabystyle API');
+  res.send('Welcome to bbabystyle api');
 });
 
-app.get('/sitemaps', async (req, res) => {
-  try {
-    const { type } = req.query;
-    if (!type) return res.status(400).json({ msg: 'Invalid request!' });
-    if (type === 'post') {
-      const posts = await Post.find({}).sort({ createdAt: -1 });
-      res.status(200).json(posts);
-    } else if (type === 'community') {
-      const communities = await Community.find({});
-      res.status(200).json(communities);
-    } else if (type === 'news') {
-      const news = await News.find({});
-      res.status(200).json(news);
-    } else {
-      res.status(400).json({ msg: 'Invalid type!' });
-    }
-  } catch (err) {
-    catchErrorCtrl(err, res);
-  }
-});
+app.use('/sitemap', sitemapRouter);
 
 app.use('/static', express.static(staticPath));
 

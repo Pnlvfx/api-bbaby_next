@@ -6,6 +6,7 @@ const schema = new Schema<CommunityProps>(
     name: {
       type: String,
       required: true,
+      unique: true,
     },
     image: {
       type: String,

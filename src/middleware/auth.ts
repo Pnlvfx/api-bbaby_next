@@ -1,6 +1,6 @@
 import type { Response, NextFunction, Request } from 'express';
 import type { UserRequest } from '../@types/express';
-import { getUserFromToken } from '../components/user/user-functions/userFunctions';
+import { getUserFromToken } from '../routes/user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../coraline/cor-route/crlerror';
 
 const auth = async (expressRequest: Request, res: Response, next: NextFunction) => {

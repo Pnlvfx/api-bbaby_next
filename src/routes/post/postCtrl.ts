@@ -8,6 +8,7 @@ import Community from '../../models/Community';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import cloudinary from '../../config/cloudinary';
+import { PostProps } from '../../models/types/post';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -18,20 +19,17 @@ const PostCtrl = {
       if (!limit || !skip) return res.status(500).json({ msg: 'Limit and Skip parameters are required for this API.' });
       const user_agent = req.useragent;
       const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
-      let filters = {};
+      let posts: PostProps[];
       if (communityName) {
-        filters = { community: new RegExp(`^${communityName.toString()}$`, 'i') };
+        const filters = { community: new RegExp(`^${communityName.toString()}$`, 'i') };
+        posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else if (author) {
-        filters = { author: new RegExp(`^${author}$`, 'i') };
+        const filters = { author: new RegExp(`^${author}$`, 'i') };
+        posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else {
         const communities = await Community.find({ language: userLang ? userLang : 'en' });
         const selectedCommunities = Array.from(communities.map((community) => community.name));
-        filters = { community: selectedCommunities };
-      }
-      let posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
-      if (posts.length < _limit && !author && !communityName) {
-        //home
-        filters = {};
+        const filters = { community: selectedCommunities };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       }
       if (token) {

@@ -15,9 +15,9 @@ governanceRouter.post('/create-video', governanceCtrl.createVideo);
 
 governanceRouter.post('/translate', governanceCtrl.translate);
 
-governanceRouter.post('/news/article', governanceCtrl.getBBCarticle);
-
 governanceRouter.post('/news', governanceCtrl.postArticle);
+
+governanceRouter.get('/news/:permalink', governanceCtrl.getBBCarticle);
 
 governanceRouter.get('/pexels', governanceCtrl.getPexelsImage);
 

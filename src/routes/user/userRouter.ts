@@ -8,12 +8,12 @@ userRouter.get('/', userCtrl.user);
 
 //userRouter.get('/analytics', userCtrl.analytics);
 
-userRouter.use(auth);
+userRouter.get('/about', auth, userCtrl.userInfo);
 
-userRouter.get('/about', userCtrl.userInfo);
+userRouter.post('/change_avatar', auth, userCtrl.changeAvatar);
 
-userRouter.post('/change_avatar', userCtrl.changeAvatar);
+userRouter.post('/forgot', auth, userCtrl.forgotPassword);
 
-userRouter.post('/forgot', userCtrl.forgotPassword);
+userRouter.get('/:username', userCtrl.userFromUsername);
 
 export default userRouter;

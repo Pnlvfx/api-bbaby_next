@@ -4,7 +4,7 @@ import { CommunityProps } from './community';
 export interface PostProps extends Document {
   author: string;
   title: string;
-  body: string;
+  body?: string;
   community: string;
   communityIcon: string;
   community_detail?: CommunityProps;

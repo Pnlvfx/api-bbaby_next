@@ -1,5 +1,5 @@
-import sendEMail from '../../components/user/user-functions/sendMail';
-import { createActivationToken } from '../../components/user/user-functions/userFunctions';
+import sendEMail from '../../routes/user/user-functions/sendMail';
+import { createActivationToken } from '../../routes/user/user-functions/userFunctions';
 import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import User from '../../models/User';

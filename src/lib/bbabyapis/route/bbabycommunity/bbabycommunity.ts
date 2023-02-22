@@ -1,4 +1,4 @@
-import { getUserFromToken } from '../../../../components/user/user-functions/userFunctions';
+import { getUserFromToken } from '../../../../routes/user/user-functions/userFunctions';
 import { catchError } from '../../../../coraline/cor-route/crlerror';
 import Community from '../../../../models/Community';
 import { IUser } from '../../../../models/types/user';

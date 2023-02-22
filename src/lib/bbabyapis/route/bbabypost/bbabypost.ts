@@ -51,14 +51,15 @@ const bbabypost = {
         await shareToTwitter(post, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
       }
       if (options?.sharePostToTG) {
-        const text = `${post.title + ' ' + post.body + ' ' + url}`;
+        const text = `${post.title + ' ' + post.body || '' + ' ' + url}`;
         const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
         await telegramapis.sendMessage(chat_id, text);
       }
-      communityInfo.$inc('number_of_posts', 1);
+      communityInfo.number_of_posts += 1;
       user.last_post.push(communityInfo._id);
       user.upVotes.push(post._id);
       post.ups += 1;
+      await communityInfo.save();
       await user.save();
       await post.save();
       await coraline.sendLog(`New post created from ${user.username}: ${url}`);
