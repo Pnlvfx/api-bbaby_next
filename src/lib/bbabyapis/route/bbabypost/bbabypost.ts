@@ -51,7 +51,7 @@ const bbabypost = {
         await shareToTwitter(post, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
       }
       if (options?.sharePostToTG) {
-        const text = `${post.title + ' ' + post.body || '' + ' ' + url}`;
+        const text = `${post.title + ' ' + url}`;
         const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
         await telegramapis.sendMessage(chat_id, text);
       }

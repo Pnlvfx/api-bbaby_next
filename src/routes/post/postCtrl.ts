@@ -137,7 +137,7 @@ const PostCtrl = {
       const { title, community, body, selectedFile, isImage, isVideo, height, width, sharePostToTG, sharePostToTwitter } = req.body;
       if (!title) return res.status(500).json({ msg: 'Title is required.' });
       if (!community) return res.status(500).json({ msg: 'Please select a valid community.' });
-      const savedPost = await bbabyapis.post.newPost(user, title, community, {
+      const post = await bbabyapis.post.newPost(user, title, community, {
         body,
         height,
         isImage,
@@ -147,7 +147,7 @@ const PostCtrl = {
         sharePostToTwitter,
         width,
       });
-      res.status(201).json(savedPost);
+      res.status(201).json(post);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
