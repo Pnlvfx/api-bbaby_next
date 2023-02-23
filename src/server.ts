@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to bbabystyle api');
 });
 
-app.use('/sitemap', sitemapRouter);
+app.use('/sitemaps', sitemapRouter);
 
 app.use('/static', express.static(staticPath));
 
