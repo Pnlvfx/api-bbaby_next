@@ -6,6 +6,12 @@ const postRouter = Router();
 
 postRouter.get('/', PostCtrl.getPosts);
 
+postRouter.get('/hot', PostCtrl.getHotPosts);
+
+postRouter.get('/new', PostCtrl.getNewPosts);
+
+postRouter.get('/top', PostCtrl.getTopPosts);
+
 postRouter.get('/:id', PostCtrl.getPost);
 
 postRouter.use('/', auth);

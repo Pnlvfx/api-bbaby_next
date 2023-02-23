@@ -9,6 +9,7 @@ import userapis from '../../lib/userapis/userapis';
 import { UserRequest } from '../../@types/express';
 import sendEMail from '../user/user-functions/sendMail';
 import { IUser } from '../../models/types/user';
+import cloudinary from '../../config/cloudinary';
 
 interface JwtPayload {
   _doc: IUser;
@@ -97,25 +98,27 @@ const oauthCtrl = {
       const response = await fetch(url, {
         method: 'GET',
       });
-      if (!response.ok) return res.status(401).json({ msg: 'Invalid Google Token, please retry.' });
+      if (!response.ok) return res.status(401).json({ msg: 'Invalid Google token, please retry.' });
       const data = await response.json();
       const { email_verified, email, name, picture } = data;
+      if (!email_verified) return res.status(400).json({ msg: 'Email verification failed.' });
       const password = email + GOOGLE_SECRET;
       const passwordHash = bcrypt.hashSync(password, 10);
-      if (!email_verified) return res.status(400).json({ msg: 'Email verification failed.' });
-      const user = await User.findOne({ email });
+      let user = await User.findOne({ email });
       if (user) {
         const match = bcrypt.compareSync(password, user.password);
         if (!match) return res.status(400).json({ msg: 'Password is incorrect.' });
-        login(user._id.toString(), res);
       } else {
         const { country, countryCode, city, region, lat, lon } = ipInfo;
+        const avatar = await cloudinary.v2.uploader.upload(picture, {
+          upload_preset: 'bbaby_avatar',
+        });
         const username = await name.replace(/\s/g, '');
-        const _user = new User({
+        user = new User({
           username,
           email,
           password: passwordHash,
-          avatar: picture,
+          avatar: avatar.secure_url,
           country,
           countryCode,
           city,
@@ -123,9 +126,9 @@ const oauthCtrl = {
           lat,
           lon,
         });
-        await _user.save();
-        login(_user._id.toString(), res);
+        await user.save();
       }
+      login(user._id.toString(), res);
     } catch (err) {
       if (err instanceof Error) res.status(500).json({ msg: err.message });
     }

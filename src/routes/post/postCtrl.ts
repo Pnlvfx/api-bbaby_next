@@ -27,11 +27,71 @@ const PostCtrl = {
         const filters = { author: new RegExp(`^${author}$`, 'i') };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else {
-        const communities = await Community.find({ language: userLang ? userLang : 'en' });
+        const communities = await Community.find({ language: userLang || 'en' });
         const selectedCommunities = Array.from(communities.map((community) => community.name));
         const filters = { community: selectedCommunities };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       }
+      if (token) {
+        const user = await getUserFromToken(token);
+        posts.map((post) => {
+          if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
+          if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
+        });
+      }
+      res.status(200).json(posts);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  getHotPosts: async (req: Request, res: Response) => {
+    try {
+      const { token } = req.cookies;
+      const { limit, skip } = req.query;
+      if (!limit || !skip) return res.status(500).json({ msg: 'Limit and Skip parameters are required for this API.' });
+      const user_agent = req.useragent;
+      const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
+      const posts = await Post.find({}).sort({ ups: -1 }).limit(_limit).skip(Number(skip));
+      if (token) {
+        const user = await getUserFromToken(token);
+        posts.map((post) => {
+          if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
+          if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
+        });
+      }
+      res.status(200).json(posts);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  getNewPosts: async (req: Request, res: Response) => {
+    try {
+      const { token } = req.cookies;
+      const { limit, skip } = req.query;
+      if (!limit || !skip) return res.status(500).json({ msg: 'Limit and Skip parameters are required for this API.' });
+      const user_agent = req.useragent;
+      const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
+      const posts = await Post.find({}).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
+      if (token) {
+        const user = await getUserFromToken(token);
+        posts.map((post) => {
+          if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
+          if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
+        });
+      }
+      res.status(200).json(posts);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  getTopPosts: async (req: Request, res: Response) => {
+    try {
+      const { token } = req.cookies;
+      const { limit, skip } = req.query;
+      if (!limit || !skip) return res.status(500).json({ msg: 'Limit and Skip parameters are required for this API.' });
+      const user_agent = req.useragent;
+      const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
+      const posts = await Post.find({}).sort({ numComments: -1 }).limit(_limit).skip(Number(skip));
       if (token) {
         const user = await getUserFromToken(token);
         posts.map((post) => {

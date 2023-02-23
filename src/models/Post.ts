@@ -11,9 +11,6 @@ const PostSchema = new Schema<PostProps>(
       type: String,
       required: true,
     },
-    body: {
-      type: String,
-    },
     community: {
       type: String,
       required: true,
@@ -22,10 +19,16 @@ const PostSchema = new Schema<PostProps>(
       type: String,
       required: true,
     },
-    community_detail: {},
+    body: {
+      type: String,
+    },
+    community_detail: {
+      type: Schema.Types.ObjectId,
+      ref: 'Community',
+    },
     mediaInfo: {
       dimension: {
-        type: Array,
+        type: Array<number>,
       },
       isImage: {
         type: Boolean,
@@ -51,6 +54,7 @@ const PostSchema = new Schema<PostProps>(
     },
     permalink: {
       type: String,
+      required: true,
     },
   },
   {
