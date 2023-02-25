@@ -119,40 +119,25 @@ const TwitterCtrl = {
     try {
       const req = expressRequest as TwitterRequest;
       const { twitter } = req;
-      const { slug, owner_screen_name } = req.query;
-      if (!slug || !owner_screen_name)
-        return res.status(400).json({
-          msg: 'This API require a slug parameter and an owner_screen_name.',
-        });
-      if (owner_screen_name === 'Bbabystyle') {
+      const { lang } = req.query;
+      if (!lang) return res.status(400).json({ msg: 'This API require a lang parameters.' });
+      if (lang === 'it') {
         if (config.NODE_ENV === 'development' && italianTweets && italianTweets.length > 1) {
           res.status(200).json(italianTweets);
         } else {
-          const response = await twitterapis.oauth.getProtectedResource(
-            `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
-            'GET',
-            twitter.access_token,
-            twitter.access_token_secret,
-          );
-          const data = JSON.parse(response.data.toString());
-          if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
+          const { access_token, access_token_secret } = twitter;
+          const data = await twitterapis.getListTweets(access_token, access_token_secret, lang);
           italianTweets = data;
-          res.json(data);
+          res.status(200).json(data);
         }
-      } else {
+      } else if (lang === 'en') {
         if (config.NODE_ENV === 'development' && englishTweets && englishTweets.length > 1) {
           res.status(200).json(englishTweets);
         } else {
-          const response = await twitterapis.oauth.getProtectedResource(
-            `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
-            'GET',
-            twitter.access_token,
-            twitter.access_token_secret,
-          );
-          const data = JSON.parse(response.data.toString());
-          if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
+          const { access_token, access_token_secret } = twitter;
+          const data = await twitterapis.getListTweets(access_token, access_token_secret, lang);
           englishTweets = data;
-          res.json(data);
+          res.status(200).json(data);
         }
       }
     } catch (error) {

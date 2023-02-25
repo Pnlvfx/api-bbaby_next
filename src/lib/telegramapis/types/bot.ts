@@ -10,14 +10,12 @@ interface ReplyMarkup {
   force_reply?: boolean;
 }
 
-interface SendPhotoOptions {
+interface SendPhotoOptions extends SendMessageOptions {
   caption?: string;
   protect_content?: boolean;
   allow_sending_without_reply?: boolean;
   disable_notification?: boolean;
   parse_mode?: string;
-  reply_markup?: ReplyMarkup;
-  reply_to_message_id?: number;
 }
 
 interface InlineKeyboard {

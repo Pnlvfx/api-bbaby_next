@@ -1,7 +1,7 @@
 import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
-import coraline from '../../coraline/coraline';
 import Community from '../../models/Community';
 import Earthquake from '../../models/Earthquake';
+import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
 import earthquakeapis from './earthquakeapis';
 
@@ -41,9 +41,15 @@ const earthquakeInfo = async () => {
 };
 const earthquakePost = async (earthquake: Earthquake) => {
   try {
-    const user = await bbabyapis.newBot('earthquake');
-    user.role = 1;
-    await user.save();
+    let user = await User.findOne({ username: 'earthquake' });
+    if (!user) {
+      user = await bbabyapis.newBot('earthquake');
+      user.is_bot = false;
+      user.role = 1;
+      await user.save();
+    }
+    user.is_bot = false; // to remove
+    await user.save(); // to remove
     const { properties } = earthquake;
     const start = properties.mag >= 5.5 ? 'Breaking News: A massive earthquake' : 'News: An earthquake';
     const post = `${start} with a magnitude of ${properties.mag} strikes ${properties.place}. The tremors were felt on ${new Date(
@@ -59,7 +65,6 @@ const earthquakePost = async (earthquake: Earthquake) => {
       sharePostToTwitter: share,
       sharePostToTG: share,
     });
-    await coraline.sendLog(post);
   } catch (err) {
     throw catchError(err);
   }

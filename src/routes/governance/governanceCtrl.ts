@@ -7,13 +7,12 @@ import audioconcat from 'audioconcat';
 import News from '../../models/News';
 import BBC from '../../models/BBC';
 import coraline from '../../coraline/coraline';
-import googleapis from '../../lib/googleapis/googleapis';
 import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
-import openaiapis from '../../lib/openaiapis/openaiapis';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
 import telegramapis from '../../lib/telegramapis/telegramapis';
 import { TwitterApi } from 'twitter-api-v2';
 import twitterapis from '../../lib/twitterapis/twitterapis';
+import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 
 const governanceCtrl = {
   createImage: async (expressRequest: Request, res: Response) => {
@@ -121,13 +120,8 @@ const governanceCtrl = {
       if (!text) return res.status(400).json({ msg: 'You need to send one text with in your request body.' });
       const { lang } = req.query;
       if (!lang) return res.status(400).json({ msg: 'Add the source language in your query url.' });
-      const to = lang.toString() === 'en' ? 'it' : 'en';
-      let translation;
-      try {
-        translation = await openaiapis.translate(text, lang.toString(), to);
-      } catch (err) {
-        translation = await googleapis.translate(text, lang.toString(), to);
-      }
+      const to = lang === 'en' ? 'it' : 'en';
+      const translation = await bbabyapis.translate(text, lang.toString(), to);
       res.status(200).json(translation);
     } catch (err) {
       catchErrorCtrl(err, res);

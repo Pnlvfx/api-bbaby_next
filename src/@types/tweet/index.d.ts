@@ -81,7 +81,7 @@ type ExtendedEntitiesProps = {
           w: number;
         };
       };
-      type: 'video' | 'image';
+      type: 'video' | 'photo';
       video_info: {
         aspect_ratio: [16, 9];
         duration_millis: number;

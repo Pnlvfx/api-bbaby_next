@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import telegramapis from '../../lib/telegramapis/telegramapis';
 import { apiconfig } from '../../config/APIconfig';
 import { checkUpdateType } from '../../lib/telegramapis/hooks/telegramhooks';
+import bbabyapis from '../../lib/bbabyapis/bbabyapis';
+import Community from '../../models/Community';
 
 export interface ConversationState {
   command: '';
@@ -12,28 +13,54 @@ const telegramCtrl = {
   processUpdate: async (req: Request, res: Response) => {
     try {
       const data = req.body as TelegramUpdate;
-      const msg = data.message as TelegramMessage;
       const check = checkUpdateType(data);
       if (check === 'message') {
-        if (msg.chat.id !== apiconfig.telegram.my_chat_id) return;
-        if (msg.text) {
-          if (msg.text?.match('/start')) {
-            await telegramapis.sendMessage(msg.chat.id, 'Hello');
-          } else if (msg.text.match('/quora')) {
-            await telegramapis.sendMessage(msg.chat.id, 'Please send here your text!');
-          }
-        } else {
-          // msg is a photo or video
-          if (msg.video) {
-            //tiktokapis.createVideo(msg.video.file_id, msg.video.file_unique_id);
+        if (data.message?.chat.id === apiconfig.telegram.logs_group_id) {
+          const msg = data.message as TelegramMessage;
+          if (msg.text) {
+            console.log(msg);
+            if (msg.reply_to_message) {
+              const user = await bbabyapis.AIuser();
+              let community = await Community.findOne({ name: 'Notizie' });
+              if (!community) {
+                community = await bbabyapis.community.createCommunity(user, 'Notizie', 'it');
+              }
+              const title = msg.text.split(':')[1];
+              await bbabyapis.post.newPost(user, title, community.name);
+            }
           }
         }
       } else {
         const info = data.callback_query as TelegramCallbackQuery;
         if (info.data === 'post' && info.message.text) {
-          //callback_query
+          const title = info.message.text.split(':')[1];
+          console.log(title);
         }
       }
+      // if (check === 'message') {
+      //if (msg.chat.id !== apiconfig.telegram.my_chat_id) return;
+      //   if (msg.text) {
+      //     console.log(msg);
+      //     if (msg.text?.match('/start')) {
+      //       await telegramapis.sendMessage(msg.chat.id, 'Hello');
+      //     } else if (msg.reply_to_message) {
+      //       console.log(msg.reply_to_message.text);
+      //     }
+      //   } else {
+      //     // msg is a photo or video
+      //     if (msg.video) {
+      //       //tiktokapis.createVideo(msg.video.file_id, msg.video.file_unique_id);
+      //     }
+      //   }
+      // } else {
+      //   const info = data.callback_query as TelegramCallbackQuery;
+      //   if (info.data === 'post' && info.message.text) {
+      //     const title = info.message.text.split(':')[1];
+      //     console.log(title);
+      //   } else if (info.data === 'edit' && info.message.text) {
+      //     console.log(info);
+      //   }
+      // }
       res.sendStatus(200);
     } catch (err) {
       res.sendStatus(200);

@@ -1,8 +1,8 @@
 import { TUploadableMedia, TwitterApi } from 'twitter-api-v2';
 import config from '../../config/config';
-import _oauth from '../twitter-oauth/twitter_oauth';
+import _oauth from './twitter_oauth';
 import { catchError } from '../../coraline/cor-route/crlerror';
-
+import { getListInfo } from './twitter-config';
 const oauthCallback = `${config.CLIENT_URL}/settings`; //redirect
 
 const twitterapis = {
@@ -43,6 +43,22 @@ const twitterapis = {
       const url = `https://api.twitter.com/1.1/trends/place.json?id=${id}`;
       const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET);
       return JSON.parse(response.data.toString());
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  getListTweets: async (access_token: string, access_token_secret: string, lang: 'en' | 'it') => {
+    try {
+      const { slug, owner_screen_name } = getListInfo(lang);
+      const res = await twitterapis.oauth.getProtectedResource(
+        `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
+        'GET',
+        access_token,
+        access_token_secret,
+      );
+      const data = JSON.parse(res.data.toString());
+      if (!Array.isArray(data)) throw new Error('Invalid response from twitter!');
+      return data as TweetProps[];
     } catch (err) {
       throw catchError(err);
     }

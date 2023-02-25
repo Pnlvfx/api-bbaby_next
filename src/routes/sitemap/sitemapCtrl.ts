@@ -8,7 +8,6 @@ const sitemapCtrl = {
   getSitemap: async (req: Request, res: Response) => {
     try {
       const { type } = req.query;
-      console.log(type);
       if (!type) return res.status(400).json({ msg: 'Invalid request!' });
       if (type === 'post') {
         const posts = await Post.find({}).sort({ createdAt: -1 });

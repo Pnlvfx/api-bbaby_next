@@ -14,6 +14,8 @@ import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { useEarthquake } from '../earthquakeapis/earthquake';
 import { answer } from './hooks/answer';
+import { useTelegram, useTwitter } from './hooks/hooks';
+import googleapis from '../googleapis/googleapis';
 
 const bbabyapis = {
   initialize: async () => {
@@ -22,7 +24,8 @@ const bbabyapis = {
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       await useEarthquake();
-      //await useTelegram();
+      await useTelegram();
+      await useTwitter();
       //await useBBC();
       //await useAnswer();
     } catch (err) {
@@ -111,6 +114,19 @@ const bbabyapis = {
         sharePostToTwitter: share,
       });
       return post;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  translate: async (text: string, from: string, to: string) => {
+    try {
+      let translation;
+      try {
+        translation = await openaiapis.translate(text, from, to);
+      } catch (err) {
+        translation = await googleapis.translate(text, from, to);
+      }
+      return translation;
     } catch (err) {
       throw catchError(err);
     }

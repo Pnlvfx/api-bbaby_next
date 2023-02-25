@@ -34,6 +34,7 @@ interface TelegramMessage {
   from: TelegramMessageFrom;
   chat: TelegramMessageChat;
   date: number;
+  reply_to_message?: TelegramMessage;
   text?: string;
   photo?: TelegramMessageMediaInfo[];
   caption?: string;
@@ -50,6 +51,11 @@ interface TelegramMessage {
     file_unique_id: string;
     file_size: number;
   };
+}
+
+interface ReplyToMessage {
+  message_id: number;
+  from: TelegramMessageFrom;
 }
 
 interface TelegramCallbackQuery {
