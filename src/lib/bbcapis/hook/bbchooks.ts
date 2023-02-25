@@ -119,19 +119,17 @@ export const getNews = async (link: string) => {
       });
       await browser.close();
       if (typeof info === 'string') {
-        console.log('still missed', info);
+        coraline.sendLog(info);
         throw new Error('bbc news missed');
-      } else {
-        if (Array.isArray(info)) {
-          const metadata = await bbabyapis.getLinkPreview(link);
-          info = {
-            title: metadata.title,
-            image: metadata.image,
-            description: info[0].description,
-            date: info[0].date,
-            original_link: link,
-          };
-        }
+      } else if (Array.isArray(info)) {
+        const metadata = await bbabyapis.getLinkPreview(link);
+        info = {
+          title: metadata.title,
+          image: metadata.image,
+          description: info[0].description,
+          date: info[0].date,
+          original_link: link,
+        };
       }
       news = info;
     } catch (err) {
