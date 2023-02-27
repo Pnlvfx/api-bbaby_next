@@ -14,7 +14,7 @@ import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { useEarthquake } from '../earthquakeapis/earthquake';
 import { answer } from './hooks/answer';
-import { useTelegram, useTwitter } from './hooks/hooks';
+import { useTelegram } from './hooks/hooks';
 import googleapis from '../googleapis/googleapis';
 
 const bbabyapis = {
@@ -25,7 +25,7 @@ const bbabyapis = {
       await mongoose.connect(db);
       await useEarthquake();
       await useTelegram();
-      await useTwitter();
+      //await useTwitter();
       //await useBBC();
       //await useAnswer();
     } catch (err) {
