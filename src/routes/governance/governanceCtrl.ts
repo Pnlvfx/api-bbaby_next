@@ -178,16 +178,16 @@ const governanceCtrl = {
       const bigImage = await coraline.media.getMediaFromUrl(mediaInfo.image, public_id, 'images');
       const newImage = await coraline.media.image.resize(bigImage);
       news.$set({ 'mediaInfo.image': newImage.url, 'mediaInfo.width': 1920, 'mediaInfo.height': 1080 });
-      const savedNews = await news.save();
+      await news.save();
       const url = `${config.CLIENT_URL}${news.permalink}`;
       if (sharePostToTG) {
-        const text = `${savedNews.title + ' ' + url}`;
+        const text = `${news.title + ' ' + url}`;
         const chat_id = '@bbabystyle1';
         await telegramapis.sendMessage(chat_id, text);
       }
       if (sharePostToTwitter) {
         try {
-          const twitterText = savedNews.title.substring(0, 300 - url.length - 10) + ' ' + url;
+          const twitterText = news.title.substring(0, 300 - url.length - 10) + ' ' + url;
           const twitterUser = new TwitterApi({
             appKey: config.TWITTER_CONSUMER_KEY,
             appSecret: config.TWITTER_CONSUMER_SECRET,
@@ -198,11 +198,11 @@ const governanceCtrl = {
           coraline.sendLog('twimage saved');
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {
-          await savedNews.delete();
+          await news.deleteOne();
           throw catchError(err);
         }
       }
-      res.status(201).json(savedNews);
+      res.status(201).json(news);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

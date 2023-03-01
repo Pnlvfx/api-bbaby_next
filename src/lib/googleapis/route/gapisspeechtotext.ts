@@ -5,7 +5,7 @@ import googleapis from '../googleapis';
 import { catchError } from '../../../coraline/cor-route/crlerror';
 import { promisify } from 'util';
 
-const gapisspeechtotext = async (file: string) => {
+const gapisspeechtotext = async (audio: string) => {
   try {
     const credentials = await googleapis.serviceAccount.getAccessToken('speech_to_text');
     const headers = getGoogleHeader(credentials);
@@ -16,8 +16,9 @@ const gapisspeechtotext = async (file: string) => {
       languageCode: 'en-US',
       audio_channel_count: 2,
     };
-    const audios = await convertAudio(file);
-    const transcript = await Promise.all(
+    const audios = await convertAudio(audio);
+    const transcript: string[] = [];
+    await Promise.all(
       audios.map(async (_) => {
         try {
           const readFile = promisify(fs.readFile);
@@ -36,13 +37,12 @@ const gapisspeechtotext = async (file: string) => {
           });
           const data = (await res.json()) as SpeechToTextResponse;
           if (!res.ok) throw new Error(data.error?.message);
-          const text: string[] = [];
+          if (!data.results) throw new Error('Something went wrong!');
           data.results.map((_) => {
             _.alternatives.map((__) => {
-              text.push(__.transcript);
+              transcript.push(__.transcript);
             });
           });
-          return text;
         } catch (err) {
           throw catchError(err);
         }

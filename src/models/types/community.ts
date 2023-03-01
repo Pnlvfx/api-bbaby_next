@@ -5,7 +5,7 @@ export interface CommunityProps extends Document {
   image: string;
   cover: string;
   author: string;
-  description: string;
+  description?: string;
   acceptFollowers: boolean;
   subscribers: number;
   user_is_moderator: boolean;

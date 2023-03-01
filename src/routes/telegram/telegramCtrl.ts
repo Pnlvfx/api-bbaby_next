@@ -37,30 +37,6 @@ const telegramCtrl = {
           console.log(title);
         }
       }
-      // if (check === 'message') {
-      //if (msg.chat.id !== apiconfig.telegram.my_chat_id) return;
-      //   if (msg.text) {
-      //     console.log(msg);
-      //     if (msg.text?.match('/start')) {
-      //       await telegramapis.sendMessage(msg.chat.id, 'Hello');
-      //     } else if (msg.reply_to_message) {
-      //       console.log(msg.reply_to_message.text);
-      //     }
-      //   } else {
-      //     // msg is a photo or video
-      //     if (msg.video) {
-      //       //tiktokapis.createVideo(msg.video.file_id, msg.video.file_unique_id);
-      //     }
-      //   }
-      // } else {
-      //   const info = data.callback_query as TelegramCallbackQuery;
-      //   if (info.data === 'post' && info.message.text) {
-      //     const title = info.message.text.split(':')[1];
-      //     console.log(title);
-      //   } else if (info.data === 'edit' && info.message.text) {
-      //     console.log(info);
-      //   }
-      // }
       res.sendStatus(200);
     } catch (err) {
       res.sendStatus(200);

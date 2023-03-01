@@ -3,6 +3,14 @@ import { TiktakProps } from './types/tiktak';
 
 const TiktakSchema = new Schema<TiktakProps>(
   {
+    original_title: {
+      type: String,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
     original_body: {
       type: String,
       required: true,

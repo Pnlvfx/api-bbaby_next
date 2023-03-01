@@ -16,7 +16,6 @@ import newsRouter from './routes/news/newsRouter';
 import redditRouter from './routes/reddit/redditRouter';
 import oauthRouter from './routes/oauth/oauthRouter';
 import auth from './middleware/auth';
-import governance from './middleware/governance';
 import contentType from './middleware/contentType';
 import videoRouter from './bbaby_static/videoRouter';
 import coraline from './coraline/coraline';
@@ -26,6 +25,7 @@ import bbabyapis from './lib/bbabyapis/bbabyapis';
 import telegramRouter from './routes/telegram/telegramRouter';
 import generalRouter from './routes/general/generalRouter';
 import sitemapRouter from './routes/sitemap/sitemapRouter';
+import tiktokRouter from './routes/tiktok/tiktokRouter';
 
 const app = express();
 
@@ -35,7 +35,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(compression());
-app.use(cors({ origin: [config.CLIENT_URL, 'https://new.bbabystyle.com'], credentials: true }));
+app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
 const staticPath = coraline.useStatic();
 
 bbabyapis.initialize();
@@ -44,21 +44,21 @@ app.get('/', (req, res) => {
   res.send('Welcome to bbabystyle api');
 });
 
-app.use('/sitemaps', sitemapRouter);
+app.use('/', oauthRouter);
 
-app.use('/static', express.static(staticPath));
+app.use('/', generalRouter);
 
 app.use('/', telegramRouter);
+
+app.use('/', express.static(staticPath));
+
+app.use('/sitemaps', sitemapRouter);
 
 app.use('/analytics', analyticsRouter);
 
 app.use('/images', imageRouter);
 
 app.use('/videos', videoRouter);
-
-app.use('/', oauthRouter);
-
-app.use('/', generalRouter);
 
 app.use('/user', userRouter);
 
@@ -78,6 +78,8 @@ app.use('/twitter', auth, twitterRouter);
 
 app.use('/reddit', auth, redditRouter);
 
-app.use('/governance', auth, governance, governanceRouter);
+app.use('/governance', auth, governanceRouter);
+
+app.use('/tiktok', auth, tiktokRouter);
 
 app.listen(4000);

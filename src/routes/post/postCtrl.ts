@@ -204,7 +204,7 @@ const PostCtrl = {
       if (post.mediaInfo) {
         await cloudinary.v2.uploader.destroy(`posts/${post._id.toString()}`);
       }
-      await post.delete();
+      await post.deleteOne();
       await Comment.deleteMany({ rootId: id });
       res.json(true);
     } catch (err) {

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import coraline from '../../coraline/coraline';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
-import userapis from '../../lib/userapis/userapis';
+import { getUserFromToken } from '../user/user-functions/userFunctions';
 
 const analyticsCtrl = {
   sendLog: async (req: Request, res: Response) => {
@@ -16,10 +16,15 @@ const analyticsCtrl = {
   },
   pageview: async (req: Request, res: Response) => {
     try {
-      const userIp = req.socket.remoteAddress;
-      console.log(userIp);
-      const info = await userapis.getIP(userIp);
-      console.log(info);
+      const { token } = req.cookies;
+      const userIp = req.socket.remoteAddress?.split(':').pop();
+      const user = token ? await getUserFromToken(token) : null;
+      if (req.useragent?.isBot) {
+        coraline.sendLog(`New bot: ${req.useragent?.source}`);
+      } else {
+        coraline.sendLog(`New session: ${user?.username || 'unknown user'}, Useragent: ${req.useragent?.source}, ip: ${userIp}`);
+      }
+      res.sendStatus(200);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

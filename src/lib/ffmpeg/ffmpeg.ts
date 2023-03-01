@@ -12,7 +12,7 @@ const ffmpeg = {
         const folder = coraline.use('lib/audio');
         output = `${folder}/${coraline.generateRandomId(10)}.mp3`;
       }
-      const ffmpeg = spawn('ffmpeg', ['-i', video, output]);
+      const ffmpeg = spawn('ffmpeg', ['-y', '-i', video, output]);
       ffmpeg.stdout.on('data', () => {
         //
       });

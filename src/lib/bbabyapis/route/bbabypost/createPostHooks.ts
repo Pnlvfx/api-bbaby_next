@@ -69,7 +69,7 @@ export const shareToTwitter = async (
       await twitterapis.tweet(twitterUser, twitterText);
     }
   } catch (err) {
-    savedPost.delete();
+    savedPost.deleteOne();
     throw catchError(err);
   }
 };

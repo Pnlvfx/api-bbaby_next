@@ -12,7 +12,7 @@ interface TweetProps {
     urls: [];
     media: [];
   };
-  extended_entities: ExtendedEntitiesProps;
+  extended_entities?: ExtendedEntitiesProps;
   source: string;
   user: TweetUserProps;
   retweet_count: number;

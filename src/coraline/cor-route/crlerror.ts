@@ -14,7 +14,7 @@ export const catchErrorCtrl = (err: unknown, res: Response) => {
 };
 
 export const catchErrorWithTelegram = (err: unknown) => {
-  if (process.env.NODE_ENV === 'development') console.log(err);
+  console.log(err);
   if (err instanceof Error) {
     coraline.sendLog(process.env.NODE_ENV + ' ' + err.message);
   } else if (typeof err === 'string') {

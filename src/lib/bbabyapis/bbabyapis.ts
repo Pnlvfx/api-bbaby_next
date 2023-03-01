@@ -12,11 +12,9 @@ import { IUser } from '../../models/types/user';
 import Post from '../../models/Post';
 import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
-import { useEarthquake } from '../earthquakeapis/earthquake';
 import { answer } from './hooks/answer';
-import { useTelegram } from './hooks/hooks';
 import googleapis from '../googleapis/googleapis';
-
+import { useEarthquake } from '../earthquakeapis/earthquake';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -24,8 +22,12 @@ const bbabyapis = {
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       await useEarthquake();
-      await useTelegram();
-      //await useTwitter();
+      //await useTelegram();
+      //useTwitter();
+      // const video = await tiktokapis.downloadVideo('https://www.tiktok.com/@billionaire.hustlerss/video/7198846630810930458');
+      // const path = coraline.useStatic('videos/tiktok');
+      // const filename = `${path}/billionairehustlers.mp4`;
+      // await tiktokapis.extractText(filename);
       //await useBBC();
       //await useAnswer();
     } catch (err) {
@@ -122,9 +124,9 @@ const bbabyapis = {
     try {
       let translation;
       try {
-        translation = await openaiapis.translate(text, from, to);
-      } catch (err) {
         translation = await googleapis.translate(text, from, to);
+      } catch (err) {
+        translation = await openaiapis.translate(text, from, to);
       }
       return translation;
     } catch (err) {

@@ -18,11 +18,10 @@ const schema = new Schema<CommunityProps>(
     },
     author: {
       type: String,
-      //required: true,
+      required: true,
     },
     description: {
       type: String,
-      default: 'Add description',
     },
     acceptFollowers: {
       type: Boolean,

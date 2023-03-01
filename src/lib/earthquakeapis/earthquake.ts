@@ -5,16 +5,24 @@ import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
 import earthquakeapis from './earthquakeapis';
 
+const initial = async () => {
+  try {
+    const earthquakes = await earthquakeapis.get();
+    earthquakes.features.map(async (earthquake) => {
+      try {
+        const dbearthquake = new Earthquake(earthquake);
+        await dbearthquake.save();
+      } catch (err) {
+        throw catchError(err);
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const useEarthquake = async () => {
-  const earthquakes = await earthquakeapis.get();
-  earthquakes.features.map(async (earthquake) => {
-    try {
-      const dbearthquake = new Earthquake(earthquake);
-      await dbearthquake.save();
-    } catch (err) {
-      throw catchError(err);
-    }
-  });
+  initial();
   setInterval(earthquakeInfo, 60000 * 2);
 };
 
@@ -25,7 +33,7 @@ const earthquakeInfo = async () => {
     earthquakeData.features.map(async (earthquake) => {
       const exist = await Earthquake.findOne({ id: earthquake.id });
       if (exist) return;
-      if (earthquake.properties.mag >= 4) {
+      if (earthquake.properties.mag >= 4.8) {
         if (earthquake.properties.place.includes('Italy')) {
           await earthquakePost(earthquake);
         } else {

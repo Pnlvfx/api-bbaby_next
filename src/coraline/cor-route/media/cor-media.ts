@@ -37,9 +37,8 @@ const coralineMedia = {
     return /\.(mp4)$/.test(url);
   },
   getMediaFromUrl: (media_url: string, public_id: string, type: 'videos' | 'images') => {
-    return new Promise<CoralineImage>((resolve, reject) => {
-      const protocol = url.parse(media_url).protocol;
-      const fetcher = protocol === 'https:' ? https : http;
+    return new Promise<CoralineMedia>((resolve, reject) => {
+      const fetcher = url.parse(media_url).protocol === 'https:' ? https : http;
       fetcher.get(media_url, (res) => {
         if (res.statusCode === 302) {
           //redirect
@@ -64,8 +63,7 @@ const coralineMedia = {
         });
         fileStream.on('finish', () => {
           fileStream.close();
-          const res = { filename, url, format };
-          return resolve(res);
+          return resolve({ filename, url, format });
         });
       });
     });

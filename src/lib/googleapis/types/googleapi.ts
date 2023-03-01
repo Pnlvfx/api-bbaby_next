@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 interface SpeechToTextResponse {
-  results: Results[];
+  results?: Results[];
   error?: GoogleError;
 }
 
