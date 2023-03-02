@@ -32,4 +32,5 @@ interface DownloadReponse {
 
 interface TiktokProps extends DownloadReponse {
   text: string;
+  translated?: string;
 }

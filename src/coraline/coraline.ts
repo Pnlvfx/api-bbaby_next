@@ -153,7 +153,7 @@ const coraline = {
         const error = 'Coraline: Error during a timeout';
         if (err instanceof Error) coraline.sendLog(error + err.message);
         if (typeof err === 'string') coraline.sendLog(error + err);
-        coraline.sendLog(error);
+        await coraline.sendLog(error);
       }
     }, timeUntilFunction);
   },

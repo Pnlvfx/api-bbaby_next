@@ -24,10 +24,6 @@ const bbabyapis = {
       await useEarthquake();
       //await useTelegram();
       //useTwitter();
-      // const video = await tiktokapis.downloadVideo('https://www.tiktok.com/@billionaire.hustlerss/video/7198846630810930458');
-      // const path = coraline.useStatic('videos/tiktok');
-      // const filename = `${path}/billionairehustlers.mp4`;
-      // await tiktokapis.extractText(filename);
       //await useBBC();
       //await useAnswer();
     } catch (err) {

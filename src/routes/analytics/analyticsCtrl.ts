@@ -17,13 +17,13 @@ const analyticsCtrl = {
   pageview: async (req: Request, res: Response) => {
     try {
       const { token } = req.cookies;
-      const userIp = req.socket.remoteAddress?.split(':').pop();
+      const userIp = req.headers['x-forwarded-for'];
       const user = token ? await getUserFromToken(token) : null;
-      if (req.useragent?.isBot) {
-        coraline.sendLog(`New bot: ${req.useragent?.source}`);
-      } else {
-        coraline.sendLog(`New session: ${user?.username || 'unknown user'}, Useragent: ${req.useragent?.source}, ip: ${userIp}`);
-      }
+      if (req.useragent?.isBot) return;
+      if (req.useragent?.source.match('Ahrefs')) return;
+      if (req.useragent?.source.match('Chrome-Lighthouse')) return;
+      if (req.useragent?.source.match('Googlebot')) return;
+      await coraline.sendLog(`New session: ${user?.username || 'unknown user'}, Useragent: ${req.useragent?.source}, ip: ${userIp}`);
       res.sendStatus(200);
     } catch (err) {
       catchErrorCtrl(err, res);

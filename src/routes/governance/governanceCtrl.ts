@@ -195,7 +195,6 @@ const governanceCtrl = {
             accessSecret: config.BBABYITALIA_ACCESS_TOKEN_SECRET,
           });
           const twimage = await twitterapis.uploadMedia(twitterUser, Buffer.from(newImage.filename));
-          coraline.sendLog('twimage saved');
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {
           await news.deleteOne();

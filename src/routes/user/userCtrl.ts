@@ -126,32 +126,6 @@ const userCtrl = {
       if (err instanceof Error) res.status(500).json({ msg: err.message });
     }
   },
-  // analytics: async (req: Request, res: Response) => {
-  //   try {
-  //     const { token } = req.cookies;
-  //     const user = token ? await getUserFromToken(token) : null;
-  //     const { useragent } = req;
-  //     if (useragent?.isBot || useragent?.browser === 'unknown') {
-  //       //coraline.sendLog(`New bot ` + 'Useragent: ' + useragent?.source);
-  //     } else {
-  //       const info = await userapis.getIP();
-  //       coraline.sendLog(
-  //         `New session: ${user?.username.toLowerCase() || 'unknown user'}` +
-  //           ', Country: ' +
-  //           info.country.toLowerCase() +
-  //           ', City: ' +
-  //           info.city.toLowerCase() +
-  //           ', Browser: ' +
-  //           useragent?.browser.toLowerCase() +
-  //           ', Platform: ' +
-  //           useragent?.platform.toLowerCase(),
-  //       );
-  //     }
-  //     res.status(200).json(true);
-  //   } catch (err) {
-  //     catchErrorCtrl(err, res);
-  //   }
-  // },
 };
 
 export default userCtrl;

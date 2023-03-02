@@ -41,7 +41,26 @@ const tiktokCtrl = {
     try {
       const { id } = req.params;
       const file = `${infoPath}/${id}`;
-      console.log(file);
+      const tiktok = (await coraline.readJSON(file)) as TiktokProps;
+      res.status(200).json(tiktok);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  save: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { text, translated } = req.body;
+      const file = `${infoPath}/${id}`;
+      const tiktok = (await coraline.readJSON(file)) as TiktokProps;
+      if (text) {
+        tiktok.text = text;
+      }
+      if (translated) {
+        tiktok.translated = translated;
+      }
+      await coraline.saveFile(file, tiktok);
+      res.status(200).json(tiktok);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

@@ -119,7 +119,7 @@ export const getNews = async (link: string) => {
       });
       await browser.close();
       if (typeof info === 'string') {
-        coraline.sendLog(info);
+        await coraline.sendLog(info);
         throw new Error('bbc news missed');
       } else if (Array.isArray(info)) {
         const metadata = await bbabyapis.getLinkPreview(link);
