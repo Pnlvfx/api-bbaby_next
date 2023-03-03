@@ -24,13 +24,16 @@ interface TiktokInfoProps {
     url?: string;
   };
 }
-
-interface DownloadReponse {
+interface TiktokProps {
   id: string;
   video: CoralineMedia;
+  text?: string;
+  translated?: string;
+  textArray?: TextArrayProps[];
 }
 
-interface TiktokProps extends DownloadReponse {
+type TextArrayProps = {
   text: string;
-  translated?: string;
-}
+  start: number;
+  end: number;
+};

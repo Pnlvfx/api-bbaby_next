@@ -13,7 +13,7 @@ const tiktokapis = {
     try {
       try {
         const response = await coraline.readJSON(output);
-        return response as DownloadReponse;
+        return response as TiktokProps;
       } catch (err) {
         const info = await getInfo(url);
         if (!info.video.url.no_wm) throw new Error('Missing video for this url!');
@@ -25,7 +25,7 @@ const tiktokapis = {
           video,
         };
         await coraline.saveFile(output, response);
-        return response as DownloadReponse;
+        return response as TiktokProps;
       }
     } catch (err) {
       throw catchError(err);
@@ -38,6 +38,15 @@ const tiktokapis = {
       const audio = await ffmpeg.videoToAudio(video, filename);
       const text = await googleapis.speechToText(audio);
       return text.join(' ');
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  deleteTiktok: async (filename: string) => {
+    try {
+      const tiktok = (await coraline.readJSON(filename)) as TiktokProps;
+      await coraline.deleteFile(tiktok.video.filename);
+      await coraline.deleteFile(filename);
     } catch (err) {
       throw catchError(err);
     }
