@@ -15,7 +15,6 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
-import { useTwitter } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
     try {
