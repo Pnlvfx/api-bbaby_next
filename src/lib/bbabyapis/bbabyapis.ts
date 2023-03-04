@@ -15,6 +15,7 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
+import { check, useTwitter } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -22,8 +23,9 @@ const bbabyapis = {
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       await useEarthquake();
-      //await useTelegram();
-      //await useTwitter();
+      check();
+      // await useTelegram();
+      await useTwitter();
       //await useBBC();
       //await useAnswer();
     } catch (err) {

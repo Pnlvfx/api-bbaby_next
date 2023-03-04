@@ -17,8 +17,8 @@ const imageCtrl = {
       };
       res.writeHead(200, headers);
       const videoStream = fs.createReadStream(image);
-      videoStream.on('error', (err) => {
-        return coraline.sendLog(err.message);
+      videoStream.on('error', async (err) => {
+        console.log(err);
       });
       videoStream.pipe(res);
     } catch (err) {

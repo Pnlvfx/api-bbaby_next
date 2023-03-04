@@ -56,7 +56,14 @@ const UserSchema = new Schema<IUser>(
       type: [Schema.Types.ObjectId],
     },
     tokens: {
-      type: [],
+      type: [
+        {
+          access_token: String,
+          refresh_token: String,
+          provider: String,
+          expires: Number,
+        },
+      ],
     },
     hasExternalAccount: {
       type: Boolean,

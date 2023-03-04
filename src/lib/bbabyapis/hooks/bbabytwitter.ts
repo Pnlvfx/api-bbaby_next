@@ -1,17 +1,16 @@
-import { TweetV1TimelineResult } from 'twitter-api-v2';
+import { TweetV2 } from 'twitter-api-v2';
 import { apiconfig } from '../../../config/APIconfig';
-import config from '../../../config/config';
 import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import telegramapis from '../../telegramapis/telegramapis';
 import twitterapis from '../../twitterapis/twitterapis';
 import bbabyapis from '../bbabyapis';
-const alreadySent: TweetV1TimelineResult = [];
+const alreadySent: TweetV2[] = [];
 
 export const getNewTweets = async () => {
   try {
-    const tweets = await twitterapis.getListTweets(config.BBABY_ACCESS_TOKEN, config.BBABY_ACCESS_TOKEN_SECRET, 'en');
-    const filtered = tweets.filter((t) => !alreadySent.find((pt) => pt.id === t.id));
-    return filtered;
+    const data = await twitterapis.getListTweets('en');
+    const filtered = data.tweets.filter((t) => !alreadySent.find((pt) => pt.id === t.id));
+    return { tweets: filtered, users: data.includes.users, media: data.includes.media };
   } catch (err) {
     throw catchError(err);
   }
@@ -20,23 +19,33 @@ export const getNewTweets = async () => {
 export const sendTweet = async () => {
   try {
     console.log('new Twitter request');
-    const tweets = (await getNewTweets())?.sort((a, b) => b.favorite_count - a.favorite_count);
+    const data = await getNewTweets();
+    const tweets = data.tweets.sort((a, b) => {
+      if (!b.public_metrics || !a.public_metrics) return 0;
+      return b.public_metrics.like_count - a.public_metrics.like_count;
+    });
     if (!tweets || tweets.length === 0) return;
     tweets.length = tweets.length >= 2 ? 2 : tweets.length;
     tweets?.map(async (tweet) => {
       try {
-        if (!tweet.full_text) return;
-        if (tweet.extended_entities?.media && tweet.extended_entities.media[0]?.type === 'video') return;
-        const withoutLink = tweet.full_text.replace(/https?:\/\/\S+/gi, '');
+        if (!tweet.text) return;
+        const media = data.media.find((m) => {
+          if (!tweet.attachments?.media_keys) return;
+          return tweet.attachments.media_keys[0] === m.media_key;
+        });
+        if (media?.type === 'video') return;
+        const user = data.users.find((u) => tweet.author_id === u.id);
+        if (!user) return;
+        const withoutLink = tweet.text.replace(/https?:\/\/\S+/gi, '');
         if (!withoutLink) return;
         const translated = await bbabyapis.translate(withoutLink, 'en', 'it');
-        const toSend = `${process.env.NODE_ENV} ${tweet.user.name}: ${translated}`;
+        const toSend = `${process.env.NODE_ENV} ${user.name}: ${translated}`;
         console.log({ toSend });
         const reply_markup: SendMessageOptions['reply_markup'] = {
           inline_keyboard: [[{ callback_data: 'post', text: 'Post' }]],
         };
-        if (tweet.extended_entities?.media && tweet.extended_entities.media[0]?.type === 'photo') {
-          await telegramapis.sendPhoto(apiconfig.telegram.logs_group_id, tweet?.extended_entities.media[0].media_url_https, {
+        if (media?.type === 'photo' && media.url) {
+          await telegramapis.sendPhoto(apiconfig.telegram.logs_group_id, media.url, {
             caption: toSend,
           });
         } else {

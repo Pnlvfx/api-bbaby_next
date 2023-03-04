@@ -11,7 +11,6 @@ const twitterAuth = async (expressRequest: Request, res: Response, next: NextFun
       return res.status(401).json({
         msg: 'You need to connect your twitter account to access this page!',
       });
-    if (!twitter.access_token || !twitter.access_token_secret) return res.status(400).json({ msg: 'Please, try to login to twitter again!' });
     req.twitter = twitter;
     next();
   } catch (err) {

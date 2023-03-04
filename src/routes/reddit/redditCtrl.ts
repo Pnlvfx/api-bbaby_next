@@ -75,11 +75,8 @@ const redditCtrl = {
       const { user } = req;
       const { after, count } = req.query;
       const redditTokens = user?.tokens?.find((provider) => provider.provider === 'reddit');
-      if (!redditTokens?.access_token_expiration || !redditTokens.access_token)
-        return res.status(500).json({ msg: 'You are not authorized to see this content.' });
-      const registrationDate = new Date(redditTokens.access_token_expiration);
-      const now = new Date();
-      if (now >= registrationDate) {
+      if (!redditTokens?.expires) return res.status(500).json({ msg: 'You are not authorized to see this content.' });
+      if (Date.now() >= redditTokens.expires) {
         await redditapis.getNewToken(redditTokens);
       }
       const posts = await redditapis.getPostsWithToken(redditTokens.access_token, after?.toString(), count?.toString());

@@ -41,14 +41,12 @@ export const useAnswer = async () => {
 
 export const useTwitter = async () => {
   try {
-    const client = new TwitterApi({
-      appKey: config.TWITTER_CONSUMER_KEY,
-      appSecret: config.TWITTER_CONSUMER_SECRET,
-      accessToken: config.BBABYITA_ACCESS_TOKEN,
-      accessSecret: config.BBABYITA_ACCESS_TOKEN_SECRET,
+    const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
+    const stream = await client.v2.sampleStream();
+    console.log('stream started');
+    stream.on(ETwitterStreamEvent.Connected, () => {
+      console.log('connected');
     });
-    const stream = await client.v2.getStream('/statuses/mentions_timeline.json');
-    console.log(stream);
     stream.on(ETwitterStreamEvent.ConnectionError, (err) => {
       console.log(err, 'Connection Error');
     });
@@ -63,4 +61,14 @@ export const useTwitter = async () => {
     throw catchError(err);
   }
   //setInterval(sendTweet, 2 * 60 * 1000);
+};
+
+export const check = async () => {
+  const keyPath = coraline.use('private_key');
+  await coraline.readJSON(`${keyPath}/anonynewsitaly.json`);
+  await coraline.readJSON(`${keyPath}/bbabystyle.json`);
+  await coraline.readJSON(`${keyPath}/bbabystyleitalia.json`);
+  await coraline.readJSON(`${keyPath}/bbabystyle_googleCredentials.json`);
+  await coraline.readJSON(`${keyPath}/bbabystyle-private.json`);
+  await coraline.readJSON(`${keyPath}/bbabyita.json`);
 };

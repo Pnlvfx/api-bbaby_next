@@ -13,13 +13,17 @@ export const catchErrorCtrl = (err: unknown, res: Response) => {
   else res.status(500).json({ msg: 'API error' });
 };
 
-export const catchErrorWithTelegram = (err: unknown) => {
-  console.log(err);
-  if (err instanceof Error) {
-    coraline.sendLog(process.env.NODE_ENV + ' ' + err.message);
-  } else if (typeof err === 'string') {
-    coraline.sendLog(process.env.NODE_ENV + ' ' + err);
-  } else {
-    coraline.sendLog('Unknown error');
+export const catchErrorWithTelegram = async (err: unknown) => {
+  try {
+    console.log(err);
+    if (err instanceof Error) {
+      await coraline.sendLog(process.env.NODE_ENV + ' ' + err.message);
+    } else if (typeof err === 'string') {
+      await coraline.sendLog(process.env.NODE_ENV + ' ' + err);
+    } else {
+      await coraline.sendLog('Unknown error');
+    }
+  } catch (err) {
+    //
   }
 };

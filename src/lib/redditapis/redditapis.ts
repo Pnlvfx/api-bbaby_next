@@ -1,7 +1,6 @@
 import { TokensProps } from '../../models/types/user';
 import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
-import coraline from '../../coraline/coraline';
 const USER_AGENT = `bbabysyle/1.0.0 (www.bbabytyle.com)`;
 
 const redditapis = {
@@ -15,10 +14,9 @@ const redditapis = {
       });
       if (!res.ok) throw new Error('For some reason reddit have refused your credentials. Please try to contact reddit support.');
       const body = await res.json();
-      const date = new Date();
-      const expiration = coraline.addHours(1, date);
+      const expiration = Date.now() + 3600;
       redditTokens.access_token = body.access_token;
-      redditTokens.access_token_expiration = expiration;
+      redditTokens.expires = expiration;
       return body.access_token as string;
     } catch (err) {
       throw catchError(err);

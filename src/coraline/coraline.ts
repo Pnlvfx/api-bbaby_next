@@ -156,8 +156,8 @@ const coraline = {
         }
       } catch (err) {
         const error = 'Coraline: Error during a timeout';
-        if (err instanceof Error) coraline.sendLog(error + err.message);
-        if (typeof err === 'string') coraline.sendLog(error + err);
+        if (err instanceof Error) await coraline.sendLog(error + err.message);
+        if (typeof err === 'string') await coraline.sendLog(error + err);
         await coraline.sendLog(error);
       }
     }, timeUntilFunction);

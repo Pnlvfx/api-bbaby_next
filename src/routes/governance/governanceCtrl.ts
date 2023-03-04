@@ -10,7 +10,6 @@ import coraline from '../../coraline/coraline';
 import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
 import telegramapis from '../../lib/telegramapis/telegramapis';
-import { TwitterApi } from 'twitter-api-v2';
 import twitterapis from '../../lib/twitterapis/twitterapis';
 import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 
@@ -188,12 +187,7 @@ const governanceCtrl = {
       if (sharePostToTwitter) {
         try {
           const twitterText = news.title.substring(0, 300 - url.length - 10) + ' ' + url;
-          const twitterUser = new TwitterApi({
-            appKey: config.TWITTER_CONSUMER_KEY,
-            appSecret: config.TWITTER_CONSUMER_SECRET,
-            accessToken: config.BBABYITALIA_ACCESS_TOKEN,
-            accessSecret: config.BBABYITALIA_ACCESS_TOKEN_SECRET,
-          });
+          const twitterUser = await twitterapis.getMyClient('bbabystyleitalia');
           const twimage = await twitterUser.v1.uploadMedia(Buffer.from(newImage.filename));
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {
