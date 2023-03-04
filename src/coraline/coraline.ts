@@ -30,6 +30,11 @@ const coraline = {
   getRandomInt: (max: number) => {
     return Math.floor(Math.random() * max);
   },
+  year: (options?: { min?: number; max?: number }) => {
+    const min = options?.min || 0;
+    const max = options?.max || new Date().getFullYear();
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  },
   getUniqueArray: (arr: [], key: string) => {
     return [...new Map(arr.map((item) => [item[key], item])).values()];
   },

@@ -5,13 +5,14 @@ import User from '../../models/User';
 import twitterapis from '../../lib/twitterapis/twitterapis';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
+import { TweetV1TimelineResult, TwitterApi } from 'twitter-api-v2';
 
 const COOKIE_NAME = 'oauth_token';
 let access_token_secret = '';
 
-let tweets: TweetProps[] | undefined;
-let italianTweets: TweetProps[] | undefined;
-let englishTweets: TweetProps[] | undefined;
+let tweets: TweetV1TimelineResult | undefined;
+let italianTweets: TweetV1TimelineResult | undefined;
+let englishTweets: TweetV1TimelineResult | undefined;
 
 const TwitterCtrl = {
   twitterReqToken: async (userRequest: Request, res: Response) => {
@@ -22,7 +23,7 @@ const TwitterCtrl = {
         return res.status(400).json({
           msg: 'Invalid origin, use https or localhost if you are in development',
         });
-      const { oauth_token, oauth_token_secret } = await twitterapis.oauth.getOAuthRequestToken();
+      const { oauth_token, oauth_token_secret } = await twitterapis.getOAuthRequestToken();
       if (!oauth_token) return res.status(500).json({ msg: 'Twitter error.' });
       const domain = userapis.getCookieDomain(req.headers.origin);
       access_token_secret = oauth_token_secret;
@@ -50,7 +51,7 @@ const TwitterCtrl = {
       if (oauth_token !== req_oauth_token) {
         return res.status(403).json({ msg: 'Request token do not match' });
       }
-      const { oauth_access_token, oauth_access_token_secret } = await twitterapis.oauth.getOauthAccessToken(
+      const { oauth_access_token, oauth_access_token_secret } = await twitterapis.getOauthAccessToken(
         oauth_token,
         oauth_token_secret,
         oauth_verifier,
@@ -64,6 +65,36 @@ const TwitterCtrl = {
       res.status(200).json({ success: true });
     } catch (err) {
       if (err instanceof Error) res.status(403).json({ message: err.message });
+    }
+  },
+  twitterUserInfo: async (expressRequest: Request, res: Response) => {
+    try {
+      const req = expressRequest as TwitterRequest;
+      const { user, twitter } = req;
+      const client = new TwitterApi({
+        appKey: config.TWITTER_CONSUMER_KEY,
+        appSecret: config.TWITTER_CONSUMER_SECRET,
+        accessToken: twitter.access_token,
+        accessSecret: twitter.access_token_secret,
+      });
+      const twitterUser = await client.currentUser();
+      const info = await User.findOneAndUpdate(
+        { username: user?.username },
+        {
+          $push: {
+            externalAccounts: {
+              username: twitterUser.screen_name,
+              provider: 'twitter',
+              link: `https://www.twitter.com/${twitterUser.screen_name}`,
+            },
+          },
+          hasExternalAccount: true,
+        },
+      );
+      if (!info) return res.status(500).json({ msg: 'Something went wrong in bbaby database' });
+      res.status(200).json(twitterUser);
+    } catch (error) {
+      res.status(403).json({ message: error });
     }
   },
   twitterLogout: async (expressRequest: Request, res: Response) => {
@@ -83,36 +114,6 @@ const TwitterCtrl = {
       res.status(200).json({ success: true });
     } catch (err) {
       if (err instanceof Error) res.status(403).json({ msg: err.message });
-    }
-  },
-  twitterUserInfo: async (expressRequest: Request, res: Response) => {
-    try {
-      const req = expressRequest as TwitterRequest;
-      const { user, twitter } = req;
-      const response = await twitterapis.oauth.getProtectedResource(
-        `https://api.twitter.com/1.1/account/verify_credentials.json`,
-        'GET',
-        twitter.access_token,
-        twitter.access_token_secret,
-      );
-      const twitterUser = JSON.parse(response.data.toString());
-      const info = await User.findOneAndUpdate(
-        { username: user?.username },
-        {
-          $push: {
-            externalAccounts: {
-              username: twitterUser.screen_name,
-              provider: 'twitter',
-              link: `https://www.twitter.com/${twitterUser.screen_name}`,
-            },
-          },
-          hasExternalAccount: true,
-        },
-      );
-      if (!info) return res.status(500).json({ msg: 'Something went wrong in bbaby database' });
-      res.status(200).json(twitterUser);
-    } catch (error) {
-      res.status(403).json({ message: error });
     }
   },
   getList: async (expressRequest: Request, res: Response) => {
@@ -149,11 +150,14 @@ const TwitterCtrl = {
       if (config.NODE_ENV === 'development' && tweets && tweets.length > 1) {
         res.status(200).json(tweets);
       } else {
-        const url = 'https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended&count=100';
-        const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET);
-        const data = JSON.parse(response.data.toString()) as TweetProps[];
-        if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
-        tweets = data;
+        const client = new TwitterApi({
+          appKey: config.TWITTER_CONSUMER_KEY,
+          appSecret: config.TWITTER_CONSUMER_SECRET,
+          accessToken: config.ANON_ACCESS_TOKEN,
+          accessSecret: config.ANON_ACCESS_TOKEN_SECRET,
+        });
+        const data = await client.v1.homeTimeline({ count: 100, tweet_mode: 'extended' });
+        tweets = data.tweets;
         res.status(200).json(data);
       }
     } catch (err) {
@@ -165,11 +169,18 @@ const TwitterCtrl = {
       const req = expressRequest as TwitterRequest;
       const { twitter } = req;
       const { screen_name } = req.params;
-      const url = `https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=${screen_name}&tweet_mode=extended&count=100`;
-      const response = await twitterapis.oauth.getProtectedResource(url, 'GET', twitter.access_token, twitter.access_token_secret);
-      const data = JSON.parse(response.data.toString()) as TweetProps[];
-      if (!Array.isArray(data)) return res.status(500).json({ msg: 'Invalid response from twitter!' });
-      res.status(200).json(data);
+      const client = new TwitterApi({
+        appKey: config.TWITTER_CONSUMER_KEY,
+        appSecret: config.TWITTER_CONSUMER_SECRET,
+        accessToken: twitter.access_token,
+        accessSecret: twitter.access_token_secret,
+      });
+      const data = await client.v1.userTimeline('', {
+        count: 100,
+        tweet_mode: 'extended',
+        screen_name,
+      });
+      res.status(200).json(data.tweets);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

@@ -1,10 +1,11 @@
+import { TweetV1TimelineResult } from 'twitter-api-v2';
 import { apiconfig } from '../../../config/APIconfig';
 import config from '../../../config/config';
 import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import telegramapis from '../../telegramapis/telegramapis';
 import twitterapis from '../../twitterapis/twitterapis';
 import bbabyapis from '../bbabyapis';
-const alreadySent: TweetProps[] = [];
+const alreadySent: TweetV1TimelineResult = [];
 
 export const getNewTweets = async () => {
   try {
@@ -24,7 +25,8 @@ export const sendTweet = async () => {
     tweets.length = tweets.length >= 2 ? 2 : tweets.length;
     tweets?.map(async (tweet) => {
       try {
-        if (tweet.extended_entities?.media[0].type === 'video') return;
+        if (!tweet.full_text) return;
+        if (tweet.extended_entities?.media && tweet.extended_entities.media[0]?.type === 'video') return;
         const withoutLink = tweet.full_text.replace(/https?:\/\/\S+/gi, '');
         if (!withoutLink) return;
         const translated = await bbabyapis.translate(withoutLink, 'en', 'it');
@@ -33,7 +35,7 @@ export const sendTweet = async () => {
         const reply_markup: SendMessageOptions['reply_markup'] = {
           inline_keyboard: [[{ callback_data: 'post', text: 'Post' }]],
         };
-        if (tweet?.extended_entities?.media[0]?.type === 'photo') {
+        if (tweet.extended_entities?.media && tweet.extended_entities.media[0]?.type === 'photo') {
           await telegramapis.sendPhoto(apiconfig.telegram.logs_group_id, tweet?.extended_entities.media[0].media_url_https, {
             caption: toSend,
           });

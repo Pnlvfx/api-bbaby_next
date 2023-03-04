@@ -56,8 +56,6 @@ const earthquakePost = async (earthquake: Earthquake) => {
       user.role = 1;
       await user.save();
     }
-    user.is_bot = false; // to remove
-    await user.save(); // to remove
     const { properties } = earthquake;
     const start = properties.mag >= 5.5 ? 'Breaking News: A massive earthquake' : 'News: An earthquake';
     const post = `${start} with a magnitude of ${properties.mag} strikes ${properties.place}. The tremors were felt on ${new Date(

@@ -51,7 +51,7 @@ app.use('/', generalRouter);
 
 app.use('/', telegramRouter);
 
-app.use('/', express.static(staticPath));
+app.use('/static', express.static(staticPath));
 
 app.use('/sitemaps', sitemapRouter);
 

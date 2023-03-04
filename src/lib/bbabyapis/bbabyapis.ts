@@ -15,15 +15,16 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
+import { useTwitter } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
     try {
-      const db = process.env.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle'; // local;
+      const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       await useEarthquake();
       //await useTelegram();
-      //useTwitter();
+      //await useTwitter();
       //await useBBC();
       //await useAnswer();
     } catch (err) {
@@ -62,7 +63,7 @@ const bbabyapis = {
         const chance = new Chance();
         const email = chance.email();
         const password = coraline.generateRandomId(10);
-        const _username = coraline.createPermalink(chance.name() + chance.year({ min: 1964, max: 2000 }));
+        const _username = coraline.createPermalink(chance.name() + coraline.year({ min: 1964, max: 2000 }));
         const ipInfo = await userapis.getIP();
         const user = await userapis.newUser(email, _username, password, ipInfo);
         user.is_bot = true;

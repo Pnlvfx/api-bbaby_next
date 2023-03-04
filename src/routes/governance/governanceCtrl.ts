@@ -194,7 +194,7 @@ const governanceCtrl = {
             accessToken: config.BBABYITALIA_ACCESS_TOKEN,
             accessSecret: config.BBABYITALIA_ACCESS_TOKEN_SECRET,
           });
-          const twimage = await twitterapis.uploadMedia(twitterUser, Buffer.from(newImage.filename));
+          const twimage = await twitterUser.v1.uploadMedia(Buffer.from(newImage.filename));
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {
           await news.deleteOne();

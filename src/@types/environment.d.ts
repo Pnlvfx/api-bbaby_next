@@ -12,6 +12,8 @@ namespace NodeJS {
     CLOUD_API_SECRET: string;
     TWITTER_CONSUMER_KEY: string;
     TWITTER_CONSUMER_SECRET: string;
+    TWITTER_CLIENT_ID: string;
+    TWITTER_CLIENT_SECRET: string;
     ACTIVATION_TOKEN_SECRET: string;
     SENDER_EMAIL_ADDRESS: string;
     SENDER_EMAIL_PASSWORD: string;
@@ -22,6 +24,8 @@ namespace NodeJS {
     BBABYITALIA_ACCESS_TOKEN_SECRET: string;
     BBABY_ACCESS_TOKEN: string;
     BBABY_ACCESS_TOKEN_SECRET: string;
+    BBABYITA_ACCESS_TOKEN: string;
+    BBABYITA_ACCESS_TOKEN_SECRET: string;
     REDDIT_CLIENT_ID: string;
     REDDIT_CLIENT_SECRET: string;
     YOUTUBE_CLIENT_ID: string;

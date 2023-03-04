@@ -1,18 +1,32 @@
-import { TUploadableMedia, TwitterApi } from 'twitter-api-v2';
+import { TwitterApi } from 'twitter-api-v2';
 import config from '../../config/config';
-import _oauth from './twitter_oauth';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import { getListInfo } from './twitter-config';
-const oauthCallback = `${config.CLIENT_URL}/settings`; //redirect
+const oauthCallback = `${config.CLIENT_URL}/settings`;
 
 const twitterapis = {
-  oauth: _oauth(oauthCallback),
-  uploadMedia: async (client: TwitterApi, media: TUploadableMedia) => {
+  getOAuthRequestToken: async () => {
     try {
-      // const stats = fs.statSync(media);
-      // const size = stats.size / (1024*1024)
-      const mediaId = await client.v1.uploadMedia(media);
-      return mediaId;
+      const client = new TwitterApi({
+        appKey: config.TWITTER_CONSUMER_KEY,
+        appSecret: config.TWITTER_CONSUMER_SECRET,
+      });
+      const { oauth_token, oauth_token_secret } = await client.generateAuthLink(oauthCallback);
+      return { oauth_token, oauth_token_secret };
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  getOauthAccessToken: async (oauth_token: string, oauth_token_secret: string, oauth_verifier: string) => {
+    try {
+      const client = new TwitterApi({
+        appKey: config.TWITTER_CONSUMER_KEY,
+        appSecret: config.TWITTER_CONSUMER_SECRET,
+        accessToken: oauth_token,
+        accessSecret: oauth_token_secret,
+      });
+      const { accessToken, accessSecret } = await client.login(oauth_verifier);
+      return { oauth_access_token: accessToken, oauth_access_token_secret: accessSecret };
     } catch (err) {
       throw catchError(err);
     }
@@ -29,36 +43,17 @@ const twitterapis = {
       throw catchError(err);
     }
   },
-  getTrendsLocations: async () => {
-    try {
-      const url = 'https://api.twitter.com/1.1/trends/available.json';
-      const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET);
-      return JSON.parse(response.data.toString());
-    } catch (err) {
-      throw catchError(err);
-    }
-  },
-  getTrends: async (id = 1) => {
-    try {
-      const url = `https://api.twitter.com/1.1/trends/place.json?id=${id}`;
-      const response = await twitterapis.oauth.getProtectedResource(url, 'GET', config.ANON_ACCESS_TOKEN, config.ANON_ACCESS_TOKEN_SECRET);
-      return JSON.parse(response.data.toString());
-    } catch (err) {
-      throw catchError(err);
-    }
-  },
   getListTweets: async (access_token: string, access_token_secret: string, lang: 'en' | 'it') => {
     try {
       const { slug, owner_screen_name } = getListInfo(lang);
-      const res = await twitterapis.oauth.getProtectedResource(
-        `https://api.twitter.com/1.1/lists/statuses.json?slug=${slug}&owner_screen_name=${owner_screen_name}&tweet_mode=extended&count=100`,
-        'GET',
-        access_token,
-        access_token_secret,
-      );
-      const data = JSON.parse(res.data.toString());
-      if (!Array.isArray(data)) throw new Error('Invalid response from twitter!');
-      return data as TweetProps[];
+      const client = new TwitterApi({
+        appKey: config.TWITTER_CONSUMER_KEY,
+        appSecret: config.TWITTER_CONSUMER_SECRET,
+        accessToken: access_token,
+        accessSecret: access_token_secret,
+      });
+      const data = await client.v1.listStatuses({ slug, owner_screen_name });
+      return data.tweets;
     } catch (err) {
       throw catchError(err);
     }

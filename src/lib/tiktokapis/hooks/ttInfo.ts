@@ -1,13 +1,17 @@
-import needle from 'needle';
 import { load } from 'cheerio';
 import { catchError } from '../../../coraline/cor-route/crlerror';
 
 export const getInfo = async (link: string) => {
   const host = 'https://ttsave.app/download';
   const body = { id: link };
-  const res = await needle('post', host, body, { json: true });
+  const res = await fetch(host, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const html = await res.text();
   try {
-    const $ = load(res.body);
+    const $ = load(html);
     const response: TiktokInfoProps = {
       success: true,
       author: {

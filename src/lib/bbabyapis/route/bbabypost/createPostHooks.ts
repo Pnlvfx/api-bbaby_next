@@ -60,7 +60,7 @@ export const shareToTwitter = async (
         const isUrl = type === 'images' ? coraline.media.urlisImage(selectedFile) : coraline.media.urlisVideo(video as string);
         const public_id = `posts/${savedPost._id.toString()}`;
         const media = isUrl ? await coraline.media.getMediaFromUrl(selectedFile, public_id, type) : { filename: selectedFile };
-        const twimage = await twitterapis.uploadMedia(twitterUser, isUrl ? media.filename : Buffer.from(media.filename));
+        const twimage = await twitterUser.v1.uploadMedia(isUrl ? media.filename : Buffer.from(media.filename));
         await twitterapis.tweet(twitterUser, twitterText, twimage);
       } else {
         await twitterapis.tweet(twitterUser, twitterText);
