@@ -15,7 +15,7 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
-import { check, useTwitter } from './hooks/hooks';
+import { check } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -25,7 +25,7 @@ const bbabyapis = {
       await useEarthquake();
       check();
       // await useTelegram();
-      await useTwitter();
+      //await useTwitter();
       //await useBBC();
       //await useAnswer();
     } catch (err) {
