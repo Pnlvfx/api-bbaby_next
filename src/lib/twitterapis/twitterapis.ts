@@ -78,6 +78,7 @@ const twitterapis = {
       }
       return client;
     } catch (err) {
+      console.log(err);
       throw catchError(err);
     }
   },

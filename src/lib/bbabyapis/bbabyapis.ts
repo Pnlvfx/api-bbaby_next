@@ -16,6 +16,7 @@ import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
 import { check } from './hooks/hooks';
+import { useTwitter } from './hooks/twhook';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -25,9 +26,9 @@ const bbabyapis = {
       await useEarthquake();
       check();
       // await useTelegram();
-      //await useTwitter();
-      //await useBBC();
-      //await useAnswer();
+      await useTwitter();
+      // await useBBC();
+      // await useAnswer();
     } catch (err) {
       catchErrorWithTelegram('bbabyapis.initialize' + ' ' + err);
     }
