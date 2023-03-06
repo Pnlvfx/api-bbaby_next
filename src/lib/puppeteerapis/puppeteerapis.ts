@@ -97,6 +97,19 @@ const puppeteerapis = {
       throw catchError(err);
     }
   },
+  scrollFor: async (page: Page, duration: number, interval: number, distance: number) => {
+    const startTime = Date.now();
+    const endTime = startTime + duration * 1000;
+    let currentTime = startTime;
+
+    while (currentTime < endTime) {
+      await page.evaluate((distance) => {
+        window.scrollBy(0, distance);
+      }, distance);
+      await page.waitForTimeout(interval * 100);
+      currentTime = Date.now();
+    }
+  },
   performanceWrapper: async (callback: () => Promise<unknown>) => {
     try {
       const maxCPUUsage = os.cpus().length * 100 * 1000;

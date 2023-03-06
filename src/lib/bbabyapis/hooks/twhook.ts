@@ -1,6 +1,6 @@
 // import { ETwitterStreamEvent, TwitterApi } from 'twitter-api-v2';
 // import config from '../../../config/config';
-import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
+import { catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import twitterapis from '../../twitterapis/twitterapis';
 import openaiapis from '../../openaiapis/openaiapis';
 import coraline from '../../../coraline/coraline';
@@ -52,15 +52,19 @@ const useAImentions = async () => {
     await Promise.all(
       filtered.map(async (tweet) => {
         try {
-          const originalId = tweet.referenced_tweets ? tweet.referenced_tweets[0].id : undefined;
-          if (!originalId) return;
-          const originalTweet = await client.v2.singleTweet(originalId);
+          const mentionId = tweet.referenced_tweets ? tweet.referenced_tweets[0].id : undefined;
+          if (!mentionId) return;
+          const originalTweet = await client.v2.singleTweet(mentionId);
           const language = await googleapis.detectLanguage(originalTweet.data.text);
-          console.log(language);
           const s = language === 'it' ? 'Che ne pensi in massimo 270 lettere?' : 'What do you think about this in maximum 270 word?';
           const prompt = `${s} ${originalTweet.data.text}`;
           const aitext = await openaiapis.request(prompt);
           if (aitext.length >= 300) return;
+          await client.v2.tweet(aitext, {
+            reply: {
+              in_reply_to_tweet_id: tweet.id,
+            },
+          });
           alreadySent.push(tweet.id);
           const username = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);
           await coraline.sendLog(`New tweet reply: https://twitter.com/${username}/status/${tweet.id}`);
@@ -75,11 +79,6 @@ const useAImentions = async () => {
 };
 
 export const useTwitter = async () => {
-  try {
-    // await useStream();
-  } catch (err) {
-    throw catchError(err);
-  }
   setInterval(useAImentions, 10 * 60 * 1000);
   //setInterval(sendTweet, 2 * 60 * 1000);
 };

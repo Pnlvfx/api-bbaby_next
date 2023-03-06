@@ -16,16 +16,21 @@ import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
 import { useTwitter } from './hooks/twhook';
+import { check } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
     try {
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
-      await useEarthquake();
-      // check();
+      check();
+      if (process.env.NODE_ENV === 'production') {
+        useEarthquake();
+        await useTwitter();
+      }
+      // await quoraapis.useQuora();
+      // const data = await quoraapis.getQuoras();
       // await useTelegram();
-      await useTwitter();
       // await useBBC();
       // await useAnswer();
     } catch (err) {
