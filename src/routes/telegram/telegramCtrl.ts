@@ -18,7 +18,6 @@ const telegramCtrl = {
         if (data.message?.chat.id === apiconfig.telegram.logs_group_id) {
           const msg = data.message as TelegramMessage;
           if (msg.text) {
-            console.log(msg);
             if (msg.reply_to_message) {
               const user = await bbabyapis.AIuser();
               let community = await Community.findOne({ name: 'Notizie' });
@@ -33,8 +32,7 @@ const telegramCtrl = {
       } else {
         const info = data.callback_query as TelegramCallbackQuery;
         if (info.data === 'post' && info.message.text) {
-          const title = info.message.text.split(':')[1];
-          console.log(title);
+          //const title = info.message.text.split(':')[1];
         }
       }
       res.sendStatus(200);

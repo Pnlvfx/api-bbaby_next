@@ -187,7 +187,7 @@ const governanceCtrl = {
       if (sharePostToTwitter) {
         try {
           const twitterText = news.title.substring(0, 300 - url.length - 10) + ' ' + url;
-          const twitterUser = await twitterapis.getMyClient('bbabystyleitalia');
+          const twitterUser = await twitterapis.getMyClient('bbabystyle');
           const twimage = await twitterUser.v1.uploadMedia(Buffer.from(newImage.filename));
           await twitterapis.tweet(twitterUser, twitterText, twimage);
         } catch (err) {

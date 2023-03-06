@@ -19,7 +19,7 @@ let italianTweets: TweetResponse | undefined;
 let englishTweets: TweetResponse | undefined;
 
 const isTwitterBbaby = (username: string) => {
-  if (username === 'anonynewsitaly' || username === 'bbabyita' || username === 'bbabystyle' || username === 'bbabystyleitalia') return true;
+  if (username === 'anonynewsitaly' || username === 'bbabyita' || username === 'bugstransfer' || username === 'bbabystyle') return true;
   return false;
 };
 
@@ -125,7 +125,7 @@ const twitterCtrl = {
           expansions: ['author_id', 'attachments.media_keys'],
           'tweet.fields': ['public_metrics', 'entities', 'created_at'],
           'user.fields': ['username', 'name', 'profile_image_url'],
-          'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url'],
+          'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url', 'variants'],
           max_results: 100,
         });
         tweets = {
@@ -149,7 +149,7 @@ const twitterCtrl = {
         expansions: ['author_id', 'attachments.media_keys'],
         'tweet.fields': ['public_metrics', 'entities', 'created_at'],
         'user.fields': ['username', 'name', 'profile_image_url'],
-        'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url'],
+        'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url', 'variants'],
         max_results: 100,
       });
       res.status(200).json({

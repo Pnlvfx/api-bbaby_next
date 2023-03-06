@@ -17,7 +17,7 @@ const initial = async () => {
       }
     });
   } catch (err) {
-    console.log(err);
+    throw catchError(err);
   }
 };
 

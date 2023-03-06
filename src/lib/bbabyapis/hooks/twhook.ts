@@ -4,7 +4,10 @@ import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/
 import twitterapis from '../../twitterapis/twitterapis';
 import openaiapis from '../../openaiapis/openaiapis';
 import coraline from '../../../coraline/coraline';
+import { TweetV2 } from 'twitter-api-v2';
+import googleapis from '../../googleapis/googleapis';
 const start_time = new Date().toISOString();
+const alreadySent: TweetV2['id'][] = [];
 
 // const useStream = async () => {
 //   try {
@@ -39,19 +42,33 @@ const useAImentions = async () => {
     const client = await twitterapis.getMyClient('bbabyita');
     const me = await client.v2.me();
     const mentions = await client.v2.userMentionTimeline(me.data.id, {
+      expansions: ['author_id'],
       'tweet.fields': ['referenced_tweets'],
+      'user.fields': ['username'],
       start_time,
     });
-    const originalId = mentions.tweets.length > 0 && mentions.tweets[0].referenced_tweets ? mentions.tweets[0].referenced_tweets[0].id : undefined;
-    if (!originalId) return;
-    const originalTweet = await client.v2.singleTweet(originalId);
-    const aitext = await openaiapis.request(`Che ne pensi di: ${originalTweet.data.text}?`);
-    await client.v2.tweet(aitext, {
-      reply: {
-        in_reply_to_tweet_id: originalId,
-      },
-    });
-    await coraline.sendLog(`new tweet reply to :${originalTweet.data.text}, with ${aitext}`);
+    if (!mentions.data.data) return;
+    const filtered = mentions.data.data.filter((t) => !alreadySent.find((t2) => t2 === t.id));
+    await Promise.all(
+      filtered.map(async (tweet) => {
+        try {
+          const originalId = tweet.referenced_tweets ? tweet.referenced_tweets[0].id : undefined;
+          if (!originalId) return;
+          const originalTweet = await client.v2.singleTweet(originalId);
+          const language = await googleapis.detectLanguage(originalTweet.data.text);
+          console.log(language);
+          const s = language === 'it' ? 'Che ne pensi in massimo 270 lettere?' : 'What do you think about this in maximum 270 word?';
+          const prompt = `${s} ${originalTweet.data.text}`;
+          const aitext = await openaiapis.request(prompt);
+          if (aitext.length >= 300) return;
+          alreadySent.push(tweet.id);
+          const username = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);
+          await coraline.sendLog(`New tweet reply: https://twitter.com/${username}/status/${tweet.id}`);
+        } catch (err) {
+          catchErrorWithTelegram(err);
+        }
+      }),
+    );
   } catch (err) {
     catchErrorWithTelegram(err);
   }
@@ -60,9 +77,9 @@ const useAImentions = async () => {
 export const useTwitter = async () => {
   try {
     // await useStream();
-    setInterval(useAImentions, 20 * 60 * 1000);
   } catch (err) {
     throw catchError(err);
   }
+  setInterval(useAImentions, 10 * 60 * 1000);
   //setInterval(sendTweet, 2 * 60 * 1000);
 };

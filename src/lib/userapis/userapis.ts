@@ -14,7 +14,6 @@ const userapis = {
         url += '/' + ip;
       }
       url += `?key=${config.IP_LOOKUP_API_KEY}`;
-      console.log(url);
       const res = await fetch(url, {
         method: 'get',
       });

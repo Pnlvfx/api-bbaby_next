@@ -15,7 +15,7 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import googleapis from '../googleapis/googleapis';
 import { useEarthquake } from '../earthquakeapis/earthquake';
-import { check } from './hooks/hooks';
+import { useTwitter } from './hooks/twhook';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -23,9 +23,9 @@ const bbabyapis = {
       mongoose.set('strictQuery', true);
       await mongoose.connect(db);
       await useEarthquake();
-      check();
+      // check();
       // await useTelegram();
-      //await useTwitter();
+      await useTwitter();
       // await useBBC();
       // await useAnswer();
     } catch (err) {
@@ -124,7 +124,11 @@ const bbabyapis = {
       try {
         translation = await googleapis.translate(text, from, to);
       } catch (err) {
-        translation = await openaiapis.translate(text, from, to);
+        const prompt = `Transform this text from ${from} to ${to}, you are allowed to change something, but it's important that is readable for people : ${text.substring(
+          0,
+          3300,
+        )}`;
+        translation = await openaiapis.request(prompt);
       }
       return translation;
     } catch (err) {

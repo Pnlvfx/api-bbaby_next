@@ -2,7 +2,6 @@ import { spawn } from 'child_process';
 import coraline from '../../coraline/coraline';
 import path from 'path';
 import { catchError } from '../../coraline/cor-route/crlerror';
-import videoshow from 'videoshow';
 import fs from 'fs';
 
 const ffmpeg = {
@@ -77,31 +76,6 @@ const ffmpeg = {
           reject(code);
         }
       });
-    });
-  },
-  imagesToVideo: (images: FFmpegImage[], audio: string, output: string, options?: VideoOptions) => {
-    return new Promise<string>((resolve, reject) => {
-      const videoOptions = {
-        fps: options?.fps || 24,
-        transition: options?.transition || false,
-        transitionDuration: options?.transitionDuration || 0, // seconds
-        videoBitrate: 1024,
-        videoCodec: 'libx264',
-        size: '1920x?',
-        audioBitrate: '128k',
-        audioChannels: 2,
-        format: 'mp4',
-        pixelFormat: 'yuv420p',
-      };
-      videoshow(images, videoOptions)
-        .audio(audio)
-        .save(output)
-        .on('error', (err: string, stdout: string, stderr: string) => {
-          reject(`Some error occured ${err ? err : stdout ? stdout : stderr}`);
-        })
-        .on('end', () => {
-          resolve(output);
-        });
     });
   },
   imagesToTransparentVideo: (images: FFmpegImage[], output: string) => {
@@ -210,6 +184,39 @@ const ffmpeg = {
       ffmpeg.on('close', (code) => {
         if (code === 0) resolve(output);
         reject('Error when trying to concatenate this videos!');
+      });
+    });
+  },
+  resizeVideo: (video: string, width: number, height: number, output: string) => {
+    return new Promise<string>((resolve, reject) => {
+      const ffmpeg = spawn('ffmpeg', [
+        '-y',
+        '-i',
+        video,
+        '-vf',
+        `scale=${width}:${height}`,
+        '-c:v',
+        'libx264',
+        '-c:a',
+        'aac',
+        '-b:v',
+        '2M',
+        '-r',
+        '30',
+        output,
+      ]);
+
+      ffmpeg.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+      });
+
+      ffmpeg.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+      });
+
+      ffmpeg.on('close', (code) => {
+        if (code === 0) resolve(output);
+        reject('Error when trying to resize this videos!');
       });
     });
   },

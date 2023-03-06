@@ -42,7 +42,7 @@ export const check = async () => {
   const keyPath = coraline.use('private_key');
   await coraline.readJSON(`${keyPath}/anonynewsitaly.json`);
   await coraline.readJSON(`${keyPath}/bbabystyle.json`);
-  await coraline.readJSON(`${keyPath}/bbabystyleitalia.json`);
+  await coraline.readJSON(`${keyPath}/bugstransfer.json`);
   await coraline.readJSON(`${keyPath}/bbabystyle_googleCredentials.json`);
   await coraline.readJSON(`${keyPath}/bbabystyle-private.json`);
   await coraline.readJSON(`${keyPath}/bbabyita.json`);

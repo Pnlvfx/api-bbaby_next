@@ -30,7 +30,7 @@ const twitterapis = {
         expansions: ['author_id', 'attachments.media_keys'],
         'tweet.fields': ['public_metrics', 'entities', 'created_at'],
         'user.fields': ['username', 'name', 'profile_image_url'],
-        'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url'],
+        'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url', 'variants'],
         max_results: 100,
       });
       return data;
@@ -62,7 +62,7 @@ const twitterapis = {
       throw catchError(err);
     }
   },
-  getMyClient: async (name: 'anonynewsitalia' | 'bbabystyleitalia' | 'bbabystyle' | 'bbabyita') => {
+  getMyClient: async (name: 'anonynewsitalia' | 'bugstransfer' | 'bbabystyle' | 'bbabyita') => {
     try {
       const keyPath = coraline.use('private_key');
       const filename = `${keyPath}/${name}.json`;
@@ -72,13 +72,14 @@ const twitterapis = {
         if (!token.refresh_token) throw new Error(`Missing refresh token for ${name}`);
         const c = new TwitterApi({ clientId: config.TWITTER_CLIENT_ID, clientSecret: config.TWITTER_CLIENT_SECRET });
         const t = await c.refreshOAuth2Token(token.refresh_token);
+        const expires = Date.now() + t.expiresIn * 1000;
+        await coraline.saveFile(filename, { access_token: t.accessToken, expires, refresh_token: t.refreshToken, provider: 'twitter' });
         client = t.client;
       } else {
         client = new TwitterApi(token.access_token);
       }
       return client;
     } catch (err) {
-      console.log(err);
       throw catchError(err);
     }
   },

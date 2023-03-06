@@ -15,9 +15,9 @@ const chooseUser = async (user: IUser, post: PostProps, language: 'it' | 'en') =
     } else if (post.community === 'Italy') {
       client = await twitterapis.getMyClient('anonynewsitalia');
     } else if (language === 'it') {
-      client = await twitterapis.getMyClient('bbabystyleitalia');
-    } else {
       client = await twitterapis.getMyClient('bbabystyle');
+    } else {
+      client = await twitterapis.getMyClient('bugstransfer');
     }
     return client;
   } catch (err) {

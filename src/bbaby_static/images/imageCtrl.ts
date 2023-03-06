@@ -17,9 +17,7 @@ const imageCtrl = {
       };
       res.writeHead(200, headers);
       const videoStream = fs.createReadStream(image);
-      videoStream.on('error', async (err) => {
-        console.log(err);
-      });
+      videoStream.on('error', () => null);
       videoStream.pipe(res);
     } catch (err) {
       catchErrorCtrl(err, res);

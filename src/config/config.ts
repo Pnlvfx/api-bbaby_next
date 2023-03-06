@@ -26,6 +26,7 @@ interface ENV {
   NODE_ENV: string | undefined;
   PEXELS_API_KEY: string | undefined;
   OPENAI_API_KEY: string | undefined;
+  OPENAI_API_KEY_2: string | undefined;
   IP_LOOKUP_API_KEY: string | undefined;
 }
 
@@ -52,6 +53,7 @@ interface Config {
   NODE_ENV: 'development' | 'production';
   PEXELS_API_KEY: string;
   OPENAI_API_KEY: string;
+  OPENAI_API_KEY_2: string;
   IP_LOOKUP_API_KEY: string;
 }
 
@@ -79,6 +81,7 @@ const getConfig = (): ENV => {
     NODE_ENV: process.env.NODE_ENV,
     PEXELS_API_KEY: process.env.PEXELS_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_API_KEY_2: process.env.OPENAI_API_KEY_2,
     IP_LOOKUP_API_KEY: process.env.IP_LOOKUP_API_KEY,
   };
 };

@@ -8,6 +8,9 @@ export const catchError = (err: unknown) => {
 };
 
 export const catchErrorCtrl = (err: unknown, res: Response) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(err);
+  }
   if (err instanceof Error) res.status(500).json({ msg: err.message });
   else if (typeof err === 'string') res.status(500).json({ msg: err });
   else res.status(500).json({ msg: 'API error' });
