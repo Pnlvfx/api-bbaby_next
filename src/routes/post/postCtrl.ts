@@ -9,6 +9,7 @@ import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import cloudinary from '../../config/cloudinary';
 import { PostProps } from '../../models/types/post';
+import coraline from '../../coraline/coraline';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -40,6 +41,10 @@ const PostCtrl = {
         });
       }
       res.status(200).json(posts);
+      const earthquakePosts = posts.filter((p) => p.community === 'Earthquake');
+      if (earthquakePosts.length && !communityName && _limit === 15 && process.env.NODE_ENV === 'production') {
+        await coraline.sendLog('There are too many earthquakes posts');
+      }
     } catch (err) {
       catchErrorCtrl(err, res);
     }

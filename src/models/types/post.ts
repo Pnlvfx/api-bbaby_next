@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { CommunityProps } from './community';
 
 export interface PostProps extends Document {
@@ -16,12 +16,11 @@ export interface PostProps extends Document {
 }
 
 interface MediaInfoProps {
-  dimension?: Types.Array<number>;
+  dimension: number[];
   isImage?: boolean;
   isVideo?: boolean;
   image?: string;
   video?: {
     url?: string;
-    thumbnail: string;
   };
 }

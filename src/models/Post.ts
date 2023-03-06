@@ -19,6 +19,10 @@ const PostSchema = new Schema<PostProps>(
       type: String,
       required: true,
     },
+    permalink: {
+      type: String,
+      required: true,
+    },
     body: {
       type: String,
     },
@@ -40,7 +44,9 @@ const PostSchema = new Schema<PostProps>(
         type: String,
       },
       video: {
-        type: Object,
+        type: {
+          url: String,
+        },
       },
     },
     ups: {
@@ -51,10 +57,6 @@ const PostSchema = new Schema<PostProps>(
     numComments: {
       type: Number,
       default: 0,
-    },
-    permalink: {
-      type: String,
-      required: true,
     },
   },
   {

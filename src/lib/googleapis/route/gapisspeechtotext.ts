@@ -44,7 +44,7 @@ const gapisspeechtotext = async (audio: string) => {
             });
           });
         } catch (err) {
-          throw catchError(err);
+          return;
         }
       }),
     );

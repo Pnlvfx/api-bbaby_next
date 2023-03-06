@@ -18,6 +18,14 @@ const coralineMedia = {
     const url = `${process.env.SERVER_URL}/static/${extra_path[1]}`;
     return url;
   },
+  getPathFromUrl: (url: string) => {
+    const split = url.split('/static/');
+    const pathArr = split[1].split('/');
+    const filename = pathArr.pop();
+    const base_path = coraline.useStatic(pathArr.join('/'));
+    const folder = `${base_path}/${filename}`;
+    return folder;
+  },
   saveAudio: async (audio: string, output: string) => {
     try {
       const buffer = Buffer.from(audio, 'base64');

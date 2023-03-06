@@ -2,28 +2,34 @@ import fs from 'fs';
 import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import https from 'https';
+import { PexelsImageOptions, PexelsVideoOptions, PhotosWithTotalResults, Videos } from './types/pexels';
 
 const headers = {
   Authorization: config.PEXELS_API_KEY,
 };
 
 const pexelsapi = {
-  getImage: async (text: string) => {
+  getImage: async (text: string, options?: PexelsImageOptions) => {
     try {
-      const orientation = 'landscape'; //landscape / portrait
-      const url = `https://api.pexels.com/v1/search?query=${text}&orientation=${orientation}`;
-      const response = await fetch(url, {
+      let url = `https://api.pexels.com/v1/search?query=${text}`;
+      if (options) {
+        const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
+        usedOptions.forEach(([key, value]) => {
+          url += `&${key}=${value}`;
+        });
+      }
+      const res = await fetch(url, {
         method: 'GET',
         headers,
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error('Pexels API error.');
+      const data = (await res.json()) as PhotosWithTotalResults;
+      if (!res.ok) throw new Error('Pexels API error.');
       return data.photos;
     } catch (err) {
       throw catchError(err);
     }
   },
-  getVideo: async (text: string, options?: PexelsOptions) => {
+  getVideo: async (text: string, options?: PexelsVideoOptions) => {
     try {
       let url = `https://api.pexels.com/videos/search?query=${text}`;
       if (options) {
@@ -36,7 +42,7 @@ const pexelsapi = {
         method: 'GET',
         headers,
       });
-      const data = (await res.json()) as PexelsResponse;
+      const data = (await res.json()) as Videos;
       if (!res.ok) throw new Error('Pexels API error.');
       return data.videos;
     } catch (err) {

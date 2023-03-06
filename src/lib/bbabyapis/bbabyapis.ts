@@ -13,23 +13,24 @@ import Post from '../../models/Post';
 import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
-import googleapis from '../googleapis/googleapis';
-import { useEarthquake } from '../earthquakeapis/earthquake';
+import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { useTwitter } from './hooks/twhook';
 import { check } from './hooks/hooks';
+import { useTwitterNotification } from './hooks/bbabytwitter';
 const bbabyapis = {
   initialize: async () => {
     try {
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
-      mongoose.set('strictQuery', true);
       await mongoose.connect(db);
+      mongoose.set('strictQuery', true);
       check();
-      if (process.env.NODE_ENV === 'production') {
-        useEarthquake();
-        await useTwitter();
+      if (config.NODE_ENV === 'development') {
+        useTwitterNotification(2);
+        // await quoraapis.useQuora(5, 40);
+      } else {
+        useEarthquakeAI(5);
+        useTwitter(5);
       }
-      // await quoraapis.useQuora();
-      // const data = await quoraapis.getQuoras();
       // await useTelegram();
       // await useBBC();
       // await useAnswer();
@@ -104,7 +105,7 @@ const bbabyapis = {
       console.log({ prompt });
       const temperature = Math.random();
       const title = await openaiapis.request(prompt, temperature);
-      console.log(title);
+      console.log({ title });
       const exist = await Post.findOne({ title, community });
       if (exist) {
         if (!prompt.match(`and don't use this question or similar:`)) {
@@ -119,23 +120,6 @@ const bbabyapis = {
         sharePostToTwitter: share,
       });
       return post;
-    } catch (err) {
-      throw catchError(err);
-    }
-  },
-  translate: async (text: string, from: string, to: string) => {
-    try {
-      let translation;
-      try {
-        translation = await googleapis.translate(text, from, to);
-      } catch (err) {
-        const prompt = `Transform this text from ${from} to ${to}, you are allowed to change something, but it's important that is readable for people : ${text.substring(
-          0,
-          3300,
-        )}`;
-        translation = await openaiapis.request(prompt);
-      }
-      return translation;
     } catch (err) {
       throw catchError(err);
     }

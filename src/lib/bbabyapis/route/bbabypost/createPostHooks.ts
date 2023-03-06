@@ -13,7 +13,7 @@ const chooseUser = async (user: IUser, post: PostProps, language: 'it' | 'en') =
       if (!twitter) throw new Error('You need to authorize the twitter API in the User Settings page.');
       client = await twitterapis.getUserClient(twitter, user);
     } else if (post.community === 'Italy') {
-      client = await twitterapis.getMyClient('anonynewsitalia');
+      client = await twitterapis.getMyClient('anonynewsitaly');
     } else if (language === 'it') {
       client = await twitterapis.getMyClient('bbabystyle');
     } else {
@@ -36,7 +36,7 @@ export const shareToTwitter = async (
 ) => {
   try {
     //const govText = savedPost.title.substring(0, 300 - url.length - 8) + ' ' + url;
-    const govText = savedPost.title.substring(0, 300);
+    const govText = savedPost.title.substring(0, 280);
     const twitterText = user.role === 0 ? url : govText;
     const twitterUser = await chooseUser(user, savedPost, communityInfo.language);
     if (user.role === 1) {

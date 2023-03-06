@@ -11,7 +11,7 @@ import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
 import telegramapis from '../../lib/telegramapis/telegramapis';
 import twitterapis from '../../lib/twitterapis/twitterapis';
-import bbabyapis from '../../lib/bbabyapis/bbabyapis';
+import googleapis from '../../lib/googleapis/googleapis';
 
 const governanceCtrl = {
   createImage: async (expressRequest: Request, res: Response) => {
@@ -120,7 +120,7 @@ const governanceCtrl = {
       const { lang } = req.query;
       if (!lang) return res.status(400).json({ msg: 'Add the source language in your query url.' });
       const to = lang === 'en' ? 'it' : 'en';
-      const translation = await bbabyapis.translate(text, lang.toString(), to);
+      const translation = await googleapis.translate(text, lang.toString(), to);
       res.status(200).json(translation);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -205,7 +205,9 @@ const governanceCtrl = {
       const req = expressRequest as UserRequest;
       const { text } = req.query;
       if (!text) return res.status(400).json({ msg: 'Please add a search text in your query params.' });
-      const photos = await pexelsapi.getImage(text.toString());
+      const photos = await pexelsapi.getImage(text.toString(), {
+        orientation: 'landscape',
+      });
       res.status(200).json(photos);
     } catch (err) {
       catchErrorCtrl(err, res);

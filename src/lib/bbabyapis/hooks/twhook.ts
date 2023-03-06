@@ -39,6 +39,7 @@ const alreadySent: TweetV2['id'][] = [];
 
 const useAImentions = async () => {
   try {
+    console.log('New twitter request');
     const client = await twitterapis.getMyClient('bbabyita');
     const me = await client.v2.me();
     const mentions = await client.v2.userMentionTimeline(me.data.id, {
@@ -56,20 +57,24 @@ const useAImentions = async () => {
           if (!mentionId) return;
           const originalTweet = await client.v2.singleTweet(mentionId);
           const language = await googleapis.detectLanguage(originalTweet.data.text);
-          const s = language === 'it' ? 'Che ne pensi in massimo 270 lettere?' : 'What do you think about this in maximum 270 word?';
+          const s = language === 'it' ? 'Che ne pensi in massimo 270 lettere?' : 'What do you think about this in maximum 270 words?';
           const prompt = `${s} ${originalTweet.data.text}`;
           const aitext = await openaiapis.request(prompt);
-          if (aitext.length >= 300) return;
+          if (aitext.length >= 300) {
+            coraline.sendLog(`twitterAI: sorry but my tweet have ${aitext.length} words`);
+            return;
+          }
           await client.v2.tweet(aitext, {
             reply: {
               in_reply_to_tweet_id: tweet.id,
             },
           });
           alreadySent.push(tweet.id);
-          const username = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);
-          await coraline.sendLog(`New tweet reply: https://twitter.com/${username}/status/${tweet.id}`);
+          const user = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);
+          if (!user) return;
+          await coraline.sendLog(`New tweet reply: https://twitter.com/${user.username}/status/${tweet.id}`);
         } catch (err) {
-          catchErrorWithTelegram(err);
+          return;
         }
       }),
     );
@@ -78,7 +83,6 @@ const useAImentions = async () => {
   }
 };
 
-export const useTwitter = async () => {
-  setInterval(useAImentions, 10 * 60 * 1000);
-  //setInterval(sendTweet, 2 * 60 * 1000);
+export const useTwitter = (minutesInterval: number) => {
+  setInterval(useAImentions, minutesInterval * 60 * 1000);
 };

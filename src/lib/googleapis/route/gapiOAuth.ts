@@ -3,8 +3,8 @@ import coraline from '../../../coraline/coraline';
 import { GoogleCredentials } from '../types/credentials';
 import config from '../../../config/config';
 
-const gapiOAth = {
-  newGoogleOAuthUrl: (origin: string) => {
+const gapiOAuth = {
+  newOAuthUrl: (origin: string) => {
     const base_url = 'https://accounts.google.com/o/oauth2/v2/auth';
     const prompt = 'consent';
     const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
@@ -18,7 +18,7 @@ const gapiOAth = {
       const headers = {
         'content-type': 'application/x-www-form-urlencoded',
       };
-      let body = null;
+      let body;
       if (code && redirect_uri) {
         body = new URLSearchParams({
           client_id: YOUTUBE_CLIENT_ID,
@@ -35,15 +35,15 @@ const gapiOAth = {
           refresh_token,
         });
       }
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method: 'post',
         headers,
         body,
       });
-      if (!response.ok) throw new Error(response.status + response.statusText + 'Error while trying to get a new token!');
+      if (!res.ok) throw new Error(res.status + res.statusText + 'Error while trying to get a new token!');
       const tokenPath = coraline.use('token');
       const file = `${tokenPath}/youtube_token.json`;
-      const credentials = (await response.json()) as GoogleCredentials;
+      const credentials = (await res.json()) as GoogleCredentials;
       if (credentials.expires_in) {
         credentials.expires = Date.now() / 1000 + credentials.expires_in;
       }
@@ -82,4 +82,4 @@ const gapiOAth = {
   },
 };
 
-export default gapiOAth;
+export default gapiOAuth;

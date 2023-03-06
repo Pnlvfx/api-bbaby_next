@@ -3,8 +3,8 @@ import { apiconfig } from '../../../../../config/APIconfig';
 import { catchError } from '../../../../../coraline/cor-route/crlerror';
 import coraline from '../../../../../coraline/coraline';
 import BBC from '../../../../../models/BBC';
+import googleapis from '../../../../googleapis/googleapis';
 import telegramapis from '../../../../telegramapis/telegramapis';
-import bbabyapis from '../../../bbabyapis';
 
 const bbabynews = {
   getShortestNews: async () => {
@@ -40,7 +40,7 @@ const bbabynews = {
       const short = await bbabynews.getShortestNews();
       if (!short) return;
       const date = coraline.date.toYYMMDD(short.date as string);
-      const translated = await bbabyapis.translate(`${short.title} \n\n${short.description}`, 'en', 'it');
+      const translated = await googleapis.translate(`${short.title} \n\n${short.description}`, 'en', 'it');
       const text = `${date} \n${translated}`;
       const tgPhoto = await telegramapis.sendPhoto(apiconfig.telegram.my_chat_id, short.image, {
         protect_content: true,

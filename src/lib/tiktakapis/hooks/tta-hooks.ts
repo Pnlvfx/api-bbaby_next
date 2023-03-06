@@ -2,9 +2,10 @@ import { catchError } from '../../../coraline/cor-route/crlerror';
 import ffmpeg from '../../ffmpeg/ffmpeg';
 import pexelsapi from '../../pexelsapi/pexelsapi';
 import path from 'path';
+import { Video } from '../../pexelsapi/types/pexels';
 
 type Selected = {
-  video: PexelsVideo;
+  video: Video;
   duration: number;
 };
 
@@ -24,14 +25,16 @@ export const splitText = (text: string, max: number) => {
   return parts;
 };
 
-const findClosestVideoSize = (width: number, height: number, videoFiles: PexelsVideo['video_files']) => {
+const findClosestVideoSize = (width: number, height: number, videoFiles: Video['video_files']) => {
   let closest = videoFiles[0];
   let closestDiff = Number.MAX_SAFE_INTEGER;
   for (const file of videoFiles) {
-    const diff = Math.abs(file.width - width) + Math.abs(file.height - height);
-    if (diff < closestDiff) {
-      closest = file;
-      closestDiff = diff;
+    if (file.width && file.height) {
+      const diff = Math.abs(file.width - width) + Math.abs(file.height - height);
+      if (diff < closestDiff) {
+        closest = file;
+        closestDiff = diff;
+      }
     }
   }
   return closest;
@@ -42,7 +45,7 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
     const orientation = width >= 1920 ? 'landscape' : 'portrait';
     const pexelsVideos = await pexelsapi.getVideo(synthetize, { per_page: 80, orientation });
     if (pexelsVideos.length === 0) throw new Error('We cannot find valid videos with this settings!');
-    pexelsVideos.sort((a, b) => b.duration - a.duration);
+    // pexelsVideos.sort((a, b) => b.duration - a.duration);
     const selected: Selected[] = [];
     let current = 0;
     pexelsVideos.map((video) => {

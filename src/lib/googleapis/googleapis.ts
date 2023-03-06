@@ -3,24 +3,17 @@ import { catchError } from '../../coraline/cor-route/crlerror';
 import { getGoogleHeader, getGoogleParent } from './config/googleconfig';
 import gapisspeechtotext from './route/gapisspeechtotext';
 import gapiyoutube from './route/gapiyoube';
-import gapiOAth from './route/gapiOAuth';
+import gapiOAuth from './route/gapiOAuth';
 
 const googleapis = {
-  OAuth2: gapiOAth,
-  youtube: gapiyoutube,
-  serviceAccount,
   translate: async (text: string, from: string, to: string) => {
     try {
-      const parent = getGoogleParent();
-      const mimeType = 'text/plain';
-      const sourceLanguageCode = from;
-      const targetLanguageCode = to;
-      const url = `https://translate.googleapis.com/v3beta1/${parent}:translateText`;
+      const url = `https://translate.googleapis.com/v3beta1/${getGoogleParent()}:translateText`;
       const body = JSON.stringify({
         contents: [text],
-        targetLanguageCode,
-        sourceLanguageCode,
-        mimeType,
+        sourceLanguageCode: from,
+        targetLanguageCode: to,
+        mimeType: 'text/plain',
       });
       const credentials = await googleapis.serviceAccount.getAccessToken('translate');
       const res = await fetch(url, {
@@ -30,21 +23,17 @@ const googleapis = {
       });
       const data = (await res.json()) as GoogleTranslateResponse;
       if (!res.ok) throw new Error(data.error?.message);
-      for (const translation of data.translations) {
-        return translation.translatedText as string;
-      }
+      return data.translations[0].translatedText;
     } catch (err) {
       throw catchError(err);
     }
   },
   detectLanguage: async (text: string) => {
     try {
-      const parent = getGoogleParent();
-      const mimeType = 'text/plain';
-      const url = `https://translate.googleapis.com/v3beta1/${parent}:detectLanguage`;
+      const url = `https://translate.googleapis.com/v3beta1/${getGoogleParent()}:detectLanguage`;
       const body = JSON.stringify({
         content: text,
-        mimeType,
+        mimeType: 'text/plain',
       });
       const credentials = await googleapis.serviceAccount.getAccessToken('translate');
       const res = await fetch(url, {
@@ -89,7 +78,10 @@ const googleapis = {
       throw catchError(err);
     }
   },
+  serviceAccount,
+  OAuth2: gapiOAuth,
   speechToText: gapisspeechtotext,
+  youtube: gapiyoutube,
 };
 
 export default googleapis;

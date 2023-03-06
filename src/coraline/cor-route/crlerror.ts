@@ -27,6 +27,6 @@ export const catchErrorWithTelegram = async (err: unknown) => {
       await coraline.sendLog('Unknown error');
     }
   } catch (err) {
-    //
+    return;
   }
 };

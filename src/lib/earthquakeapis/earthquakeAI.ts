@@ -1,12 +1,16 @@
 import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
+import coraline from '../../coraline/coraline';
 import Community from '../../models/Community';
 import Earthquake from '../../models/Earthquake';
 import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
+import pexelsapi from '../pexelsapi/pexelsapi';
+import twitterapis from '../twitterapis/twitterapis';
 import earthquakeapis from './earthquakeapis';
 
 const initial = async () => {
   try {
+    await Earthquake.deleteMany({});
     const earthquakes = await earthquakeapis.get();
     earthquakes.features.map(async (earthquake) => {
       try {
@@ -20,28 +24,20 @@ const initial = async () => {
     throw catchError(err);
   }
 };
-
-export const useEarthquake = async () => {
-  initial();
-  setInterval(earthquakeInfo, 60000 * 2);
-};
-
-const earthquakeInfo = async () => {
+const earthquakeAI = async () => {
   try {
-    console.log('new earthquake request');
     const earthquakeData = await earthquakeapis.get();
     earthquakeData.features.map(async (earthquake) => {
-      const exist = await Earthquake.findOne({ id: earthquake.id });
-      if (exist) return;
-      if (earthquake.properties.mag >= 4.8) {
-        if (earthquake.properties.place.includes('Italy')) {
-          await earthquakePost(earthquake);
-        } else {
-          await earthquakePost(earthquake);
-        }
+      try {
+        const exist = await Earthquake.findOne({ id: earthquake.id });
+        if (exist) return;
+        if (earthquake.properties.mag < 4.8) return;
+        await earthquakePost(earthquake);
+        const dbEathquake = new Earthquake(earthquake);
+        await dbEathquake.save();
+      } catch (err) {
+        return;
       }
-      const dbEathquake = new Earthquake(earthquake);
-      await dbEathquake.save();
     });
   } catch (err) {
     catchErrorWithTelegram('bbabyapis.earthquakeInfo' + ' ' + err);
@@ -63,15 +59,27 @@ const earthquakePost = async (earthquake: Earthquake) => {
     ).toLocaleString()}. Stay safe, folks! 🌎💔`;
     let community = await Community.findOne({ name: 'Earthquake' });
     if (!community) {
-      community = await bbabyapis.community.createCommunity(user, 'Earthquake');
+      community = await bbabyapis.community.createCommunity(user, 'Earthquake', 'en');
     }
-    //const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
-    const share = false; //process.env.NODE_ENV === 'production' ? true : false;
-    await bbabyapis.post.newPost(user, post, community.name, {
-      sharePostToTwitter: share,
-      sharePostToTG: share,
+    const images = await pexelsapi.getImage('earthquake', {
+      orientation: 'landscape',
     });
+    const image = images[coraline.getRandomInt(images.length - 1)];
+    await bbabyapis.post.newPost(user, post, community.name, {
+      isImage: true,
+      height: image.height,
+      width: image.width,
+      selectedFile: image.url,
+    });
+    const client = await twitterapis.getMyClient('bugstransfer');
+    const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
+    await twitterapis.tweet(client, tweet);
   } catch (err) {
-    throw catchError(err);
+    catchErrorWithTelegram(err);
   }
+};
+
+export const useEarthquakeAI = async (minuteInterval: number) => {
+  initial();
+  setInterval(earthquakeAI, minuteInterval * 60 * 1000);
 };

@@ -62,7 +62,7 @@ const twitterapis = {
       throw catchError(err);
     }
   },
-  getMyClient: async (name: 'anonynewsitalia' | 'bugstransfer' | 'bbabystyle' | 'bbabyita') => {
+  getMyClient: async (name: 'anonynewsitaly' | 'bugstransfer' | 'bbabystyle' | 'bbabyita') => {
     try {
       const keyPath = coraline.use('private_key');
       const filename = `${keyPath}/${name}.json`;

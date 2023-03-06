@@ -13,6 +13,8 @@ tiktakRouter.post('/:permalink/background-video', tiktakCtrl.createBgVideo);
 
 tiktakRouter.post('/:permalink/create', tiktakCtrl.createVideo);
 
+tiktakRouter.get('/:permalink/send', tiktakCtrl.send);
+
 tiktakRouter.post('/:permalink/delete', tiktakCtrl.delete);
 
 export default tiktakRouter;

@@ -3,6 +3,7 @@ import governanceCtrl from './governanceCtrl';
 import youtubeRouter from './youtube/youtubeRouter';
 import tiktakRouter from './tiktak/tiktakRouter';
 import governance from '../../middleware/governance';
+import quoraRouter from '../quora/quoraRouter';
 
 const governanceRouter = Router();
 
@@ -11,6 +12,8 @@ governanceRouter.use(governance);
 governanceRouter.use('/youtube', youtubeRouter);
 
 governanceRouter.use('/tiktak', tiktakRouter);
+
+governanceRouter.use('/quora', quoraRouter);
 
 governanceRouter.post('/create-image', governanceCtrl.createImage);
 

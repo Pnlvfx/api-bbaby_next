@@ -29,7 +29,7 @@ const telegramapis = {
     }
   },
   sendPhoto: (chatId: string | number, photo: string | Stream, options?: SendPhotoOptions) => {
-    return new Promise<SendPhotoResponse>((resolve, rejects) => {
+    return new Promise<SendPhotoResponse>((resolve, reject) => {
       const form = new FormData();
       form.append('chat_id', chatId);
       if (options) {
@@ -81,7 +81,69 @@ const telegramapis = {
         // });
       });
       req.on('error', (error) => {
-        rejects(`Error: ${error.message}`);
+        reject(`Error: ${error.message}`);
+      });
+      if (data) {
+        req.write(data);
+      } else {
+        form.pipe(req);
+      }
+    });
+  },
+  sendVideo: (chatId: string | number, video: string | Stream, options?: SendVideoOptions) => {
+    return new Promise<SendPhotoResponse>((resolve, reject) => {
+      const form = new FormData();
+      form.append('chat_id', chatId);
+      if (options) {
+        const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
+        usedOptions.forEach(([key, value]) => {
+          form.append(key, JSON.stringify(value));
+        });
+      }
+      let data = '';
+      const req_options = {
+        host: 'api.telegram.org',
+        path: `/bot${process.env.TELEGRAM_TOKEN}/sendVideo`,
+        method: 'POST',
+        headers: {},
+      };
+      if (video instanceof Stream) {
+        if (video instanceof fs.ReadStream) {
+          form.append('video', video);
+          req_options.headers = form.getHeaders();
+        }
+      } else if (video.startsWith('http')) {
+        data = `video=${video}&chat_id=${chatId}`;
+        if (options) {
+          if (options.reply_markup) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            options.reply_markup = JSON.stringify(options.reply_markup) as any;
+          }
+          const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
+          usedOptions.forEach(([key, value]) => {
+            data += `&${key}=${JSON.stringify(value)}`;
+          });
+        }
+        req_options.headers = {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': data.length,
+        };
+      } else {
+        form.append('video', fs.createReadStream(video));
+        req_options.headers = form.getHeaders();
+      }
+
+      const req = https.request(req_options, (res) => {
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          resolve(JSON.parse(chunk) as SendPhotoResponse);
+        });
+        // res.on('end', () => {
+
+        // });
+      });
+      req.on('error', (error) => {
+        reject(`Error: ${error.message}`);
       });
       if (data) {
         req.write(data);

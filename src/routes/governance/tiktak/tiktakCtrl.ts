@@ -4,7 +4,9 @@ import { UserRequest } from '../../../@types/express';
 import Tiktak from '../../../models/Tiktak';
 import coraline from '../../../coraline/coraline';
 import tiktakapis from '../../../lib/tiktakapis/tiktakapis';
-import bbabyapis from '../../../lib/bbabyapis/bbabyapis';
+import telegramapis from '../../../lib/telegramapis/telegramapis';
+import { apiconfig } from '../../../config/APIconfig';
+import googleapis from '../../../lib/googleapis/googleapis';
 
 const tiktakCtrl = {
   newTiktak: async (userRequest: Request, res: Response) => {
@@ -18,8 +20,8 @@ const tiktakCtrl = {
       const permalink = `/governance/tiktak/${coraline.createPermalink(text)}`;
       const exist = await Tiktak.findOne({ original_body: text, permalink });
       if (exist) return res.status(200).json(exist);
-      const titletranslation = await bbabyapis.translate(title, lang.toString(), to);
-      const bodytranslation = await bbabyapis.translate(text, lang.toString(), to);
+      const titletranslation = await googleapis.translate(title, lang.toString(), to);
+      const bodytranslation = await googleapis.translate(text, lang.toString(), to);
       // const prompt = `I want you to tell what is this story talking about in one word in english, just send the word without extra arguments: \n ${text}`;
       // const synthetize = await openaiapis.request(prompt);
       const tiktak = new Tiktak({
@@ -105,6 +107,21 @@ const tiktakCtrl = {
       }
       await tiktak.save();
       res.status(200).json(true);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  send: async (userRequest: Request, res: Response) => {
+    try {
+      const req = userRequest as UserRequest;
+      const { permalink } = req.params;
+      const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
+      if (!tiktak || !tiktak.video) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
+      await telegramapis.sendVideo(apiconfig.telegram.logs_group_id, coraline.media.getPathFromUrl(tiktak.video), {
+        width: 1080,
+        height: 1920,
+      });
+      res.status(200).json({ msg: 'Video successfully sent to telegram chat' });
     } catch (err) {
       catchErrorCtrl(err, res);
     }

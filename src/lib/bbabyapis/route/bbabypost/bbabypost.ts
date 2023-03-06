@@ -26,15 +26,17 @@ const bbabypost = {
       if (options?.body) {
         post.body = options.body;
       }
-      if (options?.isImage && options?.selectedFile) {
+      if (options?.isImage && options?.selectedFile && options.width && options.height) {
         const image = await cloudinary.v2.uploader.upload(options.selectedFile, {
           upload_preset: 'bbaby_posts',
           public_id: post._id.toString(),
         });
         const { isImage, height, width } = options;
-        post.$set({ mediaInfo: { isImage, image: image.secure_url, dimension: [height, width] } });
+        post.mediaInfo.isImage = isImage;
+        post.mediaInfo.image = image.secure_url;
+        post.mediaInfo.dimension.push(...[Number(height), Number(width)]);
       }
-      if (options?.isVideo && options?.selectedFile) {
+      if (options?.isVideo && options?.selectedFile && options.width && options.height) {
         const video = await cloudinary.v2.uploader.upload(options.selectedFile, {
           upload_preset: 'bbaby_posts',
           public_id: post._id.toString(),
@@ -42,16 +44,19 @@ const bbabypost = {
           quality: 'auto',
         });
         const { isVideo, height, width } = options;
-        post.$set({ mediaInfo: { isVideo, video: { url: video.secure_url }, dimension: [height, width] } });
+        post.mediaInfo.isVideo = isVideo;
+        post.mediaInfo.video = {
+          url: video.secure_url,
+        };
+        post.mediaInfo.dimension.push(...[Number(height), Number(width)]);
       }
-      const permalink = `/b/${post.community.toLowerCase()}/comments/${post._id}`;
-      post.$set({ permalink });
-      const url = `${config.CLIENT_URL}${permalink}`;
+      post.permalink = `/b/${post.community.toLowerCase()}/comments/${post._id}`;
+      const url = `${config.CLIENT_URL}${post.permalink}`;
       if (options?.sharePostToTwitter) {
         await shareToTwitter(post, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
       }
       if (options?.sharePostToTG) {
-        const text = `${post.title + ' ' + url}`;
+        const text = `${post.title} ${url}`;
         const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
         await telegramapis.sendMessage(chat_id, text);
       }

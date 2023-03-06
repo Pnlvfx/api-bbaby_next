@@ -18,6 +18,14 @@ interface SendPhotoOptions extends SendMessageOptions {
   parse_mode?: string;
 }
 
+interface SendVideoOptions extends SendMessageOptions {
+  caption?: string;
+  disable_notification?: boolean;
+  duration?: number;
+  width: number;
+  height: number;
+}
+
 interface InlineKeyboard {
   text: string;
   callback_data: string;

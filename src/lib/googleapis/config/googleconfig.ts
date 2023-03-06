@@ -9,7 +9,7 @@ export const getGoogleHeader = (credentials: GoogleCredentials) => {
 };
 
 export const getGoogleParent = () => {
-  const projectId = 'bbabystyle';
+  const projectId = process.env.CLOUD_NAME;
   const location = 'us-central1';
   const parent = `projects/${projectId}/locations/${location}`;
   return parent;

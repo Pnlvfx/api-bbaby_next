@@ -45,7 +45,8 @@ const tiktakapis = {
             tiktak.audios.push(audioUrl);
             const duration = await ffmpeg.getDuration(audioPath);
             const textData = await TextToImage.generate(text, {
-              maxWidth: width - 60,
+              maxWidth: width,
+              margin: 30,
               bgColor,
               textColor,
               fontFamily: 'Helvetica',
@@ -60,7 +61,7 @@ const tiktakapis = {
             const overlayPath = `${folder}/overlay${index}.png`;
             const writeFile = util.promisify(fs.writeFile);
             await writeFile(overlayPath, imageOverlay, 'binary');
-            tiktak.images.push({ path: overlayPath, loop: duration - 0.5 });
+            tiktak.images.push({ path: overlayPath, loop: duration - 0.2 });
           } catch (err) {
             throw catchError(err);
           }
