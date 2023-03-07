@@ -12,7 +12,7 @@ const chooseUser = async (user: IUser, post: PostProps, language: 'it' | 'en') =
       //v2
       const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
       if (!twitter) throw new Error('You need to authorize the twitter API in the User Settings page.');
-      client = await twitterapis.getUserClient(twitter, user);
+      client = await twitterapis.v2.getUserClient(twitter, user);
     } else if (post.community === 'Italy') {
       client = await twitterapis.getMyClient('anonynewsitaly');
     } else if (language === 'it') {

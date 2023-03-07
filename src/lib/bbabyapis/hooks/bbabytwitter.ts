@@ -8,7 +8,7 @@ const alreadySent: TweetV2[] = [];
 
 const getNewTweets = async () => {
   try {
-    const data = await twitterapis.getListTweets('en');
+    const data = await twitterapis.v2.getListTweets('en');
     const filtered = data.tweets.filter((t) => !alreadySent.find((pt) => pt.id === t.id));
     return { tweets: filtered, users: data.includes.users, media: data.includes.media };
   } catch (err) {

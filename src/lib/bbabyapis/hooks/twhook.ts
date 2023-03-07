@@ -1,5 +1,3 @@
-// import { ETwitterStreamEvent, TwitterApi } from 'twitter-api-v2';
-// import config from '../../../config/config';
 import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import twitterapis from '../../twitterapis/twitterapis';
 import openaiapis from '../../openaiapis/openaiapis';
@@ -64,8 +62,10 @@ const useAImentions = async () => {
             coraline.sendLog(`twitterAI: sorry but my tweet have ${aitext.length} words`);
             return;
           }
-          await client.v1.tweet(aitext, {
-            in_reply_to_status_id: tweet.id,
+          await client.v2.tweet(aitext, {
+            reply: {
+              in_reply_to_tweet_id: tweet.id,
+            },
           });
           alreadySent.push(tweet.id);
           const user = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);

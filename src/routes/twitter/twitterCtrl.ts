@@ -76,7 +76,7 @@ const twitterCtrl = {
         if (config.NODE_ENV === 'production' && !italianTweets) {
           res.status(200).json(italianTweets);
         } else {
-          const data = await twitterapis.getListTweets(lang);
+          const data = await twitterapis.v2.getListTweets(lang);
           italianTweets = {
             data: data.tweets,
             users: data.includes.users,
@@ -88,7 +88,7 @@ const twitterCtrl = {
         if (config.NODE_ENV === 'development' && englishTweets) {
           res.status(200).json(englishTweets);
         } else {
-          const data = await twitterapis.getListTweets(lang);
+          const data = await twitterapis.v2.getListTweets(lang);
           englishTweets = {
             data: data.tweets,
             users: data.includes.users,
@@ -106,9 +106,7 @@ const twitterCtrl = {
       if (config.NODE_ENV === 'development' && tweets) {
         res.status(200).json(tweets);
       } else {
-        const req = expressRequest as TwitterRequest;
-        const { twitter, user } = req;
-        const client = await twitterapis.getUserClient(twitter, user);
+        const client = await twitterapis.getMyClient('anonynewsitaly');
         const data = await client.v2.homeTimeline({
           expansions: ['author_id', 'attachments.media_keys'],
           'tweet.fields': ['public_metrics', 'entities', 'created_at'],
@@ -132,7 +130,7 @@ const twitterCtrl = {
       const req = expressRequest as TwitterRequest;
       const { twitter, user } = req;
       const { id } = req.params;
-      const client = await twitterapis.getUserClient(twitter, user);
+      const client = await twitterapis.v2.getUserClient(twitter, user);
       const data = await client.v2.userTimeline(id, {
         expansions: ['author_id', 'attachments.media_keys'],
         'tweet.fields': ['public_metrics', 'entities', 'created_at'],
