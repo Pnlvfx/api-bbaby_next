@@ -104,7 +104,7 @@ const ffmpeg = {
       });
     });
   },
-  overlayImageToVideo: (images: FFmpegImage[], video: string, audio: string, output: string, duration: number) => {
+  overlayImagesToVideo: (images: FFmpegImage[], video: string, audio: string, output: string, duration: number) => {
     return new Promise((resolve, reject) => {
       const args = ['-y', '-i', video];
       for (let i = 0; i < images.length; i++) {

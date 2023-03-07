@@ -1,27 +1,12 @@
-import { TwitterApi } from 'twitter-api-v2';
+import { IParsedOAuth2TokenResult, TwitterApi } from 'twitter-api-v2';
 import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import { getListInfo } from './twitter-config';
 import { IUser, TokensProps } from '../../models/types/user';
 import coraline from '../../coraline/coraline';
+import { URLSearchParams } from 'url';
 
 const twitterapis = {
-  tweet: async (client: TwitterApi, text: string, mediaId?: string) => {
-    try {
-      if (text.length > 300) throw new Error(`Twitter accept maximum 300 words. Please consider making this tweet shorter!`);
-      if (mediaId) {
-        await client.v2.tweet(text, {
-          media: {
-            media_ids: [mediaId],
-          },
-        });
-      } else {
-        await client.v2.tweet(text);
-      }
-    } catch (err) {
-      throw catchError(err);
-    }
-  },
   getListTweets: async (lang: 'en' | 'it') => {
     try {
       const id = getListInfo(lang);
@@ -64,21 +49,45 @@ const twitterapis = {
   },
   getMyClient: async (name: 'anonynewsitaly' | 'bugstransfer' | 'bbabystyle' | 'bbabyita') => {
     try {
-      const keyPath = coraline.use('private_key');
-      const filename = `${keyPath}/${name}.json`;
-      const token = (await coraline.readJSON(filename)) as TokensProps;
-      let client;
-      if (Date.now() >= token.expires) {
-        if (!token.refresh_token) throw new Error(`Missing refresh token for ${name}`);
-        const c = new TwitterApi({ clientId: config.TWITTER_CLIENT_ID, clientSecret: config.TWITTER_CLIENT_SECRET });
-        const t = await c.refreshOAuth2Token(token.refresh_token);
-        const expires = Date.now() + t.expiresIn * 1000;
-        await coraline.saveFile(filename, { access_token: t.accessToken, expires, refresh_token: t.refreshToken, provider: 'twitter' });
-        client = t.client;
-      } else {
-        client = new TwitterApi(token.access_token);
-      }
+      const config = await twitterapis.getConfig();
+      const credentials = config.v1.users.find((u) => u.name === name);
+      if (!credentials) throw new Error('Twitter: Missing admin access token');
+      const client = new TwitterApi({
+        appKey: config.v1.key,
+        appSecret: config.v1.secret,
+        accessToken: credentials.access_token,
+        accessSecret: credentials.access_token_secret,
+      });
       return client;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  refreshToken: async (refresh_token: string) => {
+    try {
+      const url = 'https://api.twitter.com/oauth2/token';
+      const encondedHeader = Buffer.from(`${config.TWITTER_CLIENT_ID}:${config.TWITTER_CLIENT_SECRET}`).toString('base64');
+      const body = new URLSearchParams();
+      body.append('grant_type', 'refresh_token');
+      body.append('refresh_token', refresh_token);
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { authorization: `Basic ${encondedHeader}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
+      const data = await res.json();
+      console.log(data, 'twitter refresh token');
+      if (!res.ok) throw new Error(data?.errors[0].message);
+      return data as IParsedOAuth2TokenResult;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  getConfig: async () => {
+    try {
+      const keyPath = coraline.use('private_key');
+      const config = await coraline.readJSON(`${keyPath}/twitter.json`);
+      return config as TwitterConfig;
     } catch (err) {
       throw catchError(err);
     }

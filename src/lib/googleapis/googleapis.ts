@@ -1,7 +1,6 @@
 import serviceAccount from './route/service-account';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import { getGoogleHeader, getGoogleParent } from './config/googleconfig';
-import gapisspeechtotext from './route/gapisspeechtotext';
 import gapiyoutube from './route/gapiyoube';
 import gapiOAuth from './route/gapiOAuth';
 
@@ -80,7 +79,6 @@ const googleapis = {
   },
   serviceAccount,
   OAuth2: gapiOAuth,
-  speechToText: gapisspeechtotext,
   youtube: gapiyoutube,
 };
 

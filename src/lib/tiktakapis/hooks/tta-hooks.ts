@@ -10,12 +10,18 @@ type Selected = {
 };
 
 export const splitText = (text: string, max: number) => {
+  text = text.replace(/\n/g, ' ');
   const textArray = text.split(' ');
   const parts = [];
   let part = '';
+  const regex = /[.]/g;
   for (let i = 0; i < textArray.length; i++) {
     if (part.length + textArray[i].length + 1 <= max) {
       part += textArray[i] + ' ';
+      if (regex.test(textArray[i]) && i !== textArray.length - 1) {
+        parts.push(part);
+        part = '';
+      }
     } else {
       parts.push(part);
       part = textArray[i] + ' ';
@@ -42,6 +48,7 @@ const findClosestVideoSize = (width: number, height: number, videoFiles: Video['
 
 export const getPexelsVideo = async (synthetize: string, output: string, min_duration: number, width: number, height: number) => {
   try {
+    console.log('Getting videos from Pexels api');
     const orientation = width >= 1920 ? 'landscape' : 'portrait';
     const pexelsVideos = await pexelsapi.getVideo(synthetize, { per_page: 80, orientation });
     if (pexelsVideos.length === 0) throw new Error('We cannot find valid videos with this settings!');
@@ -57,6 +64,7 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
       return findClosestVideoSize(width, height, select.video.video_files);
     });
     const folder = path.dirname(output);
+    console.log('Saving videos...');
     const backgroundVideos = await Promise.all(
       sources.map(async (source, index) => {
         const sourceOutput = `${folder}/video_${index}.mp4`;
@@ -68,6 +76,7 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
         };
       }),
     );
+    console.log('Resizing videos');
     await Promise.all(
       backgroundVideos.map(async (bgvideo) => {
         try {
@@ -85,6 +94,7 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
     let backgroundVideo;
     if (backgroundVideos.length > 1) {
       const bgArray = backgroundVideos.map((bg) => bg.backgroundVideo);
+      console.log('Concatenating videos together');
       backgroundVideo = await ffmpeg.concatenateVideos(bgArray, width, height, output);
     } else {
       backgroundVideo = backgroundVideos[0].backgroundVideo;

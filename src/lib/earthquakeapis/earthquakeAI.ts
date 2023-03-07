@@ -73,7 +73,7 @@ const earthquakePost = async (earthquake: Earthquake) => {
     });
     const client = await twitterapis.getMyClient('bugstransfer');
     const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
-    await twitterapis.tweet(client, tweet);
+    await client.v1.tweet(tweet);
   } catch (err) {
     catchErrorWithTelegram(err);
   }

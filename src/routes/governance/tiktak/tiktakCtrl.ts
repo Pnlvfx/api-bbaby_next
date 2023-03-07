@@ -88,7 +88,6 @@ const tiktakCtrl = {
       await tiktakapis.finalVideo(tiktak, 1080, 1920, color);
       res.status(201).json(tiktak);
     } catch (err) {
-      catchErrorWithTelegram('tiktakCtrl.createTiktak' + ' ' + err);
       catchErrorCtrl(err, res);
     }
   },

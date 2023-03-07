@@ -12,12 +12,13 @@ const pitch = -8;
 const tiktakapis = {
   backgroundVideo: async (tiktak: TiktakProps, width: number, height: number) => {
     try {
+      if (!tiktak.synthetize) throw new Error('Missing synthetize parameter!');
       const folder = coraline.useStatic(`tiktak/${tiktak._id}`);
       const audio_path = `${folder}/audio_final.mp3`;
+      console.log('Converting text to speech');
       const full_audio = await googleapis.textToSpeech(`${tiktak.title} \n ${tiktak.body}`, pitch);
       tiktak.audio = await coraline.media.saveAudio(full_audio.audioContent, audio_path);
       tiktak.duration = await ffmpeg.getDuration(audio_path);
-      if (!tiktak.synthetize) throw new Error('Missing synthetize parameter!');
       const backgroundVideo = await getPexelsVideo(tiktak.synthetize, `${folder}/background_video.mp4`, tiktak.duration, width, height);
       tiktak.background_video = coraline.media.getUrlFromPath(backgroundVideo);
       await tiktak.save();
@@ -31,7 +32,7 @@ const tiktakapis = {
       if (!tiktak.background_video) throw new Error('Missing background_video attribute');
       if (!tiktak.duration) throw new Error('Missing video duration attribute');
       const bgColor = 'rgba(0,0,0,0.25';
-      const textArray = splitText(tiktak.body, 75);
+      const textArray = splitText(tiktak.body, 85);
       textArray.unshift(tiktak.title);
       const folder = coraline.useStatic(`tiktak/${tiktak._id}`);
       const audio_path = `${folder}/audio_final.mp3`;
@@ -61,14 +62,14 @@ const tiktakapis = {
             const overlayPath = `${folder}/overlay${index}.png`;
             const writeFile = util.promisify(fs.writeFile);
             await writeFile(overlayPath, imageOverlay, 'binary');
-            tiktak.images.push({ path: overlayPath, loop: duration - 0.2 });
+            tiktak.images.push({ path: overlayPath, loop: duration - 1 });
           } catch (err) {
             throw catchError(err);
           }
         }),
       );
       const final_path = `${folder}/final_video.mp4`;
-      await ffmpeg.overlayImageToVideo(tiktak.images, tiktak.background_video, audio_path, final_path, tiktak.duration);
+      await ffmpeg.overlayImagesToVideo(tiktak.images, tiktak.background_video, audio_path, final_path, tiktak.duration);
       tiktak.video = coraline.media.getUrlFromPath(final_path);
       await tiktak.save();
       return tiktak;

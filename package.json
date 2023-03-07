@@ -19,6 +19,7 @@
     "inspect": "tsc && node --inspect ."
   },
   "dependencies": {
+    "@google-cloud/speech": "^5.4.0",
     "audioconcat": "^0.1.4",
     "bcrypt": "^5.0.1",
     "chance": "^1.1.11",

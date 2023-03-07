@@ -16,7 +16,7 @@ import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { useTwitter } from './hooks/twhook';
 import { check } from './hooks/hooks';
-import { useTwitterNotification } from './hooks/bbabytwitter';
+import Tiktak from '../../models/Tiktak';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -26,12 +26,18 @@ const bbabyapis = {
       check();
       setInterval(coraline.memoryUsage, 60000);
       if (config.NODE_ENV === 'development') {
-        useTwitterNotification(2);
+        // useTwitterNotification(2);
         // await quoraapis.useQuora(5, 40);
       } else {
         useEarthquakeAI(5);
         useTwitter(5);
       }
+      const tiktak = await Tiktak.findOne({ video: { $ne: undefined } });
+      if (!tiktak || !tiktak.audio) return;
+      // await speechtotext.longRunningRecognize(
+      //   '/Users/simo97/Desktop/coraline/bbaby_next/static/tiktak/640487be2110cfc68a3c79ab/output1.flac',
+      //   'it-IT',
+      // );
       // await useTelegram();
       // await useBBC();
       // await useAnswer();

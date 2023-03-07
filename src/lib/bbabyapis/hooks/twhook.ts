@@ -64,10 +64,8 @@ const useAImentions = async () => {
             coraline.sendLog(`twitterAI: sorry but my tweet have ${aitext.length} words`);
             return;
           }
-          await client.v2.tweet(aitext, {
-            reply: {
-              in_reply_to_tweet_id: tweet.id,
-            },
+          await client.v1.tweet(aitext, {
+            in_reply_to_status_id: tweet.id,
           });
           alreadySent.push(tweet.id);
           const user = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);

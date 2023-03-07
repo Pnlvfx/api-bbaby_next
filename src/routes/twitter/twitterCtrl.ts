@@ -4,7 +4,6 @@ import config from '../../config/config';
 import twitterapis from '../../lib/twitterapis/twitterapis';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import { MediaObjectV2, TweetV2, TwitterApi, UserV2 } from 'twitter-api-v2';
-import coraline from '../../coraline/coraline';
 const oauthCallback = `${config.CLIENT_URL}/settings`;
 let codeVerifier = '';
 
@@ -17,11 +16,6 @@ interface TweetResponse {
 let tweets: TweetResponse | undefined;
 let italianTweets: TweetResponse | undefined;
 let englishTweets: TweetResponse | undefined;
-
-const isTwitterBbaby = (username: string) => {
-  if (username === 'anonynewsitaly' || username === 'bbabyita' || username === 'bugstransfer' || username === 'bbabystyle') return true;
-  return false;
-};
 
 const twitterCtrl = {
   generateOAuthUrl: async (expressRequest: Request, res: Response) => {
@@ -54,12 +48,6 @@ const twitterCtrl = {
       ];
       const expires = Date.now() + token.expiresIn * 1000;
       user.tokens.push({ access_token: token.accessToken, expires, refresh_token: token.refreshToken, provider: 'twitter' });
-      const isadmin = isTwitterBbaby(twitterUser.data.username.toLowerCase());
-      if (isadmin) {
-        const keyPath = coraline.use('private_key');
-        const filename = `${keyPath}/${twitterUser.data.username.toLowerCase()}.json`;
-        await coraline.saveFile(filename, { access_token: token.accessToken, expires, refresh_token: token.refreshToken, provider: 'twitter' });
-      }
       user.hasExternalAccount = true;
       await user.save();
       res.status(200).json(twitterUser);

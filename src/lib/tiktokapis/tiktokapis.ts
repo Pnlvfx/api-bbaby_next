@@ -1,7 +1,7 @@
 import { catchError } from '../../coraline/cor-route/crlerror';
 import coraline from '../../coraline/coraline';
 import ffmpeg from '../ffmpeg/ffmpeg';
-import googleapis from '../googleapis/googleapis';
+import speechtotext from '../googleapis/route/speechtotext';
 import { getInfo } from './hooks/ttInfo';
 
 const tiktokapis = {
@@ -36,7 +36,7 @@ const tiktokapis = {
       const path = coraline.use('tiktok');
       const filename = `${path}/${id}_original.flac`;
       const audio = await ffmpeg.videoToAudio(video, filename);
-      const text = await googleapis.speechToText(audio);
+      const text = await speechtotext.recognize(audio, 'en-US');
       return text.join(' ');
     } catch (err) {
       throw catchError(err);
