@@ -73,7 +73,7 @@ const twitterCtrl = {
       const { lang } = req.query;
       if (!lang) return res.status(400).json({ msg: 'This API require a lang parameters.' });
       if (lang === 'it') {
-        if (config.NODE_ENV === 'production' && !italianTweets) {
+        if (config.NODE_ENV === 'development' && italianTweets) {
           res.status(200).json(italianTweets);
         } else {
           const data = await twitterapis.v2.getListTweets(lang);

@@ -5,7 +5,6 @@ import coraline from '../../../coraline/coraline';
 import { TweetV2 } from 'twitter-api-v2';
 import googleapis from '../../googleapis/googleapis';
 const start_time = new Date().toISOString();
-const alreadySent: TweetV2['id'][] = [];
 
 // const useStream = async () => {
 //   try {
@@ -47,6 +46,8 @@ const useAImentions = async () => {
       start_time,
     });
     if (!mentions.data.data) return;
+    const filename = `${coraline.use('tmp/twitter')}/mentions.json`;
+    const alreadySent = (await coraline.readJSON(filename)) as TweetV2['id'][];
     const filtered = mentions.data.data.filter((t) => !alreadySent.find((t2) => t2 === t.id));
     await Promise.all(
       filtered.map(async (tweet) => {
@@ -82,5 +83,7 @@ const useAImentions = async () => {
 };
 
 export const useTwitter = (minutesInterval: number) => {
+  const filename = `${coraline.use('tmp/twitter')}/mentions.json`;
+  coraline.saveFile(filename, []);
   setInterval(useAImentions, minutesInterval * 60 * 1000);
 };

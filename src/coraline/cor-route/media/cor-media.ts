@@ -76,14 +76,6 @@ const coralineMedia = {
       });
     });
   },
-  useTempPath: (format: string) => {
-    const regex = /\./;
-    format = regex.test(format) ? format : `.${format}`;
-    const folder = coraline.use('images/tmp');
-    const id = coraline.generateRandomId(10);
-    const filename = `${folder}/${id}${format}`;
-    return filename;
-  },
   getFiletype: (filepath: string) => {
     const ext = path.extname(filepath).toLowerCase();
     if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
@@ -97,7 +89,6 @@ const coralineMedia = {
   splitBySize: async (file: string, size: number) => {
     try {
       const { buffer } = await fs.promises.readFile(file);
-
       for (let i = 0; i < buffer.byteLength; i += size) {
         const chunk = buffer.slice(i, i + size);
         await fs.promises.writeFile(`${file}_part${i}.flac`, Buffer.from(chunk));

@@ -111,7 +111,10 @@ const coraline = {
   deleteFile: async (filename: string) => {
     try {
       await fsPromises.rm(filename);
+      return true;
     } catch (err) {
+      const error = err as NodeJS.ErrnoException;
+      if (error.code === 'ENOENT') return true;
       throw catchError(err);
     }
   },
