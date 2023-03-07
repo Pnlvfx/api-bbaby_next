@@ -26,7 +26,6 @@ import telegramRouter from './routes/telegram/telegramRouter';
 import generalRouter from './routes/general/generalRouter';
 import sitemapRouter from './routes/sitemap/sitemapRouter';
 import tiktokRouter from './routes/tiktok/tiktokRouter';
-
 const app = express();
 
 app.use(contentType);

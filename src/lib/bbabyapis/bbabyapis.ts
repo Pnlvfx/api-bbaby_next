@@ -24,6 +24,7 @@ const bbabyapis = {
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
       check();
+      setInterval(coraline.memoryUsage, 60000);
       if (config.NODE_ENV === 'development') {
         useTwitterNotification(2);
         // await quoraapis.useQuora(5, 40);

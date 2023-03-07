@@ -178,6 +178,12 @@ const coraline = {
     const time = `api: ${api} took ${end - start} milliseconds`;
     return console.log(time);
   },
+  memoryUsage: () => {
+    const used = process.memoryUsage().heapUsed;
+    const total = process.memoryUsage().heapTotal;
+    const percentage = Math.round((used / total) * 10000) / 100;
+    console.log(`Heap usage: ${percentage}%`);
+  },
   media: coralineMedia,
   date: coralineDate,
   mongo: coralMongo,
