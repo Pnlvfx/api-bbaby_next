@@ -1,6 +1,6 @@
 // import { ETwitterStreamEvent, TwitterApi } from 'twitter-api-v2';
 // import config from '../../../config/config';
-import { catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
+import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import twitterapis from '../../twitterapis/twitterapis';
 import openaiapis from '../../openaiapis/openaiapis';
 import coraline from '../../../coraline/coraline';
@@ -57,7 +57,7 @@ const useAImentions = async () => {
           if (!mentionId) return;
           const originalTweet = await client.v2.singleTweet(mentionId);
           const language = await googleapis.detectLanguage(originalTweet.data.text);
-          const s = language === 'it' ? 'Risponse in massimo 250 lettere:' : 'What do you think about this in maximum 250 words?';
+          const s = language === 'it' ? 'Rispondi in massimo 250 lettere:' : 'What do you think about this in maximum 250 words?';
           const prompt = `${s} ${originalTweet.data.text}`;
           let aitext = await openaiapis.request(prompt);
           if (aitext.length >= 300) {
@@ -73,7 +73,7 @@ const useAImentions = async () => {
           if (!user) return;
           await coraline.sendLog(`New tweet reply: https://twitter.com/${user.username}/status/${tweet.id}`);
         } catch (err) {
-          return;
+          throw catchError(err);
         }
       }),
     );
