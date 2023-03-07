@@ -57,12 +57,11 @@ const useAImentions = async () => {
           if (!mentionId) return;
           const originalTweet = await client.v2.singleTweet(mentionId);
           const language = await googleapis.detectLanguage(originalTweet.data.text);
-          const s = language === 'it' ? 'Che ne pensi in massimo 250 lettere?' : 'What do you think about this in maximum 250 words?';
+          const s = language === 'it' ? 'Risponse in massimo 250 lettere:' : 'What do you think about this in maximum 250 words?';
           const prompt = `${s} ${originalTweet.data.text}`;
-          const aitext = await openaiapis.request(prompt);
+          let aitext = await openaiapis.request(prompt);
           if (aitext.length >= 300) {
-            coraline.sendLog(`twitterAI: sorry but my tweet have ${aitext.length} words`);
-            return;
+            aitext = await openaiapis.request(`Riassumi questo testo in massimo 250 lettere: ${aitext}`);
           }
           await client.v2.tweet(aitext, {
             reply: {
