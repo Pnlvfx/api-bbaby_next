@@ -14,27 +14,24 @@ const bbabypost = {
       if (user.role !== 1 && title.toString().length > 300) throw new Error('Title needs to be 300 words maximum.');
       const communityInfo = await Community.findOne({ name: community });
       if (!communityInfo) throw new Error('Please select a valid community.');
-      const exists = await Post.exists({ title, author: user.username, community });
-      if (exists) throw new Error('This post already exist.');
+      const exist = await Post.exists({ title, author: user.username, community });
+      if (exist) throw new Error('This post already exist.');
       const post = new Post({
-        author: user?.username,
-        authorAvatar: user?.avatar,
+        author: user.username,
+        authorAvatar: user.avatar,
         title,
         community,
         communityIcon: communityInfo.image,
+        body: options?.body,
       });
-      if (options?.body) {
-        post.body = options.body;
-      }
       if (options?.isImage && options?.selectedFile && options.width && options.height) {
         const image = await cloudinary.v2.uploader.upload(options.selectedFile, {
           upload_preset: 'bbaby_posts',
           public_id: post._id.toString(),
         });
-        const { isImage, height, width } = options;
-        post.mediaInfo.isImage = isImage;
+        post.mediaInfo.isImage = options.isImage;
         post.mediaInfo.image = image.secure_url;
-        post.mediaInfo.dimension.push(...[Number(height), Number(width)]);
+        post.mediaInfo.dimension.push(...[Number(options.height), Number(options.width)]);
       }
       if (options?.isVideo && options?.selectedFile && options.width && options.height) {
         const video = await cloudinary.v2.uploader.upload(options.selectedFile, {
@@ -43,12 +40,11 @@ const bbabypost = {
           resource_type: 'video',
           quality: 'auto',
         });
-        const { isVideo, height, width } = options;
-        post.mediaInfo.isVideo = isVideo;
+        post.mediaInfo.isVideo = options.isVideo;
         post.mediaInfo.video = {
           url: video.secure_url,
         };
-        post.mediaInfo.dimension.push(...[Number(height), Number(width)]);
+        post.mediaInfo.dimension.push(...[Number(options.height), Number(options.width)]);
       }
       post.permalink = `/b/${post.community.toLowerCase()}/comments/${post._id}`;
       const url = `${config.CLIENT_URL}${post.permalink}`;
@@ -56,9 +52,8 @@ const bbabypost = {
         await shareToTwitter(post, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
       }
       if (options?.sharePostToTG) {
-        const text = `${post.title} ${url}`;
         const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
-        await telegramapis.sendMessage(chat_id, text);
+        await telegramapis.sendMessage(chat_id, `${post.title} ${url}`);
       }
       communityInfo.number_of_posts += 1;
       user.last_post.push(communityInfo._id);

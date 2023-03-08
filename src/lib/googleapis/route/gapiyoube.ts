@@ -1,4 +1,3 @@
-import { youtube_v3 } from 'googleapis';
 import { catchError } from '../../../coraline/cor-route/crlerror';
 import googleapis from '../googleapis';
 import config from '../../../config/config';
@@ -18,7 +17,7 @@ const gapiyoutube = {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       };
-      const input: youtube_v3.Schema$Video = {
+      const input = {
         snippet: {
           title,
           description,

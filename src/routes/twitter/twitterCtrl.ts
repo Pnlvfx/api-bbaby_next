@@ -96,7 +96,7 @@ const twitterCtrl = {
           };
           res.status(200).json(englishTweets);
         }
-      }
+      } else return res.status(400).json({ msg: "Bad language code, the options are: 'it' or 'en'" });
     } catch (error) {
       res.status(403).json({ message: error });
     }

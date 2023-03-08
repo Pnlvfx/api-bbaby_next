@@ -36,7 +36,7 @@ const earthquakeAI = async () => {
         const dbEathquake = new Earthquake(earthquake);
         await dbEathquake.save();
       } catch (err) {
-        return;
+        throw catchError(err);
       }
     });
   } catch (err) {
@@ -69,7 +69,7 @@ const earthquakePost = async (earthquake: Earthquake) => {
       isImage: true,
       height: image.height,
       width: image.width,
-      selectedFile: image.url,
+      selectedFile: image.src.original,
     });
     const client = await twitterapis.getMyClient('bugstransfer');
     const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;

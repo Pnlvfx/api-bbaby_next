@@ -70,13 +70,25 @@ const speechtotext = {
   },
   longRunningRecognize2: async (input: string, languageCode: 'it-IT' | 'en-US') => {
     try {
-      const config = {
-        encoding: 'MP3',
-        sampleRateHertz: 16000,
-        languageCode,
-      };
+      const readFile = promisify(fs.readFile);
+      const buffer = await readFile(input);
       const client = new speech.v1p1beta1.SpeechClient();
-      console.log(client, config);
+      const [operations] = await client.longRunningRecognize({
+        audio: {
+          content: buffer.toString('base64'),
+        },
+        config: {
+          encoding: 'FLAC',
+          languageCode,
+        },
+      });
+      const [response] = await operations.promise();
+      fs.writeFile('/tmp.json', JSON.stringify(response), (err) => {
+        if (err) {
+          console.log(err);
+        } else console.log('file saved');
+      });
+      //const transcription = response.results?.map((result) => result.alternatives[0].transcript);
     } catch (err) {
       throw catchError(err);
     }

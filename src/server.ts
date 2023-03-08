@@ -36,7 +36,6 @@ app.use(express.json({ limit: '50mb' }));
 app.use(compression());
 app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
 app.set('trust proxy', true);
-const staticPath = coraline.useStatic();
 
 bbabyapis.initialize();
 
@@ -50,7 +49,7 @@ app.use('/', generalRouter);
 
 app.use('/', telegramRouter);
 
-app.use('/static', express.static(staticPath));
+app.use('/static', express.static(coraline.useStatic()));
 
 app.use('/sitemaps', sitemapRouter);
 
