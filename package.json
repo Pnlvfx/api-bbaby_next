@@ -13,7 +13,6 @@
     "lint": "eslint ./src",
     "chrome": "/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222",
     "dev": "tsc -w & nodemon .",
-    "dev-quora": "yarn chrome && tsc -w & nodemon .",
     "build": "rimraf dist && eslint ./src && tsc",
     "start": "tsc & node .",
     "inspect": "tsc && node --inspect ."

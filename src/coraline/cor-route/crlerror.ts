@@ -21,9 +21,7 @@ export const catchErrorWithTelegram = async (err: unknown) => {
       await coraline.sendLog(process.env.NODE_ENV + ' ' + err.message);
     } else if (typeof err === 'string') {
       await coraline.sendLog(process.env.NODE_ENV + ' ' + err);
-    } else {
-      await coraline.sendLog('Unknown error');
-    }
+    } else await coraline.sendLog('Unknown error');
   } catch (err) {
     return;
   }

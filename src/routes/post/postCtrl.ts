@@ -32,6 +32,9 @@ const PostCtrl = {
         const selectedCommunities = Array.from(communities.map((community) => community.name));
         const filters = { community: selectedCommunities };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
+        if (_limit === 15 && posts.length === 0) {
+          posts = await Post.find({}).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
+        }
       }
       if (token) {
         const user = await getUserFromToken(token);

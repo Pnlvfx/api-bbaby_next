@@ -90,8 +90,10 @@ export interface Video {
   }[];
 }
 export declare type Videos = PaginationObject & {
-  total_results: number;
-  videos: Video[];
+  total_results?: number;
+  videos?: Video[];
+  status?: number;
+  error?: string;
 };
 export declare type Medium = Photo | Video;
 export interface Collection {

@@ -31,10 +31,6 @@ const bbabyapis = {
         useEarthquakeAI(5);
         useTwitter(5);
       }
-      // await speechtotext.longRunningRecognize(
-      //   '/Users/simo97/Desktop/coraline/bbaby_next/static/tiktak/640487be2110cfc68a3c79ab/output1.flac',
-      //   'it-IT',
-      // );
       // await useTelegram();
       // await useBBC();
       // await useAnswer();

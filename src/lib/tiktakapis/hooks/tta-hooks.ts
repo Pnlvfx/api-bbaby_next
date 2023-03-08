@@ -51,7 +51,7 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
     console.log('Getting videos from Pexels api');
     const orientation = width >= 1920 ? 'landscape' : 'portrait';
     const pexelsVideos = await pexelsapi.getVideo(synthetize, { per_page: 80, orientation });
-    if (pexelsVideos.length === 0) throw new Error('We cannot find valid videos with this settings!');
+    if (!pexelsVideos || pexelsVideos.length === 0) throw new Error('We cannot find valid videos with this settings!');
     // pexelsVideos.sort((a, b) => b.duration - a.duration);
     const selected: Selected[] = [];
     let current = 0;

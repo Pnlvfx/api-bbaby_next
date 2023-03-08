@@ -43,7 +43,7 @@ const pexelsapi = {
         headers,
       });
       const data = (await res.json()) as Videos;
-      if (!res.ok) throw new Error('Pexels API error.');
+      if (!res.ok) throw new Error(`Pexels: ${data.status} ${data.error}`);
       return data.videos;
     } catch (err) {
       throw catchError(err);

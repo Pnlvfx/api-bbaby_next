@@ -62,12 +62,19 @@ const tiktakapis = {
             const overlayPath = `${folder}/overlay${index}.png`;
             const writeFile = util.promisify(fs.writeFile);
             await writeFile(overlayPath, imageOverlay, 'binary');
-            tiktak.images.push({ path: overlayPath, loop: duration - 1 });
+            tiktak.images.push({ path: overlayPath, loop: duration - 0.35 });
           } catch (err) {
             throw catchError(err);
           }
         }),
       );
+      let total = 0;
+      await Promise.all(
+        tiktak.images.map((image) => {
+          total += image.loop;
+        }),
+      );
+      console.log(total);
       const final_path = `${folder}/final_video.mp4`;
       await ffmpeg.overlayImagesToVideo(tiktak.images, tiktak.background_video, audio_path, final_path, tiktak.duration);
       tiktak.video = coraline.media.getUrlFromPath(final_path);

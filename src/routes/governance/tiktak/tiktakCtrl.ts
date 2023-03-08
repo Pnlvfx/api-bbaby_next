@@ -86,6 +86,7 @@ const tiktakCtrl = {
       const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
       if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
       await tiktakapis.finalVideo(tiktak, 1080, 1920, color);
+      return;
       res.status(201).json(tiktak);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -100,8 +101,12 @@ const tiktakCtrl = {
       const { video, background_video }: { video?: string; background_video?: string } = req.body;
       if (video) {
         tiktak.video = undefined;
+        tiktak.images = [];
+        tiktak.audios = [];
       }
       if (background_video) {
+        tiktak.audio = undefined;
+        tiktak.duration = undefined;
         tiktak.background_video = undefined;
       }
       await tiktak.save();

@@ -15,7 +15,7 @@ const quoraapis = {
       browserWSEndpoint = data.webSocketDebuggerUrl;
       setInterval(() => quoraapis.getQuoras(scrollSeconds), interval * 60 * 1000);
     } catch (err) {
-      throw catchError(err);
+      throw new Error('Use yarn dev-quora before using this endpoint!');
     }
   },
   getQuoras: async (scrollSeconds: number) => {

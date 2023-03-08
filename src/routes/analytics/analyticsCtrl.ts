@@ -37,7 +37,7 @@ const analyticsCtrl = {
         await coraline.sendLog(
           `New session: ${user?.username || 'unknown user'}, Country: ${userInfo.country}, City: ${userInfo.city}, Browser: ${
             req.useragent.browser
-          } Platform: ${req.useragent.platform}, ip: ${userIp}`,
+          } Platform: ${req.useragent.platform}, useragent: ${req.useragent.source}`,
         );
       } else {
         await coraline.sendLog(`New session: ${user?.username || 'unknown user'}, Useragent: ${req.useragent?.source}, ip: ${userIp}`);
