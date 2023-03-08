@@ -3,6 +3,7 @@ import ffmpeg from '../../ffmpeg/ffmpeg';
 import pexelsapi from '../../pexelsapi/pexelsapi';
 import path from 'path';
 import { Video } from '../../pexelsapi/types/pexels';
+import coraline from '../../../coraline/coraline';
 
 type Selected = {
   video: Video;
@@ -84,6 +85,7 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
             const out = bgvideo.backgroundVideo.split('.')[0];
             const output = `${out}_resized.mp4`;
             const resized = await ffmpeg.resizeVideo(bgvideo.backgroundVideo, width, height, output);
+            await coraline.deleteFile(bgvideo.backgroundVideo);
             bgvideo.backgroundVideo = resized;
           }
         } catch (err) {
@@ -96,6 +98,9 @@ export const getPexelsVideo = async (synthetize: string, output: string, min_dur
       const bgArray = backgroundVideos.map((bg) => bg.backgroundVideo);
       console.log('Concatenating videos together');
       backgroundVideo = await ffmpeg.concatenateVideos(bgArray, width, height, output);
+      backgroundVideos.map(async (delvideo) => {
+        await coraline.deleteFile(delvideo.backgroundVideo);
+      });
     } else {
       backgroundVideo = backgroundVideos[0].backgroundVideo;
     }

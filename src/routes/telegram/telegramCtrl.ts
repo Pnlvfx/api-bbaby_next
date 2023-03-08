@@ -3,6 +3,7 @@ import { apiconfig } from '../../config/APIconfig';
 import { checkUpdateType } from '../../lib/telegramapis/hooks/telegramhooks';
 import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import Community from '../../models/Community';
+import bbabypost from '../../lib/bbabyapis/route/bbabypost/bbabypost';
 
 export interface ConversationState {
   command: '';
@@ -25,7 +26,7 @@ const telegramCtrl = {
                 community = await bbabyapis.community.createCommunity(user, 'Notizie', 'it');
               }
               const title = msg.text.split(':')[1];
-              await bbabyapis.post.newPost(user, title, community.name);
+              await bbabypost.newPost(user, title, community.name);
             }
           }
         }

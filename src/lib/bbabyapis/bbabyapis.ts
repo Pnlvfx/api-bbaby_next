@@ -14,7 +14,6 @@ import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
-import { useTwitter } from './hooks/twhook';
 import { check } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
@@ -26,10 +25,9 @@ const bbabyapis = {
       if (config.NODE_ENV === 'development') {
         setInterval(coraline.memoryUsage, 60000);
         // useTwitterNotification(2);
-        // await quoraapis.useQuora(5, 40);
       } else {
         useEarthquakeAI(5);
-        useTwitter(5);
+        // useTwitter(5);
       }
       // await useTelegram();
       // await useBBC();
@@ -109,7 +107,7 @@ const bbabyapis = {
         await answer(prompt);
         return;
       }
-      const post = await bbabyapis.post.newPost(user, title, community, {
+      const post = await bbabypost.newPost(user, title, community, {
         sharePostToTG: share,
         sharePostToTwitter: share,
       });
@@ -118,7 +116,6 @@ const bbabyapis = {
       throw catchError(err);
     }
   },
-  post: bbabypost,
   news: bbabynews,
   comment: bbabycomment,
   community: bbabycommunity,

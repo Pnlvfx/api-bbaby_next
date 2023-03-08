@@ -4,7 +4,6 @@ import { getGoogleHeader } from '../config/googleconfig';
 import googleapis from '../googleapis';
 import { catchError } from '../../../coraline/cor-route/crlerror';
 import { promisify } from 'util';
-import speech from '@google-cloud/speech';
 
 const speechtotext = {
   recognize: async (audio: string, languageCode: 'it-IT' | 'en-US') => {
@@ -68,31 +67,31 @@ const speechtotext = {
       throw catchError(err);
     }
   },
-  longRunningRecognize2: async (input: string, languageCode: 'it-IT' | 'en-US') => {
-    try {
-      const readFile = promisify(fs.readFile);
-      const buffer = await readFile(input);
-      const client = new speech.v1p1beta1.SpeechClient();
-      const [operations] = await client.longRunningRecognize({
-        audio: {
-          content: buffer.toString('base64'),
-        },
-        config: {
-          encoding: 'FLAC',
-          languageCode,
-        },
-      });
-      const [response] = await operations.promise();
-      fs.writeFile('/tmp.json', JSON.stringify(response), (err) => {
-        if (err) {
-          console.log(err);
-        } else console.log('file saved');
-      });
-      //const transcription = response.results?.map((result) => result.alternatives[0].transcript);
-    } catch (err) {
-      throw catchError(err);
-    }
-  },
+  // longRunningRecognize2: async (input: string, languageCode: 'it-IT' | 'en-US') => {
+  //   try {
+  //     const readFile = promisify(fs.readFile);
+  //     const buffer = await readFile(input);
+  //     const client = new speech.v1p1beta1.SpeechClient();
+  //     const [operations] = await client.longRunningRecognize({
+  //       audio: {
+  //         content: buffer.toString('base64'),
+  //       },
+  //       config: {
+  //         encoding: 'FLAC',
+  //         languageCode,
+  //       },
+  //     });
+  //     const [response] = await operations.promise();
+  //     fs.writeFile('/tmp.json', JSON.stringify(response), (err) => {
+  //       if (err) {
+  //         console.log(err);
+  //       } else console.log('file saved');
+  //     });
+  //     //const transcription = response.results?.map((result) => result.alternatives[0].transcript);
+  //   } catch (err) {
+  //     throw catchError(err);
+  //   }
+  // },
 };
 
 const convertAudio = async (audio: string) => {

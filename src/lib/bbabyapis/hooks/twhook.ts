@@ -52,16 +52,15 @@ const useAImentions = async () => {
     await Promise.all(
       filtered.map(async (tweet) => {
         try {
-          const mentionId = tweet.referenced_tweets ? tweet.referenced_tweets[0].id : undefined;
-          if (!mentionId) return;
-          const originalTweet = await client.v2.singleTweet(mentionId);
+          const originalId = tweet.referenced_tweets ? tweet.referenced_tweets[0].id : undefined;
+          if (!originalId) throw new Error('Missing original Id for this mentions!');
+          const originalTweet = await client.v2.singleTweet(originalId);
           const language = await googleapis.detectLanguage(originalTweet.data.text);
           const s = language === 'it' ? 'Che ne pensi in massimo 250 lettere?' : 'What do you think about this in maximum 250 words?';
           const prompt = `${s} ${originalTweet.data.text}`;
           let aitext = await openaiapis.request(prompt);
           if (aitext.length >= 300) {
-            const u =
-              language === 'it' ? 'Puoi riassumere questo  messaggio in massim 300 parole?' : 'Can you summarize this message in max 300 words?';
+            const u = language === 'it' ? 'Riassumi questo messaggio in massimo 250 lettere!' : 'Summarize this message in up to 250 letters';
             aitext = await openaiapis.request(`${u} ${aitext}`);
           }
           await client.v2.tweet(aitext, {
@@ -74,7 +73,7 @@ const useAImentions = async () => {
           if (!user) return;
           await coraline.sendLog(`New tweet reply: https://twitter.com/${user.username}/status/${tweet.id}`);
         } catch (err) {
-          throw catchError(err);
+          throw catchError(err, 'Twitter mentions!');
         }
       }),
     );

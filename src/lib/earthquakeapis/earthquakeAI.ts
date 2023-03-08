@@ -4,6 +4,7 @@ import Community from '../../models/Community';
 import Earthquake from '../../models/Earthquake';
 import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
+import bbabypost from '../bbabyapis/route/bbabypost/bbabypost';
 import pexelsapi from '../pexelsapi/pexelsapi';
 import twitterapis from '../twitterapis/twitterapis';
 import earthquakeapis from './earthquakeapis';
@@ -32,7 +33,7 @@ const earthquakeAI = async () => {
         const exist = await Earthquake.findOne({ id: earthquake.id });
         if (exist) return;
         if (earthquake.properties.mag < 4.8) return;
-        await earthquakePost(earthquake);
+        await earthquakePost(earthquake.properties);
         const dbEathquake = new Earthquake(earthquake);
         await dbEathquake.save();
       } catch (err) {
@@ -43,7 +44,7 @@ const earthquakeAI = async () => {
     catchErrorWithTelegram('bbabyapis.earthquakeInfo' + ' ' + err);
   }
 };
-const earthquakePost = async (earthquake: Earthquake) => {
+const earthquakePost = async (properties: Earthquake['properties']) => {
   try {
     let user = await User.findOne({ username: 'earthquake' });
     if (!user) {
@@ -52,7 +53,6 @@ const earthquakePost = async (earthquake: Earthquake) => {
       user.role = 1;
       await user.save();
     }
-    const { properties } = earthquake;
     const start = properties.mag >= 5.5 ? 'Breaking News: A massive earthquake' : 'News: An earthquake';
     const post = `${start} with a magnitude of ${properties.mag} strikes ${properties.place}. The tremors were felt on ${new Date(
       properties.time,
@@ -65,14 +65,16 @@ const earthquakePost = async (earthquake: Earthquake) => {
       orientation: 'landscape',
     });
     const image = images[coraline.getRandomInt(images.length - 1)];
-    await bbabyapis.post.newPost(user, post, community.name, {
+    await bbabypost.newPost(user, post, community.name, {
       isImage: true,
       height: image.height,
       width: image.width,
       selectedFile: image.src.original,
     });
+    if (process.env.NODE_ENV === 'development') return;
     const client = await twitterapis.getMyClient('bugstransfer');
-    const tweet = `${post} #Earthquake #${properties.place.split(',')[1].trim()} #StaySafe`;
+    await coraline.sendLog(properties.place);
+    const tweet = `${post} #Earthquake #${properties.place.split(',')[1]?.trim()} #StaySafe`;
     await client.v1.tweet(tweet);
   } catch (err) {
     catchErrorWithTelegram(err);

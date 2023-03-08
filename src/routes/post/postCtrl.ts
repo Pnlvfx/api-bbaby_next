@@ -10,6 +10,7 @@ import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import cloudinary from '../../config/cloudinary';
 import { PostProps } from '../../models/types/post';
 import coraline from '../../coraline/coraline';
+import bbabypost from '../../lib/bbabyapis/route/bbabypost/bbabypost';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -145,7 +146,7 @@ const PostCtrl = {
       const { title, community, body, selectedFile, isImage, isVideo, height, width, sharePostToTG, sharePostToTwitter } = req.body;
       if (!title) return res.status(500).json({ msg: 'Title is required.' });
       if (!community) return res.status(500).json({ msg: 'Please select a valid community.' });
-      const post = await bbabyapis.post.newPost(user, title, community, {
+      const post = await bbabypost.newPost(user, title, community, {
         body,
         height,
         isImage,

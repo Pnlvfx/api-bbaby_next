@@ -35,13 +35,6 @@ const TiktakSchema = new Schema<TiktakProps>(
     background_video: {
       type: String,
     },
-    images: [
-      {
-        path: String,
-        loop: Number,
-      },
-    ],
-    audios: [String],
     video: {
       type: String,
     },

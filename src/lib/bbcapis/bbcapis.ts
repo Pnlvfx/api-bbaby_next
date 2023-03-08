@@ -12,7 +12,7 @@ import { catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
 //     await bbabyapis.AIpost(user, question, 'News');
 //     //const req = `Please transform in italian this news: ${question}`
 //     // const translate = await openaiapis.request(req)
-//     // await bbabyapis.post.newPost(user, translate, 'News')
+//     // await bbabypost.newPost(user, translate, 'News')
 //   } catch (err) {
 //     throw catchError(err);
 //   }

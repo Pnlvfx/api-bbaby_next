@@ -51,6 +51,7 @@ const tiktakCtrl = {
       const { permalink } = req.params;
       const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
       if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
+      console.log(tiktak);
       res.status(200).json(tiktak);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -86,7 +87,6 @@ const tiktakCtrl = {
       const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
       if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
       await tiktakapis.finalVideo(tiktak, 1080, 1920, color);
-      return;
       res.status(201).json(tiktak);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -100,16 +100,17 @@ const tiktakCtrl = {
       if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
       const { video, background_video }: { video?: string; background_video?: string } = req.body;
       if (video) {
+        if (tiktak.video) await coraline.deleteFile(coraline.media.getPathFromUrl(tiktak.video));
         tiktak.video = undefined;
-        tiktak.images = [];
-        tiktak.audios = [];
       }
       if (background_video) {
         tiktak.audio = undefined;
         tiktak.duration = undefined;
         tiktak.background_video = undefined;
+        await coraline.clearFolder(coraline.useStatic(`/tiktak/${tiktak.id}`));
       }
       await tiktak.save();
+      console.log(tiktak);
       res.status(200).json(true);
     } catch (err) {
       catchErrorCtrl(err, res);

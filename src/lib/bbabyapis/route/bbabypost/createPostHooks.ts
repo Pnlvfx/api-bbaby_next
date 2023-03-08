@@ -43,13 +43,17 @@ export const shareToTwitter = async (
     if (user.role === 1) {
       if (isImage || isVideo) {
         if (!selectedFile) throw new Error('Missing the media parameter!');
-        const type = isImage ? 'images' : 'videos';
-        const video = isVideo ? selectedFile?.toString().split('?')[0] : null;
-        const isUrl = type === 'images' ? coraline.media.urlisImage(selectedFile) : coraline.media.urlisVideo(video as string);
-        const public_id = `posts/${post._id.toString()}`;
-        const media = isUrl ? await coraline.media.getMediaFromUrl(selectedFile, public_id, type) : { filename: selectedFile };
-        const twimage = await twitterUser.v1.uploadMedia(isUrl ? media.filename : Buffer.from(media.filename));
-        await twitterUser.v1.tweet(twitterText, { media_ids: twimage });
+        const isUrl = coraline.media.urlisMedia(selectedFile.split('?')[0]);
+        let media_id: string;
+        if (isUrl) {
+          const type = isImage ? 'images' : 'videos';
+          const public_id = `posts/${post._id.toString()}`;
+          const media = await coraline.media.getMediaFromUrl(selectedFile, public_id, type);
+          media_id = await twitterUser.v1.uploadMedia(media.filename);
+        } else {
+          media_id = await twitterUser.v1.uploadMedia(Buffer.from(selectedFile));
+        }
+        await twitterUser.v1.tweet(twitterText, { media_ids: media_id });
       } else {
         await twitterUser.v1.tweet(twitterText);
       }

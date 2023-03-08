@@ -36,14 +36,14 @@ const tiktakapis = {
       textArray.unshift(tiktak.title);
       const folder = coraline.useStatic(`tiktak/${tiktak._id}`);
       const audio_path = `${folder}/audio_final.mp3`;
+      const images: { path: string; loop: number }[] = [];
       await Promise.all(
         textArray.map(async (text, index) => {
           try {
             await coraline.wait(index * 2000);
             const audio = await googleapis.textToSpeech(text, pitch);
             const audioPath = `${folder}/audio_${index}.mp3`;
-            const audioUrl = await coraline.media.saveAudio(audio.audioContent, audioPath);
-            tiktak.audios.push(audioUrl);
+            await coraline.media.saveAudio(audio.audioContent, audioPath);
             const duration = await ffmpeg.getDuration(audioPath);
             const textData = await TextToImage.generate(text, {
               maxWidth: width,
@@ -62,23 +62,29 @@ const tiktakapis = {
             const overlayPath = `${folder}/overlay${index}.png`;
             const writeFile = util.promisify(fs.writeFile);
             await writeFile(overlayPath, imageOverlay, 'binary');
-            tiktak.images.push({ path: overlayPath, loop: duration - 0.35 });
+            images.push({ path: overlayPath, loop: duration - 0.35 });
+            await coraline.deleteFile(audioPath);
           } catch (err) {
             throw catchError(err);
           }
         }),
       );
       let total = 0;
-      await Promise.all(
-        tiktak.images.map((image) => {
-          total += image.loop;
-        }),
-      );
-      console.log(total);
+      images.map((image) => {
+        total += image.loop;
+      });
+      console.log({ duration: tiktak.duration, total });
       const final_path = `${folder}/final_video.mp4`;
-      await ffmpeg.overlayImagesToVideo(tiktak.images, tiktak.background_video, audio_path, final_path, tiktak.duration);
+      await ffmpeg.overlayImagesToVideo(images, tiktak.background_video, audio_path, final_path, tiktak.duration);
       tiktak.video = coraline.media.getUrlFromPath(final_path);
       await tiktak.save();
+      images.map(async (image) => {
+        try {
+          await coraline.deleteFile(image.path);
+        } catch (err) {
+          throw catchError(err);
+        }
+      });
       return tiktak;
     } catch (err) {
       throw catchError(err);

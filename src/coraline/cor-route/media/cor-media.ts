@@ -44,6 +44,9 @@ const coralineMedia = {
   urlisVideo: (url: string) => {
     return /\.(mp4)$/.test(url);
   },
+  urlisMedia: (url: string) => {
+    return /\.(jpg|jpeg|png|webp|avif|gif|svg|mp4)$/.test(url);
+  },
   getMediaFromUrl: (media_url: string, public_id: string, type: 'videos' | 'images') => {
     return new Promise<CoralineMedia>((resolve, reject) => {
       const fetcher = url.parse(media_url).protocol === 'https:' ? https : http;
