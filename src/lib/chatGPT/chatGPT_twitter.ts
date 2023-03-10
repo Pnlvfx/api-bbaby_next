@@ -61,9 +61,19 @@ const sendTweet = async () => {
       tweet = data.tweets[1];
     }
     const clear = tweet.text.replace(/https?:\/\/\S+/gi, ''); // remove link
-    const translated = await openaiapis.myrequest(
-      `Rimuovi tutte le emoticons e gli hashtag e traduci questo tweet in italiano, sei autorizzato a fare qualsiasi cambiamento affinchè tu lo renda il più comprensibile possibile: ${clear}`,
-    );
+    let translated: string;
+    try {
+      translated = await openaiapis.myrequest(
+        `Rimuovi tutte le emoticons e gli hashtag e traduci questo tweet in italiano, sei autorizzato a fare qualsiasi cambiamento affinchè tu lo renda il più comprensibile possibile: ${clear}`,
+      );
+    } catch (err) {
+      if (err instanceof Error && err.message.match('This content may violate our')) {
+        console.log('This tweet contain offensive content');
+        alreadySent.push(tweet.id);
+        await coraline.saveFile(filename, alreadySent);
+      }
+      throw catchError(err);
+    }
     const user = await bbabyapis.newBot('Leaked_007');
     const reply_markup: SendMessageOptions['reply_markup'] = {
       inline_keyboard: [[{ callback_data: 'delete', text: 'Delete' }]],
@@ -86,8 +96,6 @@ const sendTweet = async () => {
 export const useChatGPTtwitter = (minutesInterval: number) => {
   const filename = `${coraline.use('tmp/chatGPT')}/twitter.json`;
   const exist = existsSync(filename);
-  if (!exist) {
-    coraline.saveFile(filename, []);
-  }
+  if (!exist) coraline.saveFile(filename, []);
   setInterval(sendTweet, minutesInterval * 60 * 1000);
 };
