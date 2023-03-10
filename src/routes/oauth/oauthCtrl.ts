@@ -7,9 +7,10 @@ import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
 import { UserRequest } from '../../@types/express';
-import sendEMail from '../user/user-functions/sendMail';
+import sendEMail from '../user/user-functions/sendEmail';
 import { IUser } from '../../models/types/user';
 import cloudinary from '../../config/cloudinary';
+import coraline from '../../coraline/coraline';
 
 interface JwtPayload {
   _doc: IUser;
@@ -47,23 +48,17 @@ const oauthCtrl = {
       await user.save();
       res.status(200).json({ msg: 'Success' });
     } catch (err) {
-      res.status(400).json({ msg: 'The email link you used is invalid!' });
+      catchErrorCtrl(err, res);
     }
   },
   login: async (req: Request, res: Response) => {
     try {
       const { username, password } = req.body;
-      const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
-      if (user && user.username) {
-        const passOk = bcrypt.compareSync(password, user.password);
-        if (passOk) {
-          login(user._id.toString(), res);
-        } else {
-          return res.status(422).json({ msg: 'Invalid username or password' });
-        }
-      } else {
-        return res.status(422).json({ msg: 'Invalid username or password' });
-      }
+      const user = await User.findOne({ username: coraline.mongo.regexUpperLowerCase(username) });
+      if (!user) return res.status(422).json({ msg: 'Invalid username!' });
+      const passOk = bcrypt.compareSync(password, user.password);
+      if (!passOk) return res.status(422).json({ msg: 'Invalid username or password' });
+      login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -130,7 +125,7 @@ const oauthCtrl = {
       }
       login(user._id.toString(), res);
     } catch (err) {
-      if (err instanceof Error) res.status(500).json({ msg: err.message });
+      catchErrorCtrl(err, res);
     }
   },
   saveEUCookie: async (req: Request, res: Response) => {

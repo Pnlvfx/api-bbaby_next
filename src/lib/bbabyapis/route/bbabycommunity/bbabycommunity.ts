@@ -2,12 +2,13 @@ import { getUserFromToken } from '../../../../routes/user/user-functions/userFun
 import { catchError } from '../../../../coraline/cor-route/crlerror';
 import Community from '../../../../models/Community';
 import { IUser } from '../../../../models/types/user';
+import coraline from '../../../../coraline/coraline';
 
 const bbabycommunity = {
   createCommunity: async (user: IUser, name: string, language?: 'it' | 'en') => {
     try {
       const check = await Community.exists({
-        name: new RegExp(`^${name}$`, 'i'),
+        name: coraline.mongo.regexUpperLowerCase(name),
       });
       if (check) throw new Error(`Sorry, b/${name} is taken. Try another.`);
       const lang = language || user.countryCode === 'IT' ? 'it' : 'en';
@@ -27,8 +28,7 @@ const bbabycommunity = {
   },
   getCommunity: async (token: string, name: string) => {
     try {
-      const regex = new RegExp(`^${name}$`, 'i');
-      const community = await Community.findOne({ name: regex });
+      const community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase(name) });
       if (!community) throw new Error(`This community doesn't exist`);
       if (!token) {
         community.user_is_banned = false;

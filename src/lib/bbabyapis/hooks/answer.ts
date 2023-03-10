@@ -4,19 +4,19 @@ import Community from '../../../models/Community';
 import User from '../../../models/User';
 import openaiapis from '../../openaiapis/openaiapis';
 import bbabyapis from '../bbabyapis';
+import bbabycomment from '../route/bbabycomment/bbabycomment';
+import bbabycommunity from '../route/bbabycommunity/bbabycommunity';
 
 const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'];
 
 export const answer = async (prompt?: string) => {
   try {
     const community = communities[coraline.getRandomInt(communities.length - 1)];
-    const check = await Community.exists({
-      name: new RegExp(`^${community}$`, 'i'),
-    });
+    const check = await Community.exists({ name: coraline.mongo.regexUpperLowerCase(community) });
     if (!check) {
       const owner = await User.findOne({ is_bot: true });
-      if (!owner) throw new Error('bbabyapis, missing owner in answer function!');
-      await bbabyapis.community.createCommunity(owner, community);
+      if (!owner) throw new Error('Bbabyapis, missing owner in answer function!');
+      await bbabycommunity.createCommunity(owner, community);
     }
     prompt = prompt || `Ask me something about ${community} without writing the response!`; //important;
     const user = await bbabyapis.AIuser();
@@ -32,7 +32,7 @@ export const answer = async (prompt?: string) => {
           user = await bbabyapis.newBot();
         }
         const body = await openaiapis.request(post.title);
-        await bbabyapis.comment.createComment(user, body, post._id, post._id);
+        await bbabycomment.createComment(user, body, post._id, post._id);
       } catch (err) {
         catchErrorWithTelegram(err);
       }

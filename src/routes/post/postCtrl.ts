@@ -6,11 +6,11 @@ import { Types, isValidObjectId } from 'mongoose';
 import Comment from '../../models/Comment';
 import Community from '../../models/Community';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
-import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import cloudinary from '../../config/cloudinary';
 import { PostProps } from '../../models/types/post';
 import coraline from '../../coraline/coraline';
 import bbabypost from '../../lib/bbabyapis/route/bbabypost/bbabypost';
+import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -23,10 +23,10 @@ const PostCtrl = {
       const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
       let posts: PostProps[];
       if (communityName) {
-        const filters = { community: new RegExp(`^${communityName.toString()}$`, 'i') };
+        const filters = { community: coraline.mongo.regexUpperLowerCase(communityName.toString()) };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else if (author) {
-        const filters = { author: new RegExp(`^${author}$`, 'i') };
+        const filters = { author: coraline.mongo.regexUpperLowerCase(author.toString()) };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else {
         const communities = await Community.find({ language: userLang || 'en' });
@@ -132,7 +132,7 @@ const PostCtrl = {
           post.liked = null;
         }
       }
-      const community = await bbabyapis.community.getCommunity(token, post.community);
+      const community = await bbabycommunity.getCommunity(token, post.community);
       post.community_detail = community;
       res.status(200).json(post);
     } catch (err) {

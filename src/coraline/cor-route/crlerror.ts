@@ -7,9 +7,10 @@ export const catchError = (err: unknown, ...args: string[]): void => {
       err += ' ' + value;
     });
   }
-  if (err instanceof Error) new Error(`${err.message}`);
-  else if (typeof err === 'string') new Error(err);
-  else new Error(`API error`);
+  console.log('catch Error:', err);
+  if (err instanceof Error) throw new Error(`${err.message}`);
+  else if (typeof err === 'string') throw new Error(err);
+  else throw new Error(`API error`);
 };
 
 export const catchErrorCtrl = (err: unknown, res: Response) => {
@@ -28,6 +29,6 @@ export const catchErrorWithTelegram = async (err: unknown) => {
       await coraline.sendLog(process.env.NODE_ENV + ' ' + err);
     } else await coraline.sendLog('Unknown error');
   } catch (err) {
-    return;
+    //
   }
 };

@@ -69,6 +69,7 @@ const useAImentions = async () => {
             },
           });
           alreadySent.push(tweet.id);
+          await coraline.saveFile(filename, alreadySent);
           const user = mentions.data.includes?.users?.find((u) => u.id === tweet.author_id);
           if (!user) return;
           await coraline.sendLog(`New tweet reply: https://twitter.com/${user.username}/status/${tweet.id}`);

@@ -1,6 +1,7 @@
 import config from '../../../config/config';
 import nodemailer from 'nodemailer';
 import { IUser } from '../../../models/types/user';
+import { catchError } from '../../../coraline/cor-route/crlerror';
 
 const sendEmail = (to: string, url: string, txt: string, user: IUser) => {
   const smtpTransport = nodemailer.createTransport({
@@ -49,7 +50,7 @@ const sendEmail = (to: string, url: string, txt: string, user: IUser) => {
   };
 
   smtpTransport.sendMail(mailOptions, (err, infor) => {
-    if (err) return err;
+    if (err) throw catchError(err);
     return infor;
   });
 };

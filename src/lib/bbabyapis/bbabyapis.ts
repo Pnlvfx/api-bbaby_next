@@ -1,7 +1,6 @@
-import mongoose from 'mongoose';
 import config from '../../config/config';
+import mongoose from 'mongoose';
 import coraline from '../../coraline/coraline';
-import bbabynews from './route/bbabynews/bbabypost/bbabynews';
 import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
 import userapis from '../userapis/userapis';
 import bbabypost from './route/bbabypost/bbabypost';
@@ -10,11 +9,12 @@ import User from '../../models/User';
 import openaiapis from '../openaiapis/openaiapis';
 import { IUser } from '../../models/types/user';
 import Post from '../../models/Post';
-import bbabycomment from './route/bbabycomment/bbabycomment';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { check } from './hooks/hooks';
+import { useChatGPTtwitter } from '../chatGPT/chatGPT_twitter';
+import { useTwitter } from './hooks/twhook';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -23,11 +23,10 @@ const bbabyapis = {
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
       if (config.NODE_ENV === 'development') {
-        setInterval(coraline.memoryUsage, 60000);
-        // useTwitterNotification(2);
+        useChatGPTtwitter(5);
       } else {
         useEarthquakeAI(5);
-        // useTwitter(5);
+        useTwitter(5);
       }
       // await useTelegram();
       // await useBBC();
@@ -49,13 +48,13 @@ const bbabyapis = {
   newBot: async (username?: string) => {
     try {
       if (username) {
-        const exist = await User.findOne({ username });
+        const regex = coraline.mongo.regexUpperLowerCase(username);
+        const exist = await User.findOne({ username: regex });
         if (exist) return exist;
         const email = new Chance().email();
         const password = coraline.generateRandomId(10);
         const _username = coraline.createPermalink(username);
-        const ipInfo = await userapis.getIP();
-        const user = await userapis.newUser(email, _username, password, ipInfo);
+        const user = await userapis.newUser(email, _username, password);
         user.is_bot = true;
         await user.save();
         return user;
@@ -116,8 +115,6 @@ const bbabyapis = {
       throw catchError(err);
     }
   },
-  news: bbabynews,
-  comment: bbabycomment,
   community: bbabycommunity,
 };
 

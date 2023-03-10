@@ -6,7 +6,7 @@ import Post from '../../models/Post';
 import User from '../../models/User';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
-import bbabyapis from '../../lib/bbabyapis/bbabyapis';
+import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
 
 const communityCtrl = {
   getCommunities: async (req: Request, res: Response) => {
@@ -15,7 +15,6 @@ const communityCtrl = {
       const { limit } = req.query;
       if (!limit) return res.status(400).json({ msg: 'Please add a limit field into your query request.' });
       const communities = await Community.find({}).sort({ number_of_posts: -1 }).limit(parseInt(limit.toString()));
-      if (!communities) return res.status(500).json({ msg: 'Something went wrong when trying to get the communities' });
       if (token) {
         const user = await getUserFromToken(token);
         if (!user) return res.status(401).json({ msg: 'Your token is no more valid, please try to logout and login again.' });
@@ -32,7 +31,7 @@ const communityCtrl = {
     try {
       const { token } = req.cookies;
       const { name } = req.params;
-      const community = await bbabyapis.community.getCommunity(token, name);
+      const community = await bbabycommunity.getCommunity(token, name);
       res.status(200).json(community);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -77,7 +76,7 @@ const communityCtrl = {
       const { limit } = req.query;
       if (!limit) return res.status(400).json({ msg: 'Please add a limit field into your query request.' });
       const _limit = Number(limit.toString());
-      let communities = await Community.find({ name: user?.subscribed }).limit(_limit);
+      let communities = await Community.find({ name: user.subscribed }).limit(_limit);
       const ids = Array.from(communities.map((_) => _.id));
       if (communities.length < _limit) {
         const newCommunities = await Community.find({ _id: { $nin: ids } })
@@ -96,7 +95,7 @@ const communityCtrl = {
       const { user } = req;
       const { name } = req.body;
       if (!name) return res.status(500).json({ msg: 'A community name is required' });
-      await bbabyapis.community.createCommunity(user, name);
+      await bbabycommunity.createCommunity(user, name);
       res.status(201).json({ msg: 'You have successfully created a new community' });
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -117,8 +116,7 @@ const communityCtrl = {
       const community = await Community.findOne({ name });
       if (!community) return res.status(500).json({ msg: 'Invalid community!' });
       community.image = response.secure_url;
-      const postThumb = await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });
-      if (!postThumb) return res.status(500).json({ msg: 'Something went wrong with this image. Please try with another one' });
+      await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });
       await community.save();
       res.status(200).json({ msg: 'Image updated successfully' });
     } catch (err) {
@@ -154,14 +152,13 @@ const communityCtrl = {
       const { user } = req;
       const { name } = req.params;
       const { category } = req.body;
-      const c = await Community.findOne({ name });
-      const check = user.role === 1 ? true : user.username === c?.author ? true : false;
-      if (!check) {
-        return res.status(500).json({ msg: 'You need to be a moderator to do this action!' });
-      } else {
-        await Community.findOneAndUpdate({ name }, { category });
-        res.status(200).json(true);
-      }
+      const community = await Community.findOne({ name });
+      if (!community) return res.status(500).json({ msg: "This community doesn't exist!" });
+      const check = user.role === 1 ? true : user.username === community.author ? true : false;
+      if (!check) return res.status(500).json({ msg: 'You need to be a moderator to do this action!' });
+      community.category = category;
+      await community.save();
+      res.status(200).json(true);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

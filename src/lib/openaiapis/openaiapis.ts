@@ -50,6 +50,25 @@ const openaiapis = {
       throw catchError(err);
     }
   },
+  myrequest: async (text: string) => {
+    try {
+      const body = JSON.stringify({ text });
+      const headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+      const res = await fetch('http://localhost:8080/request', {
+        method: 'POST',
+        body,
+        headers,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message);
+      return data as string;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
 };
 
 export default openaiapis;

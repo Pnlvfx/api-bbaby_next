@@ -4,6 +4,7 @@ import Community from '../../models/Community';
 import Earthquake from '../../models/Earthquake';
 import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
+import bbabycommunity from '../bbabyapis/route/bbabycommunity/bbabycommunity';
 import bbabypost from '../bbabyapis/route/bbabypost/bbabypost';
 import pexelsapi from '../pexelsapi/pexelsapi';
 import twitterapis from '../twitterapis/twitterapis';
@@ -59,7 +60,7 @@ const earthquakePost = async (properties: Earthquake['properties']) => {
     ).toLocaleString()}. Stay safe, folks! 🌎💔`;
     let community = await Community.findOne({ name: 'Earthquake' });
     if (!community) {
-      community = await bbabyapis.community.createCommunity(user, 'Earthquake', 'en');
+      community = await bbabycommunity.createCommunity(user, 'Earthquake', 'en');
     }
     const images = await pexelsapi.getImage('earthquake', {
       orientation: 'landscape',
@@ -73,8 +74,14 @@ const earthquakePost = async (properties: Earthquake['properties']) => {
     });
     if (process.env.NODE_ENV === 'development') return;
     const client = await twitterapis.getMyClient('bugstransfer');
-    await coraline.sendLog(properties.place);
-    const tweet = `${post} #Earthquake #${properties.place.split(',')[1]?.trim()} #StaySafe`;
+    let hashtags = '#Earthquake';
+    if (properties.place.includes(',')) {
+      hashtags += ` #${properties.place.split(',')[1]?.trim()}`;
+    } else {
+      hashtags += ` #${properties.place}`;
+    }
+    hashtags += ' #StaySafe';
+    const tweet = `${post} ${hashtags}`;
     await client.v1.tweet(tweet);
   } catch (err) {
     catchErrorWithTelegram(err);

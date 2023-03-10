@@ -36,8 +36,8 @@ export const shareToTwitter = async (
   selectedFile?: string,
 ) => {
   try {
-    //const govText = savedPost.title.substring(0, 300 - url.length - 8) + ' ' + url;
-    const govText = post.title.substring(0, 280);
+    const govTextUrl = `${post.title.substring(0, 279 - url.length)} ${url}`;
+    const govText = post.title.length >= 279 ? govTextUrl : post.title;
     const twitterText = user.role === 0 ? url : govText;
     const twitterUser = await chooseUser(user, post, communityInfo.language);
     if (user.role === 1) {

@@ -6,6 +6,7 @@ import cloudinary from '../../config/cloudinary';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
 import config from '../../config/config';
+import coraline from '../../coraline/coraline';
 
 const userCtrl = {
   user: async (req: Request, res: Response) => {
@@ -68,7 +69,7 @@ const userCtrl = {
   userFromUsername: async (req: Request, res: Response) => {
     try {
       const { username } = req.params;
-      const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+      const user = await User.findOne({ username: coraline.mongo.regexUpperLowerCase(username) });
       if (!user) return res.status(400).json({ msg: "This user doens't exist" });
       const response = {
         avatar: user.avatar,

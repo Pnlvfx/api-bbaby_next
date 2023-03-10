@@ -4,6 +4,7 @@ import { checkUpdateType } from '../../lib/telegramapis/hooks/telegramhooks';
 import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import Community from '../../models/Community';
 import bbabypost from '../../lib/bbabyapis/route/bbabypost/bbabypost';
+import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
 
 export interface ConversationState {
   command: '';
@@ -23,7 +24,7 @@ const telegramCtrl = {
               const user = await bbabyapis.AIuser();
               let community = await Community.findOne({ name: 'Notizie' });
               if (!community) {
-                community = await bbabyapis.community.createCommunity(user, 'Notizie', 'it');
+                community = await bbabycommunity.createCommunity(user, 'Notizie', 'it');
               }
               const title = msg.text.split(':')[1];
               await bbabypost.newPost(user, title, community.name);
