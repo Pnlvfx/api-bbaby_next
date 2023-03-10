@@ -13,7 +13,7 @@ const bbabypost = {
     try {
       if (user.role !== 1 && title.length > 300) throw new Error('Title needs to be 300 words maximum.');
       if (!title || title.length < 1) throw new Error('Title is too short, try something different!');
-      const communityInfo = await Community.findOne({ name: community });
+      const communityInfo = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase(community) });
       if (!communityInfo) throw new Error('Please select a valid community.');
       const exist = await Post.exists({ title, author: user.username, community });
       if (exist) throw new Error('This post already exist.');

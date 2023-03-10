@@ -5,6 +5,7 @@ import bbabyapis from '../../lib/bbabyapis/bbabyapis';
 import Community from '../../models/Community';
 import bbabypost from '../../lib/bbabyapis/route/bbabypost/bbabypost';
 import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
+import coraline from '../../coraline/coraline';
 
 export interface ConversationState {
   command: '';
@@ -22,7 +23,7 @@ const telegramCtrl = {
           if (msg.text) {
             if (msg.reply_to_message) {
               const user = await bbabyapis.AIuser();
-              let community = await Community.findOne({ name: 'Notizie' });
+              let community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase('Notizie') });
               if (!community) {
                 community = await bbabycommunity.createCommunity(user, 'Notizie', 'it');
               }

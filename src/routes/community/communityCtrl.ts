@@ -7,6 +7,7 @@ import User from '../../models/User';
 import { getUserFromToken } from '../user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
+import coraline from '../../coraline/coraline';
 
 const communityCtrl = {
   getCommunities: async (req: Request, res: Response) => {
@@ -62,7 +63,7 @@ const communityCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { name, descr: description } = req.body;
-      const c = await Community.findOneAndUpdate({ name }, { description });
+      const c = await Community.findOneAndUpdate({ name: coraline.mongo.regexUpperLowerCase(name) }, { description });
       if (!c) return res.status(500).json({ msg: 'Something went wrong, please try again' });
       res.status(200).json(true);
     } catch (err) {
@@ -113,7 +114,7 @@ const communityCtrl = {
         crop: 'scale',
         upload_preset: 'bbaby_community',
       });
-      const community = await Community.findOne({ name });
+      const community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase(name) });
       if (!community) return res.status(500).json({ msg: 'Invalid community!' });
       community.image = response.secure_url;
       await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });

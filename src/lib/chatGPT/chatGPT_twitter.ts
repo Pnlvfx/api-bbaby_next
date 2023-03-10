@@ -11,13 +11,11 @@ import bbabycommunity from '../bbabyapis/route/bbabycommunity/bbabycommunity';
 import coraline from '../../coraline/coraline';
 import { existsSync } from 'fs';
 let getNew = true;
-let data:
-  | {
-      tweets: TweetV2[];
-      users: UserV2[];
-      media: MediaObjectV2[];
-    }
-  | undefined;
+let data: {
+  tweets: TweetV2[];
+  users: UserV2[];
+  media: MediaObjectV2[];
+};
 
 const getNewTweets = async () => {
   try {
@@ -49,18 +47,26 @@ const sendTweet = async () => {
       if (!b.public_metrics || !a.public_metrics) return 0;
       return b.public_metrics.like_count - a.public_metrics.like_count;
     });
-    let tweet = data.tweets[0];
-    const media = data.media.find((m) => {
-      if (!tweet.attachments?.media_keys) return;
-      return tweet.attachments.media_keys[0] === m.media_key;
-    });
     const filename = `${coraline.use('tmp/chatGPT')}/twitter.json`;
     const alreadySent = (await coraline.readJSON(filename)) as TweetV2['id'][];
-    if (media?.type === 'video') {
-      alreadySent.push(tweet.id);
-      tweet = data.tweets[1];
-    }
-    const clear = tweet.text.replace(/https?:\/\/\S+/gi, ''); // remove link
+    let tweet = data.tweets[0];
+    const regex = /^(spectatorindex|disclosetv|WarMonitors|nexta_tv|AZgeopolitics)$/;
+    await Promise.all(
+      data.tweets.map((t) => {
+        const media = data.media.find((m) => {
+          if (!t.attachments?.media_keys) return;
+          return t.attachments.media_keys[0] === m.media_key;
+        });
+        if (media?.type === 'video') return;
+        const user = data.users.find((u) => u.id === t.author_id);
+        if (!user) return;
+        if (regex.test(user.username)) {
+          tweet = t;
+        }
+      }),
+    );
+    let clear = tweet.text.replace(/https?:\/\/\S+/gi, ''); // remove link
+    clear = clear.replace('BREAKING: ', '');
     let translated: string;
     try {
       translated = await openaiapis.myrequest(
@@ -78,7 +84,7 @@ const sendTweet = async () => {
     const reply_markup: SendMessageOptions['reply_markup'] = {
       inline_keyboard: [[{ callback_data: 'delete', text: 'Delete' }]],
     };
-    let community = await Community.findOne({ name: 'Notizie' });
+    let community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase('Notizie') });
     if (!community) {
       community = await bbabycommunity.createCommunity(user, 'Notizie', 'it');
     }
