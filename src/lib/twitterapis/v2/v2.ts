@@ -10,7 +10,7 @@ const v2 = {
       const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
       const data = await client.v2.listTweets(id, {
         expansions: ['author_id', 'attachments.media_keys'],
-        'tweet.fields': ['public_metrics', 'entities', 'created_at'],
+        'tweet.fields': ['public_metrics', 'entities', 'created_at', 'referenced_tweets'],
         'user.fields': ['username', 'name', 'profile_image_url'],
         'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url', 'variants'],
         max_results: 100,

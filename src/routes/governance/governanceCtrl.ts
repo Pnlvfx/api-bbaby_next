@@ -182,7 +182,7 @@ const governanceCtrl = {
       if (sharePostToTG) {
         const text = `${news.title + ' ' + url}`;
         const chat_id = '@bbabystyle1';
-        await telegramapis.sendMessage(chat_id, text);
+        await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(chat_id, text);
       }
       if (sharePostToTwitter) {
         try {

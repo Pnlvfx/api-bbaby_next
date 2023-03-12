@@ -1,7 +1,8 @@
 import { Browser, Page, PuppeteerLaunchOptions } from 'puppeteer';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
 import { catchError } from '../../coraline/cor-route/crlerror';
-import os from 'os';
+import plugin from 'puppeteer-extra-plugin-stealth';
+puppeteer.use(plugin());
 
 const puppeteerapis = {
   connect: async (url: string, options?: PuppeteerLaunchOptions) => {
@@ -108,39 +109,6 @@ const puppeteerapis = {
       }, distance);
       await page.waitForTimeout(interval * 100);
       currentTime = Date.now();
-    }
-  },
-  performanceWrapper: async (callback: () => Promise<unknown>) => {
-    try {
-      const maxCPUUsage = os.cpus().length * 100 * 1000;
-      const maxMem = os.totalmem();
-      const startCPU = process.cpuUsage();
-      const startTime = Date.now();
-
-      // call your custom function here
-      const data = await callback();
-
-      const endCPU = process.cpuUsage();
-      const endMem = process.memoryUsage();
-      const endTime = Date.now();
-
-      const usedCPU = endCPU.user - startCPU.user + endCPU.system - startCPU.system;
-      const usedMem = endMem.heapUsed;
-
-      if (usedCPU / maxCPUUsage > 0.9) {
-        console.log('CPU usage is high, close to the limit');
-      }
-      console.log('CPU Time: ' + usedCPU + ' microseconds');
-
-      if (usedMem / maxMem > 0.9) {
-        console.log('Memory usage is high, close to the limit');
-      }
-      console.log('Heap used: ' + usedMem / (1024 * 1024) + ' MB');
-
-      console.log(`Time taken: ${endTime - startTime}ms`);
-      return data;
-    } catch (err) {
-      throw catchError(err);
     }
   },
 };

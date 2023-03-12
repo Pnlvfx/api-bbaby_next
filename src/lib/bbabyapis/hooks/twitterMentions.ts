@@ -1,9 +1,9 @@
 import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import twitterapis from '../../twitterapis/twitterapis';
-import openaiapis from '../../openaiapis/openaiapis';
 import coraline from '../../../coraline/coraline';
 import { TweetV2 } from 'twitter-api-v2';
 import googleapis from '../../googleapis/googleapis';
+import bbabyapis from '../bbabyapis';
 const start_time = new Date().toISOString();
 
 // const useStream = async () => {
@@ -58,10 +58,10 @@ const useAImentions = async () => {
           const language = await googleapis.detectLanguage(originalTweet.data.text);
           const s = language === 'it' ? 'Che ne pensi in massimo 250 lettere?' : 'What do you think about this in maximum 250 words?';
           const prompt = `${s} ${originalTweet.data.text}`;
-          let aitext = await openaiapis.request(prompt);
+          let aitext = await bbabyapis.AIrequest(prompt);
           if (aitext.length >= 300) {
             const u = language === 'it' ? 'Riassumi questo messaggio in massimo 250 lettere!' : 'Summarize this message in up to 250 letters';
-            aitext = await openaiapis.request(`${u} ${aitext}`);
+            aitext = await bbabyapis.AIrequest(`${u} ${aitext}`);
           }
           await client.v2.tweet(aitext, {
             reply: {
@@ -83,7 +83,7 @@ const useAImentions = async () => {
   }
 };
 
-export const useTwitter = (minutesInterval: number) => {
+export const useTwitterMentions = (minutesInterval: number) => {
   const filename = `${coraline.use('tmp/twitter')}/mentions.json`;
   coraline.saveFile(filename, []);
   setInterval(useAImentions, minutesInterval * 60 * 1000);

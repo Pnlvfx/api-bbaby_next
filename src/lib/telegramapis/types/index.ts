@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-type METHODPROPS = 'sendMessage' | 'sendPhoto' | 'getUpdates' | 'setWebhook' | 'setMyCommands' | 'getFile';
+type METHODPROPS = 'sendMessage' | 'deleteMessage' | 'sendPhoto' | 'getUpdates' | 'setWebhook' | 'setMyCommands' | 'getFile';
 
 interface TelegramError {
   ok: boolean;

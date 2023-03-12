@@ -171,7 +171,7 @@ const coraline = {
   sendLog: async (message: string, options?: SendMessageOptions) => {
     try {
       const logs_group_id = '-1001649395850';
-      await telegramapis.sendMessage(logs_group_id, message, options);
+      await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(logs_group_id, message, options);
     } catch (err) {
       throw catchError(err);
     }

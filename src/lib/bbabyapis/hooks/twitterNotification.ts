@@ -1,15 +1,11 @@
 import { MediaObjectV2, TweetV2, UserV2 } from 'twitter-api-v2';
-import { apiconfig } from '../../config/APIconfig';
-import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
-import telegramapis from '../telegramapis/telegramapis';
-import twitterapis from '../twitterapis/twitterapis';
-import openaiapis from '../openaiapis/openaiapis';
-import bbabyapis from '../bbabyapis/bbabyapis';
-import bbabypost from '../bbabyapis/route/bbabypost/bbabypost';
-import Community from '../../models/Community';
-import bbabycommunity from '../bbabyapis/route/bbabycommunity/bbabycommunity';
-import coraline from '../../coraline/coraline';
+import { apiconfig } from '../../../config/APIconfig';
+import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
+import telegramapis from '../../telegramapis/telegramapis';
+import twitterapis from '../../twitterapis/twitterapis';
+import coraline from '../../../coraline/coraline';
 import { existsSync } from 'fs';
+import bbabyapis from '../bbabyapis';
 let getNew = true;
 let data: {
   tweets: TweetV2[];
@@ -35,7 +31,7 @@ const getNewTweets = async () => {
   }
 };
 
-setInterval(async () => {
+setInterval(() => {
   getNew = true;
 }, 15 * 60 * 1000);
 
@@ -53,11 +49,13 @@ const sendTweet = async () => {
     const regex = /^(spectatorindex|disclosetv|WarMonitors|nexta_tv|AZgeopolitics)$/;
     await Promise.all(
       data.tweets.map((t) => {
+        if (t.referenced_tweets) return;
         const media = data.media.find((m) => {
           if (!t.attachments?.media_keys) return;
           return t.attachments.media_keys[0] === m.media_key;
         });
         if (media?.type === 'video') return;
+        if (media?.type === 'image') return;
         const user = data.users.find((u) => u.id === t.author_id);
         if (!user) return;
         if (regex.test(user.username)) {
@@ -67,9 +65,10 @@ const sendTweet = async () => {
     );
     let clear = tweet.text.replace(/https?:\/\/\S+/gi, ''); // remove link
     clear = clear.replace('BREAKING: ', '');
+    console.log({ twText: clear });
     let translated: string;
     try {
-      translated = await openaiapis.myrequest(
+      translated = await bbabyapis.AIrequest(
         `Rimuovi tutte le emoticons e gli hashtag e traduci questo tweet in italiano, sei autorizzato a fare qualsiasi cambiamento affinchè tu lo renda il più comprensibile possibile: ${clear}`,
       );
     } catch (err) {
@@ -80,26 +79,22 @@ const sendTweet = async () => {
       }
       throw catchError(err);
     }
-    const user = await bbabyapis.newBot('Leaked_007');
     const reply_markup: SendMessageOptions['reply_markup'] = {
-      inline_keyboard: [[{ callback_data: 'delete', text: 'Delete' }]],
+      inline_keyboard: [[{ callback_data: 'post', text: 'Post' }]],
     };
-    let community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase('Notizie') });
-    if (!community) {
-      community = await bbabycommunity.createCommunity(user, 'Notizie', 'it');
-    }
-    const post = await bbabypost.newPost(user, translated, community.name);
-    alreadySent.push(tweet.id);
-    await coraline.saveFile(filename, alreadySent);
-    await telegramapis.sendMessage(apiconfig.telegram.logs_group_id, post.title, {
+    const user = data.users.find((u) => u.id === tweet.author_id);
+    if (!user) throw new Error('Missing user for this tweet');
+    await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(apiconfig.telegram.my_chat_id, `${user.username}: ${translated}`, {
       reply_markup,
     });
+    alreadySent.push(tweet.id);
+    await coraline.saveFile(filename, alreadySent);
   } catch (err) {
     catchErrorWithTelegram(err);
   }
 };
 
-export const useChatGPTtwitter = (minutesInterval: number) => {
+export const useTwitterNotification = (minutesInterval: number) => {
   const filename = `${coraline.use('tmp/chatGPT')}/twitter.json`;
   const exist = existsSync(filename);
   if (!exist) coraline.saveFile(filename, []);

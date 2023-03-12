@@ -12,9 +12,8 @@ import Post from '../../models/Post';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
-import { check } from './hooks/hooks';
-import { useChatGPTtwitter } from '../chatGPT/chatGPT_twitter';
-import { useTwitter } from './hooks/twhook';
+import { check, useTelegram } from './hooks/hooks';
+import { useTwitterMentions } from './hooks/twitterMentions';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -23,14 +22,21 @@ const bbabyapis = {
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
       if (config.NODE_ENV === 'development') {
-        useChatGPTtwitter(5);
+        await useTelegram();
+        // useTwitterNotification(5);
       } else {
         useEarthquakeAI(5);
-        useTwitter(5);
+        useTwitterMentions(5);
       }
-      // await useTelegram();
       // await useBBC();
       // await useAnswer();
+      // const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
+      // const trendsIds = await client.v1.trendsAvailable();
+      // const itId = trendsIds.filter((t) => t.countryCode === 'IT');
+      // const trends = await client.v1.trendsByPlace(itId[0].woeid);
+      // trends.map((trend) => {
+      //   console.log(trend);
+      // });
     } catch (err) {
       catchErrorWithTelegram('bbabyapis.initialize' + ' ' + err);
     }
@@ -111,6 +117,23 @@ const bbabyapis = {
         sharePostToTwitter: share,
       });
       return post;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  AIrequest: async (request: string) => {
+    try {
+      let res: string;
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          res = await openaiapis.myrequest(request);
+        } catch (err) {
+          res = await openaiapis.request(request);
+        }
+      } else {
+        res = await openaiapis.request(request);
+      }
+      return res;
     } catch (err) {
       throw catchError(err);
     }

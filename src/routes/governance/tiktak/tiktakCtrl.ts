@@ -122,7 +122,7 @@ const tiktakCtrl = {
       const { permalink } = req.params;
       const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
       if (!tiktak || !tiktak.video) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
-      await telegramapis.sendVideo(apiconfig.telegram.logs_group_id, coraline.media.getPathFromUrl(tiktak.video), {
+      await telegramapis(process.env.TELEGRAM_TOKEN).sendVideo(apiconfig.telegram.logs_group_id, coraline.media.getPathFromUrl(tiktak.video), {
         width: 1080,
         height: 1920,
       });

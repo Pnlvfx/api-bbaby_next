@@ -5,6 +5,7 @@ import coraline from '../../../../../coraline/coraline';
 import BBC from '../../../../../models/BBC';
 import googleapis from '../../../../googleapis/googleapis';
 import telegramapis from '../../../../telegramapis/telegramapis';
+const telegram = telegramapis(process.env.TELEGRAM_TOKEN);
 
 const bbabynews = {
   getShortestNews: async () => {
@@ -25,7 +26,7 @@ const bbabynews = {
         filter.push(article);
       });
       if (filter.length === 0) {
-        await telegramapis.sendMessage(apiconfig.telegram.my_chat_id, 'No news to get!');
+        await telegram.sendMessage(apiconfig.telegram.my_chat_id, 'No news to get!');
         return;
       } else {
         const short = filter.sort((a, b) => a.description.length - b.description.length)[0];
@@ -42,10 +43,10 @@ const bbabynews = {
       const date = coraline.date.toYYMMDD(short.date as string);
       const translated = await googleapis.translate(`${short.title} \n\n${short.description}`, 'en', 'it');
       const text = `${date} \n${translated}`;
-      const tgPhoto = await telegramapis.sendPhoto(apiconfig.telegram.my_chat_id, short.image, {
+      const tgPhoto = await telegram.sendPhoto(apiconfig.telegram.my_chat_id, short.image, {
         protect_content: true,
       });
-      await telegramapis.sendMessage(apiconfig.telegram.my_chat_id, text, {
+      await telegram.sendMessage(apiconfig.telegram.my_chat_id, text, {
         reply_to_message_id: tgPhoto.result.message_id,
         reply_markup: {
           inline_keyboard: [
