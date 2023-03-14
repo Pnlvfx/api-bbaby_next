@@ -76,9 +76,9 @@ const earthquakePost = async (properties: Earthquake['properties']) => {
     const client = await twitterapis.getMyClient('bugstransfer');
     let hashtags = '#Earthquake';
     if (properties.place.includes(',')) {
-      hashtags += ` #${properties.place.split(',')[1]?.trim()}`;
+      hashtags += ` #${properties.place.split(',')[1]?.trim().replaceAll(' ', '')}`;
     } else {
-      hashtags += ` #${properties.place}`;
+      hashtags += ` #${properties.place.replaceAll(' ', '')}`;
     }
     hashtags += ' #StaySafe';
     const tweet = `${post} ${hashtags}`;

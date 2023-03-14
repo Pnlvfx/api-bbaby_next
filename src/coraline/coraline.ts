@@ -9,6 +9,7 @@ import coralineMedia from './cor-route/media/cor-media';
 import coralineColors from './cor-route/cor-colors';
 import telegramapis from '../lib/telegramapis/telegramapis';
 import { catchError, catchErrorCtrl } from './cor-route/crlerror';
+import os from 'os';
 
 const coraline = {
   stringify: (data: unknown) => {
@@ -186,6 +187,23 @@ const coraline = {
     const total = process.memoryUsage().heapTotal;
     const percentage = Math.round((used / total) * 10000) / 100;
     console.log(`Heap usage: ${percentage}%`);
+  },
+  getUserAgent: () => {
+    const system = os.platform();
+    let userAgent = '';
+    if (system === 'darwin') {
+      const macVersion = os.release().split('.')[0];
+      const macArch = os.arch();
+      userAgent = `Mozilla/5.0 (Macintosh; ${macArch} Mac OS X ${macVersion}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36`;
+    } else if (system === 'linux') {
+      userAgent = `Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.0`;
+    } else if (system === 'win32') {
+      const winVersion = os.release().split('.')[0];
+      userAgent = `Mozilla/5.0 (Windows NT ${winVersion}; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36`;
+    } else {
+      userAgent = `Mozilla/5.0 (compatible; Node.js/${process.version}; ${process.platform} ${process.arch})`;
+    }
+    return userAgent;
   },
   media: coralineMedia,
   date: coralineDate,
