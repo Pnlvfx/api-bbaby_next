@@ -20,7 +20,10 @@ let englishTweets: TweetResponse | undefined;
 const twitterCtrl = {
   generateOAuthUrl: async (expressRequest: Request, res: Response) => {
     try {
-      const client = new TwitterApi({ clientId: config.TWITTER_CLIENT_ID, clientSecret: config.TWITTER_CLIENT_SECRET });
+      const client = new TwitterApi({
+        clientId: config.TWITTER_CLIENT_ID,
+        clientSecret: config.TWITTER_CLIENT_SECRET,
+      });
       const oauth = client.generateOAuth2AuthLink(oauthCallback, {
         scope: ['tweet.read', 'tweet.write', 'offline.access', 'users.read', 'list.read'],
       });
@@ -34,10 +37,17 @@ const twitterCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { user } = req;
-      const client = new TwitterApi({ clientId: config.TWITTER_CLIENT_ID, clientSecret: config.TWITTER_CLIENT_SECRET });
+      const client = new TwitterApi({
+        clientId: config.TWITTER_CLIENT_ID,
+        clientSecret: config.TWITTER_CLIENT_SECRET,
+      });
       const { code } = req.query;
       if (!code || !codeVerifier) return res.status(400).json({ msg: "Missing required paramd: 'code'" });
-      const token = await client.loginWithOAuth2({ code: code.toString(), redirectUri: oauthCallback, codeVerifier });
+      const token = await client.loginWithOAuth2({
+        code: code.toString(),
+        redirectUri: oauthCallback,
+        codeVerifier,
+      });
       const twitterUser = await token.client.v2.me();
       user.externalAccounts = [
         {
@@ -47,7 +57,12 @@ const twitterCtrl = {
         },
       ];
       const expires = Date.now() + token.expiresIn * 1000;
-      user.tokens.push({ access_token: token.accessToken, expires, refresh_token: token.refreshToken, provider: 'twitter' });
+      user.tokens.push({
+        access_token: token.accessToken,
+        expires,
+        refresh_token: token.refreshToken,
+        provider: 'twitter',
+      });
       user.hasExternalAccount = true;
       await user.save();
       res.status(200).json(twitterUser);
@@ -73,29 +88,23 @@ const twitterCtrl = {
       const { lang } = req.query;
       if (!lang) return res.status(400).json({ msg: 'This API require a lang parameters.' });
       if (lang === 'it') {
-        if (config.NODE_ENV === 'development' && italianTweets) {
-          res.status(200).json(italianTweets);
-        } else {
-          const data = await twitterapis.v2.getListTweets(lang);
-          italianTweets = {
-            data: data.tweets,
-            users: data.includes.users,
-            media: data.includes.media,
-          };
-          res.status(200).json(italianTweets);
-        }
+        if (config.NODE_ENV === 'development' && italianTweets) return res.status(200).json(italianTweets);
+        const data = await twitterapis.v2.getListTweets(lang);
+        italianTweets = {
+          data: data.tweets,
+          users: data.includes.users,
+          media: data.includes.media,
+        };
+        res.status(200).json(italianTweets);
       } else if (lang === 'en') {
-        if (config.NODE_ENV === 'development' && englishTweets) {
-          res.status(200).json(englishTweets);
-        } else {
-          const data = await twitterapis.v2.getListTweets(lang);
-          englishTweets = {
-            data: data.tweets,
-            users: data.includes.users,
-            media: data.includes.media,
-          };
-          res.status(200).json(englishTweets);
-        }
+        if (config.NODE_ENV === 'development' && englishTweets) return res.status(200).json(englishTweets);
+        const data = await twitterapis.v2.getListTweets(lang);
+        englishTweets = {
+          data: data.tweets,
+          users: data.includes.users,
+          media: data.includes.media,
+        };
+        res.status(200).json(englishTweets);
       } else return res.status(400).json({ msg: "Bad language code, the options are: 'it' or 'en'" });
     } catch (error) {
       res.status(403).json({ message: error });
@@ -103,24 +112,21 @@ const twitterCtrl = {
   },
   getHome: async (expressRequest: Request, res: Response) => {
     try {
-      if (config.NODE_ENV === 'development' && tweets) {
-        res.status(200).json(tweets);
-      } else {
-        const client = await twitterapis.getMyClient('anonynewsitaly');
-        const data = await client.v2.homeTimeline({
-          expansions: ['author_id', 'attachments.media_keys'],
-          'tweet.fields': ['public_metrics', 'entities', 'created_at'],
-          'user.fields': ['username', 'name', 'profile_image_url'],
-          'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url', 'variants'],
-          max_results: 100,
-        });
-        tweets = {
-          data: data.tweets,
-          users: data.includes.users,
-          media: data.includes.media,
-        };
-        res.status(200).json(tweets);
-      }
+      if (config.NODE_ENV === 'development' && tweets) return res.status(200).json(tweets);
+      const client = await twitterapis.getMyClient('anonynewsitaly');
+      const data = await client.v2.homeTimeline({
+        expansions: ['author_id', 'attachments.media_keys'],
+        'tweet.fields': ['public_metrics', 'entities', 'created_at'],
+        'user.fields': ['username', 'name', 'profile_image_url'],
+        'media.fields': ['type', 'url', 'width', 'height', 'preview_image_url', 'variants'],
+        max_results: 100,
+      });
+      tweets = {
+        data: data.tweets,
+        users: data.includes.users,
+        media: data.includes.media,
+      };
+      res.status(200).json(tweets);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
