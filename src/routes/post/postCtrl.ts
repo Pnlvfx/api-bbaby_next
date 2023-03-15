@@ -45,10 +45,10 @@ const PostCtrl = {
         });
       }
       res.status(200).json(posts);
-      const earthquakePosts = posts.filter((p) => p.community === 'Earthquake');
-      if (earthquakePosts.length && !communityName && _limit === 15 && process.env.NODE_ENV === 'production') {
-        await coraline.sendLog('There are too many earthquakes posts');
-      }
+      // const earthquakePosts = posts.filter((p) => p.community === 'Earthquake');
+      // if (earthquakePosts.length && !communityName && _limit === 15 && process.env.NODE_ENV === 'production') {
+      //   await coraline.sendLog('There are too many earthquakes posts');
+      // }
     } catch (err) {
       catchErrorCtrl(err, res);
     }
