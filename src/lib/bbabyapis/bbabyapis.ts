@@ -20,13 +20,13 @@ const bbabyapis = {
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
-      await useTelegram();
       if (config.NODE_ENV === 'development') {
         // useTwitterNotification(5);
       } else {
         useEarthquakeAI(5);
         // useTwitterMentions(5);
       }
+      await useTelegram();
       // await useBBC();
       // await useAnswer();
       // const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);

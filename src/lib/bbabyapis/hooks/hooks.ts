@@ -4,6 +4,7 @@ import coraline from '../../../coraline/coraline';
 import bbcapis from '../../bbcapis/bbcapis';
 import ttdownloader from '../../ttdownloader/ttdownloader';
 import { answer } from './answer';
+import ngrok from 'ngrok';
 
 export const useTelegram = async () => {
   try {
@@ -11,10 +12,9 @@ export const useTelegram = async () => {
     if (config.NODE_ENV === 'production') {
       base_url = config.SERVER_URL;
     } else {
-      // base_url = await ngrok.connect({
-      //   addr: 4000,
-      // });
-      base_url = 'https://29f7-212-171-109-214.eu.ngrok.io';
+      base_url = await ngrok.connect({
+        addr: 4000,
+      });
     }
     // const telegram = telegramapis(process.env.TELEGRAM_TOKEN);
     // await telegram.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);

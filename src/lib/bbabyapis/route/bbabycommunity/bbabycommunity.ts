@@ -29,7 +29,7 @@ const bbabycommunity = {
   getCommunity: async (token: string, name: string) => {
     try {
       const community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase(name) });
-      if (!community) throw new Error(`This community doesn't exist`);
+      if (!community) throw new Error(`This community doesn't exist: ${name}`);
       if (!token) {
         community.user_is_banned = false;
         community.user_is_contributor = false;
