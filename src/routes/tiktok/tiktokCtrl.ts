@@ -15,13 +15,13 @@ const tiktokCtrl = {
       try {
         tiktok = (await coraline.readJSON(output)) as TiktokProps;
         if (!tiktok.video) {
-          tiktok = await tiktokapis.downloadVideo(url.toString(), output);
+          tiktok = await tiktokapis.directDownload(url.toString(), output);
         }
         if (!tiktok.text) {
           tiktok.text = await tiktokapis.extractText(tiktok.video.filename, tiktok.id);
         }
       } catch (err) {
-        tiktok = await tiktokapis.downloadVideo(url.toString(), output);
+        tiktok = await tiktokapis.directDownload(url.toString(), output);
         tiktok.text = await tiktokapis.extractText(tiktok.video.filename, tiktok.id);
       }
       await coraline.saveFile(output, tiktok);

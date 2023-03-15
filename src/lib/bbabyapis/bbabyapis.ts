@@ -13,7 +13,6 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { check, useTelegram } from './hooks/hooks';
-import { useTwitterMentions } from './hooks/twitterMentions';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -21,12 +20,12 @@ const bbabyapis = {
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
+      await useTelegram();
       if (config.NODE_ENV === 'development') {
-        await useTelegram();
         // useTwitterNotification(5);
       } else {
         useEarthquakeAI(5);
-        useTwitterMentions(5);
+        // useTwitterMentions(5);
       }
       // await useBBC();
       // await useAnswer();

@@ -9,7 +9,8 @@ const tiktokapis = {
     const split = url.split('/');
     return split[split.length - 1];
   },
-  downloadVideo: async (url: string, output: string) => {
+  getInfo,
+  directDownload: async (url: string, output: string) => {
     try {
       try {
         const response = await coraline.readJSON(output);

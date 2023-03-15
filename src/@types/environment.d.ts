@@ -6,6 +6,7 @@ namespace NodeJS {
     CLIENT_URL: string;
     SERVER_URL: string;
     TELEGRAM_TOKEN: string;
+    TIKTOK_TELEGRAM_TOKEN: string;
     SECRET: string;
     CLOUD_NAME: string;
     CLOUD_API_KEY: string;

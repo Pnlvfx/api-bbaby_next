@@ -8,6 +8,7 @@ interface ENV {
   CLIENT_URL: string | undefined;
   SERVER_URL: string | undefined;
   TELEGRAM_TOKEN: string | undefined;
+  TIKTOK_TELEGRAM_TOKEN: string | undefined;
   SECRET: string | undefined;
   CLOUD_NAME: string | undefined;
   CLOUD_API_KEY: string | undefined;
@@ -35,6 +36,7 @@ interface Config {
   CLIENT_URL: string;
   SERVER_URL: string;
   TELEGRAM_TOKEN: string;
+  TIKTOK_TELEGRAM_TOKEN: string;
   SECRET: string;
   CLOUD_NAME: string;
   CLOUD_API_KEY: string;
@@ -63,6 +65,7 @@ const getConfig = (): ENV => {
     CLIENT_URL: process.env.CLIENT_URL,
     SERVER_URL: process.env.SERVER_URL,
     TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
+    TIKTOK_TELEGRAM_TOKEN: process.env.TIKTOK_TELEGRAM_TOKEN,
     SECRET: process.env.SECRET,
     CLOUD_NAME: process.env.CLOUD_NAME,
     CLOUD_API_KEY: process.env.CLOUD_API_KEY,

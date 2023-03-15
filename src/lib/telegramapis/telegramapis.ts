@@ -68,7 +68,8 @@ const telegramapis = (token: string) => {
             }
             const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
             usedOptions.forEach(([key, value]) => {
-              data += `&${key}=${JSON.stringify(value)}`;
+              const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+              data += `&${key}=${parsed}`;
             });
           }
           req_options.headers = {
@@ -130,7 +131,8 @@ const telegramapis = (token: string) => {
             }
             const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
             usedOptions.forEach(([key, value]) => {
-              data += `&${key}=${JSON.stringify(value)}`;
+              const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+              data += `&${key}=${parsed}`;
             });
           }
           req_options.headers = {

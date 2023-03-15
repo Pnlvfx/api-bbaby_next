@@ -22,8 +22,8 @@ interface SendVideoOptions extends SendMessageOptions {
   caption?: string;
   disable_notification?: boolean;
   duration?: number;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
 }
 
 interface InlineKeyboard {
