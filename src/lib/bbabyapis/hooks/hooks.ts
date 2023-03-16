@@ -1,10 +1,10 @@
 import config from '../../../config/config';
-import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
+import { catchError } from '../../../coraline/cor-route/crlerror';
 import coraline from '../../../coraline/coraline';
 import bbcapis from '../../bbcapis/bbcapis';
+import telegramapis from '../../telegramapis/telegramapis';
 import ttdownloader from '../../ttdownloader/ttdownloader';
 import { answer } from './answer';
-import ngrok from 'ngrok';
 
 export const useTelegram = async () => {
   try {
@@ -12,13 +12,11 @@ export const useTelegram = async () => {
     if (config.NODE_ENV === 'production') {
       base_url = config.SERVER_URL;
     } else {
-      base_url = await ngrok.connect({
-        addr: 4000,
-      });
+      base_url = process.env.NGROK_URL;
     }
-    // const telegram = telegramapis(process.env.TELEGRAM_TOKEN);
-    // await telegram.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
-    // await telegram.setMyCommands([{ command: 'start', description: 'Start the bot' }]);
+    const telegram = telegramapis(process.env.TELEGRAM_TOKEN);
+    await telegram.setWebHook(`${base_url}/bot${config.TELEGRAM_TOKEN}`);
+    await telegram.setMyCommands([{ command: 'start', description: 'Start the bot' }]);
     await ttdownloader.use(base_url);
   } catch (err) {
     throw catchError(err);
@@ -34,15 +32,9 @@ export const useBBC = async () => {
   }
 };
 
-export const useAnswer = async () => {
+export const useAnswer = async (minutesInterval: number) => {
   try {
-    setInterval(async () => {
-      try {
-        await answer();
-      } catch (err) {
-        catchErrorWithTelegram(err);
-      }
-    }, 60 * 60 * 1000);
+    setInterval(answer, minutesInterval * 60 * 1000);
   } catch (err) {
     throw catchError(err);
   }

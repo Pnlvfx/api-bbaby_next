@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { coraline_path, coralinemkDir, projectName } from './utils/coralineFunctions';
-import coralMongo from './cor-route/coralMongo';
+import regex from './cor-route/regex';
 import coralineDate from './cor-route/cor-date';
 const fsPromises = fs.promises;
 import crypto from 'crypto';
@@ -207,7 +207,7 @@ const coraline = {
   },
   media: coralineMedia,
   date: coralineDate,
-  mongo: coralMongo,
+  regex,
   colors: coralineColors,
   catchError: catchError,
   catchErrorCtrl: catchErrorCtrl,

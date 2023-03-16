@@ -57,7 +57,6 @@ const v2 = {
         body,
       });
       const data = await res.json();
-      console.log(data, 'twitter refresh token');
       if (!res.ok) throw new Error(data?.errors[0].message);
       return data as IParsedOAuth2TokenResult;
     } catch (err) {

@@ -63,7 +63,7 @@ const communityCtrl = {
     try {
       const req = expressRequest as UserRequest;
       const { name, descr: description } = req.body;
-      const c = await Community.findOneAndUpdate({ name: coraline.mongo.regexUpperLowerCase(name) }, { description });
+      const c = await Community.findOneAndUpdate({ name: coraline.regex.upperLowerCase(name) }, { description });
       if (!c) return res.status(500).json({ msg: 'Something went wrong, please try again' });
       res.status(200).json(true);
     } catch (err) {
@@ -114,7 +114,7 @@ const communityCtrl = {
         crop: 'scale',
         upload_preset: 'bbaby_community',
       });
-      const community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase(name) });
+      const community = await Community.findOne({ name: coraline.regex.upperLowerCase(name) });
       if (!community) return res.status(500).json({ msg: 'Invalid community!' });
       community.image = response.secure_url;
       await Post.updateMany({ community: name }, { $set: { communityIcon: response.secure_url } });

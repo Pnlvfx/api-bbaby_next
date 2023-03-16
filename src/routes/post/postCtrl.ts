@@ -23,10 +23,10 @@ const PostCtrl = {
       const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
       let posts: PostProps[];
       if (communityName) {
-        const filters = { community: coraline.mongo.regexUpperLowerCase(communityName.toString()) };
+        const filters = { community: coraline.regex.upperLowerCase(communityName.toString()) };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else if (author) {
-        const filters = { author: coraline.mongo.regexUpperLowerCase(author.toString()) };
+        const filters = { author: coraline.regex.upperLowerCase(author.toString()) };
         posts = await Post.find(filters).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       } else {
         const communities = await Community.find({ language: userLang || 'en' });

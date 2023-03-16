@@ -13,6 +13,7 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { check, useTelegram } from './hooks/hooks';
+import { useTwitterNotifications } from './hooks/twitterNotification';
 const bbabyapis = {
   initialize: async () => {
     try {
@@ -20,22 +21,10 @@ const bbabyapis = {
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
-      if (config.NODE_ENV === 'development') {
-        // useTwitterNotification(5);
-      } else {
-        useEarthquakeAI(5);
-        // useTwitterMentions(5);
-      }
+      if (config.NODE_ENV === 'development') return;
       await useTelegram();
-      // await useBBC();
-      // await useAnswer();
-      // const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
-      // const trendsIds = await client.v1.trendsAvailable();
-      // const itId = trendsIds.filter((t) => t.countryCode === 'IT');
-      // const trends = await client.v1.trendsByPlace(itId[0].woeid);
-      // trends.map((trend) => {
-      //   console.log(trend);
-      // });
+      useTwitterNotifications(30);
+      useEarthquakeAI(5);
     } catch (err) {
       catchErrorWithTelegram('bbabyapis.initialize' + ' ' + err);
     }
@@ -53,7 +42,7 @@ const bbabyapis = {
   newBot: async (username?: string) => {
     try {
       if (username) {
-        const regex = coraline.mongo.regexUpperLowerCase(username);
+        const regex = coraline.regex.upperLowerCase(username);
         const exist = await User.findOne({ username: regex });
         if (exist) return exist;
         const email = new Chance().email();
@@ -99,9 +88,9 @@ const bbabyapis = {
   },
   AIpost: async (user: IUser, prompt: string, community: string, share = false) => {
     try {
-      console.log({ prompt });
-      const title = await openaiapis.request(prompt, Math.random());
-      console.log({ title });
+      const title = await openaiapis.request(prompt, {
+        temperature: Math.random(),
+      });
       const exist = await Post.findOne({ title, community });
       if (exist) {
         if (!prompt.match(`and don't use this question or similar:`)) {

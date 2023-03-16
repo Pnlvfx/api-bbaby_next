@@ -51,7 +51,6 @@ const tiktakCtrl = {
       const { permalink } = req.params;
       const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
       if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
-      console.log(tiktak);
       res.status(200).json(tiktak);
     } catch (err) {
       catchErrorCtrl(err, res);
@@ -110,7 +109,6 @@ const tiktakCtrl = {
         await coraline.clearFolder(coraline.useStatic(`/tiktak/${tiktak.id}`));
       }
       await tiktak.save();
-      console.log(tiktak);
       res.status(200).json(true);
     } catch (err) {
       catchErrorCtrl(err, res);

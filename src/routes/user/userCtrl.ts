@@ -69,7 +69,7 @@ const userCtrl = {
   userFromUsername: async (req: Request, res: Response) => {
     try {
       const { username } = req.params;
-      const user = await User.findOne({ username: coraline.mongo.regexUpperLowerCase(username) });
+      const user = await User.findOne({ username: coraline.regex.upperLowerCase(username) });
       if (!user) return res.status(400).json({ msg: "This user doens't exist" });
       const response = {
         avatar: user.avatar,

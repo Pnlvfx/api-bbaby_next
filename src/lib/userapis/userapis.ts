@@ -38,7 +38,7 @@ const userapis = {
       const passwordHash = bcrypt.hashSync(password, 10);
       const existingEmail = await User.findOne({ email });
       if (existingEmail) throw new Error('This email already exist!');
-      const existingUser = await User.findOne({ username: coraline.mongo.regexUpperLowerCase(username) });
+      const existingUser = await User.findOne({ username: coraline.regex.upperLowerCase(username) });
       if (existingUser) throw new Error('This username already exist!');
       const user = new User({
         email,

@@ -8,7 +8,7 @@ const bbabycommunity = {
   createCommunity: async (user: IUser, name: string, language?: 'it' | 'en') => {
     try {
       const check = await Community.exists({
-        name: coraline.mongo.regexUpperLowerCase(name),
+        name: coraline.regex.upperLowerCase(name),
       });
       if (check) throw new Error(`Sorry, b/${name} is taken. Try another.`);
       const lang = language || user.countryCode === 'IT' ? 'it' : 'en';
@@ -28,7 +28,7 @@ const bbabycommunity = {
   },
   getCommunity: async (token: string, name: string) => {
     try {
-      const community = await Community.findOne({ name: coraline.mongo.regexUpperLowerCase(name) });
+      const community = await Community.findOne({ name: coraline.regex.upperLowerCase(name) });
       if (!community) throw new Error(`This community doesn't exist: ${name}`);
       if (!token) {
         community.user_is_banned = false;

@@ -1,29 +1,31 @@
 import { Request, Response } from 'express';
 import { apiconfig } from '../../config/APIconfig';
-import { checkUpdateType } from '../../lib/telegramapis/hooks/telegramhooks';
 import { newPostFromTG } from './hooks/tg-hooks';
 import { catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
+import telegramapis from '../../lib/telegramapis/telegramapis';
+const confirmMessage = 'Are you sure that you want to share this?';
 
 const telegramCtrl = {
   processUpdate: async (req: Request, res: Response) => {
     res.sendStatus(200);
     try {
       const data = req.body as TelegramUpdate;
-      console.log(data.message?.text);
-      const check = checkUpdateType(data);
-      if (check === 'message') {
+      if (data.message) {
         if (data.message?.chat.id === apiconfig.telegram.my_chat_id) {
-          const msg = data.message as TelegramMessage;
-          if (msg.text) {
-            if (msg.reply_to_message) {
-              await newPostFromTG(msg.text);
-            }
+          if (data.message.text) {
+            await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(data.message.chat.id, confirmMessage, {
+              reply_markup: {
+                inline_keyboard: [[{ callback_data: data.message.text, text: 'Yes' }]],
+              },
+            });
           }
         }
       } else {
         const info = data.callback_query as TelegramCallbackQuery;
         if (info.data === 'post' && info.message.text) {
-          await newPostFromTG(info.message.text);
+          await newPostFromTG(info.message.text, info.message.chat.id);
+        } else if (info.message.text?.match(confirmMessage)) {
+          await newPostFromTG(info.data, info.message.chat.id);
         }
       }
     } catch (err) {

@@ -1,4 +1,4 @@
-import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
+import { catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import coraline from '../../../coraline/coraline';
 import Community from '../../../models/Community';
 import User from '../../../models/User';
@@ -12,7 +12,7 @@ const communities = ['React', 'Nodejs', 'Express', 'Nextjs', 'History', 'Webdev'
 export const answer = async (prompt?: string) => {
   try {
     const community = communities[coraline.getRandomInt(communities.length - 1)];
-    const check = await Community.exists({ name: coraline.mongo.regexUpperLowerCase(community) });
+    const check = await Community.exists({ name: coraline.regex.upperLowerCase(community) });
     if (!check) {
       const owner = await User.findOne({ is_bot: true });
       if (!owner) throw new Error('Bbabyapis, missing owner in answer function!');
@@ -38,6 +38,6 @@ export const answer = async (prompt?: string) => {
       }
     }, 50 * 60 * 1000);
   } catch (err) {
-    throw catchError(err);
+    catchErrorWithTelegram(err);
   }
 };

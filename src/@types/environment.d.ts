@@ -27,5 +27,6 @@ namespace NodeJS {
     OPENAI_API_KEY: string;
     OPENAI_API_KEY_2: string;
     IP_LOOKUP_API_KEY: string;
+    NGROK_URL: string;
   }
 }

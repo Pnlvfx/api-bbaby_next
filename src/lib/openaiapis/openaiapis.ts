@@ -27,14 +27,21 @@ const openaiapis = {
       throw catchError(err);
     }
   },
-  request: async (prompt: string, temperature = 0.5) => {
+  request: async (prompt: string, options?: { temperature?: number; model?: 'gpt-3.5-turbo' | 'text-davinci-003' }) => {
     try {
-      const url = 'https://api.openai.com/v1/completions';
+      let url = 'https://api.openai.com/v1';
+      if (options?.model === 'gpt-3.5-turbo') {
+        url += '/chat/completions';
+      } else {
+        url += '/completions';
+      }
+      const model = options?.model || 'text-davinci-003';
+      const temperature = options?.temperature || 0.5;
       const res = await fetch(url, {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model,
           prompt,
           temperature,
           max_tokens: 300,

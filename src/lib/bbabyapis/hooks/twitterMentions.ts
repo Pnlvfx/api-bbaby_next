@@ -6,34 +6,6 @@ import googleapis from '../../googleapis/googleapis';
 import bbabyapis from '../bbabyapis';
 const start_time = new Date().toISOString();
 
-// const useStream = async () => {
-//   try {
-//     const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
-//     const stream = await client.v2.sampleStream({
-//       expansions: ['author_id'],
-//       'user.fields': ['username'],
-//       'tweet.fields': ['text', 'entities', 'public_metrics'],
-//     });
-//     stream.on(ETwitterStreamEvent.Connected, () => {
-//       console.log('connected');
-//     });
-//     stream.on(ETwitterStreamEvent.ConnectionError, (err) => {
-//       console.log(err, 'Connection Error');
-//     });
-//     stream.on(ETwitterStreamEvent.ConnectionClosed, () => {
-//       console.log('Connection has been closed.');
-//     });
-//     stream.on(ETwitterStreamEvent.Data, (data) => {
-//       if (data.data.public_metrics?.like_count && data.data.public_metrics.like_count > 1000) {
-//         console.log(data);
-//       }
-//     });
-//     stream.on(ETwitterStreamEvent.DataKeepAlive, () => console.log('Twitter has a keep-alive packet.'));
-//   } catch (err) {
-//     throw catchError(err);
-//   }
-// };
-
 const useAImentions = async () => {
   try {
     console.log('New twitter request');

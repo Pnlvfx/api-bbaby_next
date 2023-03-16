@@ -1,6 +1,6 @@
 {
   "name": "api-bbaby_next",
-  "version": "1.0.9",
+  "version": "2023.03.16",
   "description": "API of bbabystyle.com url: https://api.bbabystyle.com",
   "main": "dist/server.js",
   "repository": "https://github.com/Pnlvfx/api-bbaby_next.git",
@@ -11,7 +11,7 @@
   },
   "scripts": {
     "lint": "eslint ./src",
-    "dev": "tsc -w & node --watch .",
+    "dev": "tsc -w & node --watch ./dist/devServer.js",
     "build": "rimraf dist && eslint ./src && tsc",
     "start": "tsc & node .",
     "inspect": "tsc && node --inspect ."
@@ -52,12 +52,14 @@
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.15.3",
     "@types/nodemailer": "^6.4.7",
+    "@types/nodemon": "^1.19.2",
     "@types/sharp": "^0.31.1",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "nodemon": "^2.0.21",
     "prettier": "^2.8.4",
     "rimraf": "^4.4.0",
     "typescript": "^4.9.4"

@@ -36,6 +36,18 @@ interface SendMessageOptions {
   reply_markup?: ReplyMarkup;
 }
 
+interface SendMessageResponse {
+  ok: boolean;
+  result: {
+    message_id: number;
+    from: TelegramMessageFrom;
+    chat: TelegramMessageChat;
+    date: number;
+    text: string;
+    reply_markup?: ReplyMarkup;
+  };
+}
+
 interface SendPhotoResponse {
   ok: boolean;
   result: {
@@ -44,5 +56,6 @@ interface SendPhotoResponse {
     chat: TelegramMessageChat;
     date: number;
     photo: TelegramMessageMediaInfo[];
+    reply_markup?: ReplyMarkup;
   };
 }

@@ -22,7 +22,8 @@ const telegramapis = (token: string) => {
         if (options) {
           const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
-            query += `&${key}=${JSON.stringify(value)}`;
+            const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+            query += `&${key}=${parsed}`;
           });
         }
         const url = buildUrl('sendMessage', query);
@@ -32,7 +33,7 @@ const telegramapis = (token: string) => {
         });
         const data = await res.json();
         if (!res.ok) throw telegramError(data);
-        return data;
+        return data as SendMessageResponse;
       } catch (err) {
         throw catchError(err);
       }
@@ -44,7 +45,8 @@ const telegramapis = (token: string) => {
         if (options) {
           const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
-            form.append(key, JSON.stringify(value));
+            const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+            form.append(key, parsed);
           });
         }
         let data = '';
@@ -107,7 +109,8 @@ const telegramapis = (token: string) => {
         if (options) {
           const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
-            form.append(key, JSON.stringify(value));
+            const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+            form.append(key, parsed);
           });
         }
         let data = '';

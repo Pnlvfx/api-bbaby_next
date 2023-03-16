@@ -54,7 +54,7 @@ const oauthCtrl = {
   login: async (req: Request, res: Response) => {
     try {
       const { username, password } = req.body;
-      const user = await User.findOne({ username: coraline.mongo.regexUpperLowerCase(username) });
+      const user = await User.findOne({ username: coraline.regex.upperLowerCase(username) });
       if (!user) return res.status(422).json({ msg: 'Invalid username!' });
       const passOk = bcrypt.compareSync(password, user.password);
       if (!passOk) return res.status(422).json({ msg: 'Invalid username or password' });
