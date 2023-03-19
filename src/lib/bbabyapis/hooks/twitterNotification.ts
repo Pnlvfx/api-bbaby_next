@@ -74,7 +74,7 @@ const twitterNotification = () => {
         const user = data.users.find((u) => u.id === tweet.author_id);
         if (!user) throw new Error('Missing user for this tweet');
         const telegram = telegramapis(process.env.TELEGRAM_TOKEN);
-        await telegram.sendMessage(apiconfig.telegram.my_chat_id, `${user.name}: ${translated}`, {
+        await telegram.sendMessage(apiconfig.telegram.my_chat_id, encodeURIComponent(`${user.name}: ${translated}`), {
           reply_markup,
         });
         alreadySent.push(tweet.id);

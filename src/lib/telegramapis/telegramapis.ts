@@ -22,7 +22,8 @@ const telegramapis = (token: string) => {
         if (options) {
           const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
-            query += `&${key}=${encodeURIComponent(value)}`;
+            const parsed = typeof value === 'string' ? value : JSON.stringify(value);
+            query += `&${key}=${parsed}`;
           });
         }
         const url = buildUrl('sendMessage', query);
@@ -63,10 +64,6 @@ const telegramapis = (token: string) => {
         } else if (photo.startsWith('http')) {
           data = `photo=${photo}&chat_id=${chatId}`;
           if (options) {
-            if (options.reply_markup) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              options.reply_markup = JSON.stringify(options.reply_markup) as any;
-            }
             const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
             usedOptions.forEach(([key, value]) => {
               const parsed = typeof value === 'string' ? value : JSON.stringify(value);
@@ -127,10 +124,6 @@ const telegramapis = (token: string) => {
         } else if (video.startsWith('http')) {
           data = `video=${video}&chat_id=${chatId}`;
           if (options) {
-            if (options.reply_markup) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              options.reply_markup = JSON.stringify(options.reply_markup) as any;
-            }
             const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
             usedOptions.forEach(([key, value]) => {
               const parsed = typeof value === 'string' ? value : JSON.stringify(value);

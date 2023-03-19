@@ -81,8 +81,7 @@ const earthquakePost = async (properties: Earthquake['properties']) => {
       hashtags += ` #${properties.place.replaceAll(' ', '')}`;
     }
     hashtags += ' #StaySafe';
-    const tweet = `${post} ${hashtags}`;
-    await client.v1.tweet(tweet);
+    await client.v1.tweet(`${post} ${hashtags}`);
   } catch (err) {
     catchErrorWithTelegram(err);
   }
