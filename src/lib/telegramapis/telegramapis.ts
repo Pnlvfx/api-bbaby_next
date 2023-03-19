@@ -22,8 +22,7 @@ const telegramapis = (token: string) => {
         if (options) {
           const usedOptions = Object.entries(options).filter(([, value]) => value !== undefined);
           usedOptions.forEach(([key, value]) => {
-            const parsed = typeof value === 'string' ? value : JSON.stringify(value);
-            query += `&${key}=${parsed}`;
+            query += `&${key}=${encodeURIComponent(value)}`;
           });
         }
         const url = buildUrl('sendMessage', query);

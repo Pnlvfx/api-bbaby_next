@@ -11,7 +11,7 @@
   },
   "scripts": {
     "lint": "eslint ./src",
-    "dev": "tsc -w & node --watch ./dist/devServer.js",
+    "dev": "tsc -w & node ./dist/devServer.js",
     "build": "rimraf dist && eslint ./src && tsc",
     "start": "tsc & node .",
     "inspect": "tsc && node --inspect ."
