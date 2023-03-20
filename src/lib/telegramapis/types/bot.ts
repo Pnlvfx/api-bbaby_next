@@ -5,11 +5,6 @@ interface BotCommands {
   description: string;
 }
 
-interface ReplyMarkup {
-  inline_keyboard?: InlineKeyboard[][];
-  force_reply?: boolean;
-}
-
 interface SendPhotoOptions extends SendMessageOptions {
   caption?: string;
   protect_content?: boolean;
@@ -24,6 +19,11 @@ interface SendVideoOptions extends SendMessageOptions {
   duration?: number;
   width?: number;
   height?: number;
+}
+
+interface ReplyMarkup {
+  inline_keyboard?: InlineKeyboard[][];
+  force_reply?: boolean;
 }
 
 interface InlineKeyboard {
