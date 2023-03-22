@@ -30,6 +30,11 @@ const userapis = {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
   },
+  getCookieDomain: (url: string) => {
+    const domain = new URL(url).hostname.split('.').slice(-2).join('.');
+    if (domain === 'localhost') return domain;
+    return `.${domain}`;
+  },
   newUser: async (email: string, username: string, password: string, IPinfo?: UserIpInfoProps) => {
     try {
       if (!username || !email || !password) throw new Error('Please fill in all fields!');
@@ -61,11 +66,6 @@ const userapis = {
     } catch (err) {
       throw catchError(err);
     }
-  },
-  getCookieDomain: (url: string) => {
-    const domain = new URL(url).hostname.split('.').slice(-2).join('.');
-    if (domain === 'localhost') return domain;
-    return `.${domain}`;
   },
 };
 

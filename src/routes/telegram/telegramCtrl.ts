@@ -15,7 +15,7 @@ const telegramCtrl = {
           if (data.message.text) {
             await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(data.message.chat.id, confirmMessage, {
               reply_markup: {
-                inline_keyboard: [[{ callback_data: data.message.text, text: 'Yes' }]],
+                inline_keyboard: [[{ callback_data: encodeURIComponent(data.message.text), text: 'Yes' }]],
               },
             });
           }
