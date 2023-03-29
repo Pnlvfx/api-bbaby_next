@@ -13,6 +13,7 @@ const telegramCtrl = {
       if (data.message) {
         if (data.message?.chat.id === apiconfig.telegram.my_chat_id) {
           if (data.message.text) {
+            console.log(encodeURIComponent(data.message.text));
             await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(data.message.chat.id, confirmMessage, {
               reply_markup: {
                 inline_keyboard: [[{ callback_data: encodeURIComponent(data.message.text), text: 'Yes' }]],

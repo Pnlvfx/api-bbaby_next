@@ -15,7 +15,7 @@ export const newPostFromTG = async (message: string, chat_id: number) => {
     }
     const titles = message.split(':');
     titles.shift();
-    const post = await bbabypost.newPost(user, titles.join(''), community.name);
+    const post = await bbabypost.newPost(user, titles.join(':'), community.name);
     await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(chat_id, `Post created! Check it out at ${process.env.CLIENT_URL}${post.permalink}.`);
   } catch (err) {
     throw catchError(err);

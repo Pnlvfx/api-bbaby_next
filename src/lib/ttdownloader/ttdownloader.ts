@@ -35,7 +35,7 @@ const ttdownloader = {
             await telegram.sendVideo(data.message.chat.id, info.video.url.no_wm, {
               caption: `${successMessageArr[coraline.getRandomInt(successMessageArr.length - 1)]} \n\n@tiktokdownloader97_bot`,
             });
-            await coraline.sendLog('New video downloaded from TikTok telegram bot');
+            await coraline.sendLog(`New video downloaded from TikTok telegram bot: ${data.message.text}`);
           } else return await telegram.sendMessage(data.message.chat.id, wrongMessage);
         } else return await telegram.sendMessage(data.message.chat.id, wrongMessage);
       }

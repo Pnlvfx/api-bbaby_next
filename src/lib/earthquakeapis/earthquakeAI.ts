@@ -1,12 +1,10 @@
 import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
-import coraline from '../../coraline/coraline';
 import Community from '../../models/Community';
 import Earthquake from '../../models/Earthquake';
 import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
 import bbabycommunity from '../bbabyapis/route/bbabycommunity/bbabycommunity';
 import bbabypost from '../bbabyapis/route/bbabypost/bbabypost';
-import pexelsapi from '../pexelsapi/pexelsapi';
 import twitterapis from '../twitterapis/twitterapis';
 import earthquakeapis from './earthquakeapis';
 
@@ -62,16 +60,7 @@ const earthquakePost = async (properties: Earthquake['properties']) => {
     if (!community) {
       community = await bbabycommunity.createCommunity(user, 'Earthquake', 'en');
     }
-    const images = await pexelsapi.getImage('earthquake', {
-      orientation: 'landscape',
-    });
-    const image = images[coraline.getRandomInt(images.length - 1)];
-    await bbabypost.newPost(user, post, community.name, {
-      isImage: true,
-      height: image.height,
-      width: image.width,
-      selectedFile: image.src.original,
-    });
+    await bbabypost.newPost(user, post, community.name);
     if (process.env.NODE_ENV === 'development') return;
     const client = await twitterapis.getMyClient('bugstransfer');
     let hashtags = '#Earthquake';
