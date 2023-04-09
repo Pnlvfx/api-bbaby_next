@@ -4,12 +4,13 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 interface ENV {
-  MONGO_URI: string | undefined;
   CLIENT_URL: string | undefined;
   SERVER_URL: string | undefined;
+  NODE_ENV: string | undefined;
+  MONGO_URI: string | undefined;
+  SECRET: string | undefined;
   TELEGRAM_TOKEN: string | undefined;
   TIKTOK_TELEGRAM_TOKEN: string | undefined;
-  SECRET: string | undefined;
   CLOUD_NAME: string | undefined;
   CLOUD_API_KEY: string | undefined;
   CLOUD_API_SECRET: string | undefined;
@@ -24,7 +25,6 @@ interface ENV {
   REDDIT_CLIENT_SECRET: string | undefined;
   YOUTUBE_CLIENT_ID: string | undefined;
   YOUTUBE_CLIENT_SECRET: string | undefined;
-  NODE_ENV: string | undefined;
   PEXELS_API_KEY: string | undefined;
   OPENAI_API_KEY: string | undefined;
   OPENAI_API_KEY_2: string | undefined;
@@ -32,12 +32,13 @@ interface ENV {
 }
 
 interface Config {
-  MONGO_URI: string;
   CLIENT_URL: string;
   SERVER_URL: string;
+  NODE_ENV: 'development' | 'production';
+  MONGO_URI: string;
+  SECRET: string;
   TELEGRAM_TOKEN: string;
   TIKTOK_TELEGRAM_TOKEN: string;
-  SECRET: string;
   CLOUD_NAME: string;
   CLOUD_API_KEY: string;
   CLOUD_API_SECRET: string;
@@ -52,7 +53,6 @@ interface Config {
   REDDIT_CLIENT_SECRET: string;
   YOUTUBE_CLIENT_ID: string;
   YOUTUBE_CLIENT_SECRET: string;
-  NODE_ENV: 'development' | 'production';
   PEXELS_API_KEY: string;
   OPENAI_API_KEY: string;
   OPENAI_API_KEY_2: string;
@@ -61,12 +61,13 @@ interface Config {
 
 const getConfig = (): ENV => {
   return {
-    MONGO_URI: process.env.MONGO_URI,
     CLIENT_URL: process.env.CLIENT_URL,
     SERVER_URL: process.env.SERVER_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    MONGO_URI: process.env.MONGO_URI,
+    SECRET: process.env.SECRET,
     TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
     TIKTOK_TELEGRAM_TOKEN: process.env.TIKTOK_TELEGRAM_TOKEN,
-    SECRET: process.env.SECRET,
     CLOUD_NAME: process.env.CLOUD_NAME,
     CLOUD_API_KEY: process.env.CLOUD_API_KEY,
     CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
@@ -81,7 +82,6 @@ const getConfig = (): ENV => {
     REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET,
     YOUTUBE_CLIENT_ID: process.env.YOUTUBE_CLIENT_ID,
     YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET,
-    NODE_ENV: process.env.NODE_ENV,
     PEXELS_API_KEY: process.env.PEXELS_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_API_KEY_2: process.env.OPENAI_API_KEY_2,

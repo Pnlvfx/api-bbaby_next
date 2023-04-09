@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
-import { getUserFromToken } from '../user/user-functions/userFunctions';
 import Post from '../../models/Post';
 import { Types, isValidObjectId } from 'mongoose';
 import Comment from '../../models/Comment';
@@ -11,6 +10,7 @@ import { PostProps } from '../../models/types/post';
 import coraline from '../../coraline/coraline';
 import bbabypost from '../../lib/bbabyapis/route/bbabypost/bbabypost';
 import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
+import userapis from '../../lib/userapis/userapis';
 
 const PostCtrl = {
   getPosts: async (req: Request, res: Response) => {
@@ -38,7 +38,7 @@ const PostCtrl = {
         }
       }
       if (token) {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         posts.map((post) => {
           if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
           if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
@@ -62,7 +62,7 @@ const PostCtrl = {
       const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
       const posts = await Post.find({}).sort({ ups: -1 }).limit(_limit).skip(Number(skip));
       if (token) {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         posts.map((post) => {
           if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
           if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
@@ -82,7 +82,7 @@ const PostCtrl = {
       const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
       const posts = await Post.find({}).sort({ createdAt: -1 }).limit(_limit).skip(Number(skip));
       if (token) {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         posts.map((post) => {
           if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
           if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
@@ -102,7 +102,7 @@ const PostCtrl = {
       const _limit = user_agent?.isMobile && Number(limit.toString()) === 15 ? 7 : Number(limit.toString());
       const posts = await Post.find({}).sort({ numComments: -1 }).limit(_limit).skip(Number(skip));
       if (token) {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         posts.map((post) => {
           if (user?.upVotes.find((upvote) => upvote.toString() === post._id.toString())) post.liked = true;
           if (user?.downVotes.find((downvote) => downvote.toString() === post._id.toString())) post.liked = false;
@@ -122,7 +122,7 @@ const PostCtrl = {
       const post = await Post.findById(id);
       if (!post) return res.status(400).json({ msg: 'This post not exists.' });
       if (token) {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         if (!user) return res.status(401).json({ msg: 'Your token is no more valid, please try to logout and login again.' });
         if (user.upVotes.find((_) => _.equals(id))) {
           post.liked = true;

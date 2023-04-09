@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
 import User from '../../models/User';
-import { getUserFromToken } from './user-functions/userFunctions';
 import cloudinary from '../../config/cloudinary';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
@@ -21,7 +20,7 @@ const userCtrl = {
             mobile,
           },
         });
-      const user = await getUserFromToken(token);
+      const user = await userapis.getUserFromToken(token);
       if (!user) {
         if (req?.headers?.origin?.startsWith('http://192')) {
           res

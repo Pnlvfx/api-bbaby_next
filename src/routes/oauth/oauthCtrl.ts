@@ -1,7 +1,6 @@
 import type { CookieOptions, Request, Response } from 'express';
 import config from '../../config/config';
 import User from '../../models/User';
-import { createActivationToken, login } from '../user/user-functions/userFunctions';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
@@ -21,7 +20,7 @@ const oauthCtrl = {
     try {
       const { email, username, password, ipInfo } = req.body;
       const user = await userapis.newUser(email, username, password, ipInfo);
-      login(user._id.toString(), res);
+      userapis.login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -58,7 +57,7 @@ const oauthCtrl = {
       if (!user) return res.status(422).json({ msg: 'Invalid username!' });
       const passOk = bcrypt.compareSync(password, user.password);
       if (!passOk) return res.status(422).json({ msg: 'Invalid username or password' });
-      login(user._id.toString(), res);
+      userapis.login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -123,7 +122,7 @@ const oauthCtrl = {
         });
         await user.save();
       }
-      login(user._id.toString(), res);
+      userapis.login(user._id.toString(), res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -163,7 +162,7 @@ const oauthCtrl = {
       const req = userRequest as UserRequest;
       const { user } = req;
       if (user.email_verified) return res.status(200).json({ msg: 'This email is already verified, try to refresh the page!' });
-      const activation_token = createActivationToken(user);
+      const activation_token = userapis.createActivationToken(user);
       const url = `${config.CLIENT_URL}/verification/${activation_token}`;
       sendEMail(user.email, url, 'Verify Email Address', user);
       res.status(200).json({

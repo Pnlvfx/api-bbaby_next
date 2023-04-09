@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import coraline from '../../coraline/coraline';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
-import { getUserFromToken } from '../user/user-functions/userFunctions';
 import userapis from '../../lib/userapis/userapis';
 
 const analyticsCtrl = {
@@ -19,7 +18,7 @@ const analyticsCtrl = {
     try {
       const { token } = req.cookies;
       const userIp = req.headers['x-forwarded-for'];
-      const user = token ? await getUserFromToken(token) : null;
+      const user = token ? await userapis.getUserFromToken(token) : null;
       if (!req.useragent) return res.sendStatus(200);
       if (req.useragent.isBot) return res.sendStatus(200);
       if (req.useragent.source.match('Ahrefs')) return res.sendStatus(200);

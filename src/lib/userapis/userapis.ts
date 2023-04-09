@@ -1,13 +1,27 @@
 import sendEmail from '../../routes/user/user-functions/sendEmail';
-import { createActivationToken } from '../../routes/user/user-functions/userFunctions';
 import config from '../../config/config';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import User from '../../models/User';
 import bcrypt from 'bcrypt';
 import { UserIpInfoProps } from './types';
 import coraline from '../../coraline/coraline';
+import jwt from 'jsonwebtoken';
+import { CookieOptions, Response } from 'express';
+
+interface JwtPayload {
+  id: string;
+}
 
 const userapis = {
+  getUserFromToken: async (token: string) => {
+    try {
+      const verify = jwt.verify(token, config.SECRET) as JwtPayload;
+      const user = await User.findById(verify.id);
+      return user;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
   getIP: async (ip?: string) => {
     try {
       let url = 'https://extreme-ip-lookup.com/json';
@@ -35,6 +49,9 @@ const userapis = {
     if (domain === 'localhost') return domain;
     return `.${domain}`;
   },
+  createActivationToken: ({ ...payload }) => {
+    return jwt.sign(payload, config.ACTIVATION_TOKEN_SECRET, { expiresIn: '3d' });
+  },
   newUser: async (email: string, username: string, password: string, IPinfo?: UserIpInfoProps) => {
     try {
       if (!username || !email || !password) throw new Error('Please fill in all fields!');
@@ -58,7 +75,7 @@ const userapis = {
         user.lat = IPinfo.lat;
         user.lon = IPinfo.lon;
       }
-      const activation_token = createActivationToken(user);
+      const activation_token = userapis.createActivationToken(user);
       const url = `${config.CLIENT_URL}/verification/${activation_token}`;
       sendEmail(email, url, 'Verify Email Address', user);
       await user.save();
@@ -66,6 +83,20 @@ const userapis = {
     } catch (err) {
       throw catchError(err);
     }
+  },
+  login: (id: string, res: Response) => {
+    const token = jwt.sign({ id }, config.SECRET);
+    const maxAge = 63072000000;
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      maxAge,
+    };
+    if (!config.CLIENT_URL.startsWith('http://192')) {
+      const domain = userapis.getCookieDomain(config.CLIENT_URL);
+      cookieOptions.domain = domain;
+      cookieOptions.secure = true;
+    }
+    res.cookie('token', token, cookieOptions).json({ msg: 'Successfully logged in!' });
   },
 };
 

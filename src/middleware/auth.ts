@@ -1,7 +1,7 @@
 import type { Response, NextFunction, Request } from 'express';
 import type { UserRequest } from '../@types/express';
-import { getUserFromToken } from '../routes/user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../coraline/cor-route/crlerror';
+import userapis from '../lib/userapis/userapis';
 
 const auth = async (expressRequest: Request, res: Response, next: NextFunction) => {
   try {
@@ -12,7 +12,7 @@ const auth = async (expressRequest: Request, res: Response, next: NextFunction) 
       res.statusMessage = errorMessage;
       return res.status(401).json({ msg: errorMessage });
     }
-    const user = await getUserFromToken(req.cookies.token);
+    const user = await userapis.getUserFromToken(req.cookies.token);
     if (!user) {
       res.statusMessage = errorMessage;
       return res.status(401).json({ msg: errorMessage });

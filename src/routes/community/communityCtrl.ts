@@ -4,10 +4,10 @@ import cloudinary from '../../config/cloudinary';
 import Community from '../../models/Community';
 import Post from '../../models/Post';
 import User from '../../models/User';
-import { getUserFromToken } from '../user/user-functions/userFunctions';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import bbabycommunity from '../../lib/bbabyapis/route/bbabycommunity/bbabycommunity';
 import coraline from '../../coraline/coraline';
+import userapis from '../../lib/userapis/userapis';
 
 const communityCtrl = {
   getCommunities: async (req: Request, res: Response) => {
@@ -17,7 +17,7 @@ const communityCtrl = {
       if (!limit) return res.status(400).json({ msg: 'Please add a limit field into your query request.' });
       const communities = await Community.find({}).sort({ number_of_posts: -1 }).limit(parseInt(limit.toString()));
       if (token) {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         if (!user) return res.status(401).json({ msg: 'Your token is no more valid, please try to logout and login again.' });
         communities.map((community) => {
           if (user.subscribed?.find((sub) => sub === community.name)) community.user_is_subscriber = true;

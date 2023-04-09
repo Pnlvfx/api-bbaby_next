@@ -134,9 +134,8 @@ const twitterCtrl = {
   getUserTweets: async (expressRequest: Request, res: Response) => {
     try {
       const req = expressRequest as TwitterRequest;
-      const { twitter, user } = req;
       const { id } = req.params;
-      const client = await twitterapis.v2.getUserClient(twitter, user);
+      const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
       const data = await client.v2.userTimeline(id, {
         expansions: ['author_id', 'attachments.media_keys'],
         'tweet.fields': ['public_metrics', 'entities', 'created_at'],

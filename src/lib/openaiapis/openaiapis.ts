@@ -27,7 +27,7 @@ const openaiapis = {
       throw catchError(err);
     }
   },
-  request: async (prompt: string, options?: { temperature?: number; model?: 'gpt-3.5-turbo' | 'text-davinci-003' }) => {
+  request: async (prompt: string, options?: AIrequestOptions) => {
     try {
       let url = 'https://api.openai.com/v1';
       if (options?.model === 'gpt-3.5-turbo') {
@@ -37,12 +37,14 @@ const openaiapis = {
       }
       const model = options?.model || 'text-davinci-003';
       const temperature = options?.temperature || 0.5;
+      const stream = options?.stream || false;
       const res = await fetch(url, {
         method: 'POST',
         headers,
         body: JSON.stringify({
           model,
           prompt,
+          stream,
           temperature,
           max_tokens: 300,
           top_p: 1.0,

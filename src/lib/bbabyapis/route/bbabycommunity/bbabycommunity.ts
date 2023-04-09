@@ -1,8 +1,8 @@
-import { getUserFromToken } from '../../../../routes/user/user-functions/userFunctions';
 import { catchError } from '../../../../coraline/cor-route/crlerror';
 import Community from '../../../../models/Community';
 import { IUser } from '../../../../models/types/user';
 import coraline from '../../../../coraline/coraline';
+import userapis from '../../../userapis/userapis';
 
 const bbabycommunity = {
   createCommunity: async (user: IUser, name: string, language?: 'it' | 'en') => {
@@ -36,7 +36,7 @@ const bbabycommunity = {
         community.user_is_moderator = false;
         community.user_is_subscriber = false;
       } else {
-        const user = await getUserFromToken(token);
+        const user = await userapis.getUserFromToken(token);
         if (!user) throw new Error('Your token is no more valid, please try to logout and login again.');
         const moderator = user.username === community.author ? true : user.role === 1 ? true : false;
         const isSubscriber = user.subscribed?.find((sub) => sub.toLowerCase() === name.toLowerCase()) ? true : false;
