@@ -6,6 +6,15 @@ import telegramapis from '../telegramapis/telegramapis';
 import { helpMessage, startMessage, successMessageArr, wrongMessage } from './messages';
 const telegram = telegramapis(process.env.TIKTOK_TELEGRAM_TOKEN);
 
+const handleError = async (chatID: number, devError: string) => {
+  try {
+    await telegram.sendMessage(chatID, wrongMessage);
+    await coraline.sendLog(devError);
+  } catch (err) {
+    throw catchError(err);
+  }
+};
+
 const ttdownloader = {
   use: async (base_url: string) => {
     try {
@@ -23,7 +32,7 @@ const ttdownloader = {
     try {
       const data = req.body as TelegramUpdate;
       if (data.message) {
-        if (!data.message.text) return await telegram.sendMessage(data.message.chat.id, wrongMessage);
+        if (!data.message.text) return await handleError(data.message.chat.id, 'Missing text');
         if (data.message.text === '/start') {
           await telegram.sendMessage(data.message.chat.id, startMessage);
         } else if (data.message.text === '/help') {
@@ -36,8 +45,8 @@ const ttdownloader = {
               caption: `${successMessageArr[coraline.getRandomInt(successMessageArr.length - 1)]} \n\n@tiktokdownloader97_bot`,
             });
             await coraline.sendLog(`New video downloaded from TikTok telegram bot: ${data.message.text}`);
-          } else return await telegram.sendMessage(data.message.chat.id, wrongMessage);
-        } else return await telegram.sendMessage(data.message.chat.id, wrongMessage);
+          } else return await handleError(data.message.chat.id, 'Unknown error');
+        } else return await handleError(data.message.chat.id, 'Invalid Tiktok URL!');
       }
     } catch (err) {
       catchErrorWithTelegram(err);
