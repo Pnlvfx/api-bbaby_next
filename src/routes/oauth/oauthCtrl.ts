@@ -25,17 +25,6 @@ const oauthCtrl = {
       catchErrorCtrl(err, res);
     }
   },
-  checkEmail: async (req: Request, res: Response) => {
-    try {
-      const { email } = req.body;
-      if (!userapis.validateEmail(email)) return res.status(200).json({ status: false, msg: 'Not a valid email address' });
-      const existingEmail = await User.findOne({ email });
-      if (existingEmail) return res.status(400).json({ status: false, msg: 'This email already exist!' });
-      res.status(200).json({ status: true, msg: 'Success' });
-    } catch (err) {
-      catchErrorCtrl(err, res);
-    }
-  },
   activateEmail: async (req: Request, res: Response) => {
     try {
       const { activation_token } = req.body;

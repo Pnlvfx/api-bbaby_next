@@ -4,7 +4,6 @@ import User from '../../models/User';
 import cloudinary from '../../config/cloudinary';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import userapis from '../../lib/userapis/userapis';
-import config from '../../config/config';
 import coraline from '../../coraline/coraline';
 
 const userCtrl = {
@@ -13,41 +12,17 @@ const userCtrl = {
       const { token } = req.cookies;
       const { useragent } = req;
       const mobile = useragent?.isMobile;
-      if (!token)
+      if (!token) {
         return res.status(200).json({
           user: null,
           device: {
             mobile,
           },
         });
+      }
       const user = await userapis.getUserFromToken(token);
       if (!user) {
-        if (req?.headers?.origin?.startsWith('http://192')) {
-          res
-            .clearCookie('token', {
-              httpOnly: true,
-            })
-            .json({
-              user: null,
-              device: {
-                mobile,
-              },
-            });
-        } else {
-          const domain = userapis.getCookieDomain(config.CLIENT_URL);
-          res
-            .clearCookie('token', {
-              httpOnly: true,
-              domain,
-              secure: true,
-            })
-            .json({
-              user: null,
-              device: {
-                mobile,
-              },
-            });
-        }
+        userapis.clearToken(res, mobile); // there is a response here!
       } else {
         res.status(200).json({
           user: {

@@ -26,6 +26,7 @@ import telegramRouter from './routes/telegram/telegramRouter';
 import generalRouter from './routes/general/generalRouter';
 import sitemapRouter from './routes/sitemap/sitemapRouter';
 import tiktokRouter from './routes/tiktok/tiktokRouter';
+import validationRouter from './lib/userapis/validationRouter';
 const app = express();
 
 app.use(contentType);
@@ -44,6 +45,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/', oauthRouter);
+
+app.use('/', validationRouter);
 
 app.use('/', generalRouter);
 

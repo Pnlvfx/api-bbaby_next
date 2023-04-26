@@ -54,7 +54,7 @@ const bbabypost = {
       }
       if (options?.sharePostToTG) {
         const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';
-        await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(chat_id, `${post.title} ${url}`);
+        await telegramapis(process.env.TELEGRAM_TOKEN).sendMessage(chat_id, encodeURIComponent(`${post.title} ${url}`));
       }
       communityInfo.number_of_posts += 1;
       user.last_post.push(communityInfo._id);

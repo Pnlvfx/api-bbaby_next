@@ -7,6 +7,7 @@ import { UserIpInfoProps } from './types';
 import coraline from '../../coraline/coraline';
 import jwt from 'jsonwebtoken';
 import { CookieOptions, Response } from 'express';
+const maxAge = 63072000000;
 
 interface JwtPayload {
   id: string;
@@ -86,7 +87,6 @@ const userapis = {
   },
   login: (id: string, res: Response) => {
     const token = jwt.sign({ id }, config.SECRET);
-    const maxAge = 63072000000;
     const cookieOptions: CookieOptions = {
       httpOnly: true,
       maxAge,
@@ -97,6 +97,23 @@ const userapis = {
       cookieOptions.secure = true;
     }
     res.cookie('token', token, cookieOptions).json({ msg: 'Successfully logged in!' });
+  },
+  clearToken: (res: Response, mobile?: boolean) => {
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      maxAge,
+    };
+    if (!config.CLIENT_URL.startsWith('http://192')) {
+      const domain = userapis.getCookieDomain(config.CLIENT_URL);
+      cookieOptions.domain = domain;
+      cookieOptions.secure = true;
+    }
+    res.clearCookie('token', cookieOptions).json({
+      user: null,
+      device: {
+        mobile,
+      },
+    });
   },
 };
 

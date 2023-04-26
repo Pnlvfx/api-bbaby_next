@@ -6,8 +6,6 @@ const oauthRouter = Router();
 
 oauthRouter.post('/register', oauthCtrl.register);
 
-oauthRouter.post('/check_email', oauthCtrl.checkEmail);
-
 oauthRouter.post('/activation', oauthCtrl.activateEmail);
 
 oauthRouter.post('/login', oauthCtrl.login);
