@@ -30,12 +30,14 @@ const analyticsCtrl = {
         const ip = Array.isArray(userIp) ? userIp[0] : userIp;
         const userInfo = await userapis.getIP(ip);
         await coraline.sendLog(
-          `AInstein: New session: ${user?.username || 'unknown user'}, Country: ${userInfo.country}, City: ${userInfo.city}, Browser: ${
+          `${req.headers.origin} New session: ${user?.username || 'unknown user'}, Country: ${userInfo.country}, City: ${userInfo.city}, Browser: ${
             req.useragent.browser
           } Platform: ${req.useragent.platform}, useragent: ${req.useragent.source}`,
         );
       } else {
-        await coraline.sendLog(`AInstein: New session: ${user?.username || 'unknown user'}, Useragent: ${req.useragent?.source}, ip: ${userIp}`);
+        await coraline.sendLog(
+          `${req.headers.origin} New session: ${user?.username || 'unknown user'}, Useragent: ${req.useragent?.source}, ip: ${userIp}`,
+        );
       }
       res.sendStatus(200);
     } catch (err) {

@@ -63,7 +63,9 @@ const bbabypost = {
       await communityInfo.save();
       await user.save();
       await post.save();
-      await coraline.sendLog(`New post created from ${user.username}: ${url}`);
+      if (user.role !== 1) {
+        await coraline.sendLog(`New post created from ${user.username}: ${url}`);
+      }
       return post;
     } catch (err) {
       throw catchError(err);

@@ -13,7 +13,6 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { check, useTelegram } from './hooks/hooks';
-import { useTwitterNotifications } from './hooks/twitterNotification';
 import puppeteer from 'puppeteer';
 const bbabyapis = {
   vivaio: async () => {
@@ -77,7 +76,7 @@ const bbabyapis = {
 
       if (config.NODE_ENV === 'development') return;
       await useTelegram();
-      useTwitterNotifications(30);
+      // useTwitterNotifications(30);
       useEarthquakeAI(5);
     } catch (err) {
       catchErrorWithTelegram('bbabyapis.initialize' + ' ' + err);

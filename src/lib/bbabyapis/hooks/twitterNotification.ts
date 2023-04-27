@@ -88,6 +88,8 @@ const twitterNotification = () => {
 
 export const useTwitterNotifications = (minutesInterval: number) => {
   const exist = existsSync(filename);
-  if (!exist) coraline.saveFile(filename, []);
+  if (!exist) {
+    coraline.saveFile(filename, []);
+  }
   setInterval(twitterNotification().sendTweet, minutesInterval * 60 * 1000);
 };
