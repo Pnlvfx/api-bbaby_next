@@ -16,7 +16,6 @@ import newsRouter from './routes/news/newsRouter';
 import redditRouter from './routes/reddit/redditRouter';
 import oauthRouter from './routes/oauth/oauthRouter';
 import auth from './middleware/auth';
-import contentType from './middleware/contentType';
 import videoRouter from './bbaby_static/videoRouter';
 import coraline from './coraline/coraline';
 import analyticsRouter from './routes/analytics/analyticsRouter';
@@ -29,13 +28,12 @@ import tiktokRouter from './routes/tiktok/tiktokRouter';
 import validationRouter from './lib/userapis/validationRouter';
 const app = express();
 
-app.use(contentType);
+app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
 app.use(useragent.express());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(compression());
-app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
 app.set('trust proxy', true);
 
 bbabyapis.initialize();
@@ -76,12 +74,14 @@ app.use('/categories', categoryRouter);
 
 app.use('/news', newsRouter);
 
-app.use('/twitter', auth, twitterRouter);
+app.use(auth);
 
-app.use('/reddit', auth, redditRouter);
+app.use('/twitter', twitterRouter);
 
-app.use('/governance', auth, governanceRouter);
+app.use('/reddit', redditRouter);
 
-app.use('/tiktok', auth, tiktokRouter);
+app.use('/governance', governanceRouter);
+
+app.use('/tiktok', tiktokRouter);
 
 app.listen(4000);

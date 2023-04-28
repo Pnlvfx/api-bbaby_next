@@ -5,7 +5,6 @@ import User from '../../models/User';
 import bbabyapis from '../bbabyapis/bbabyapis';
 import bbabycommunity from '../bbabyapis/route/bbabycommunity/bbabycommunity';
 import bbabypost from '../bbabyapis/route/bbabypost/bbabypost';
-import twitterapis from '../twitterapis/twitterapis';
 import earthquakeapis from './earthquakeapis';
 
 const initial = async () => {
@@ -61,16 +60,16 @@ const earthquakePost = async (properties: Earthquake['properties']) => {
       community = await bbabycommunity.createCommunity(user, 'Earthquake', 'en');
     }
     await bbabypost.newPost(user, post, community.name);
-    if (process.env.NODE_ENV === 'development') return;
-    const client = await twitterapis.getMyClient('bugstransfer');
-    let hashtags = '#Earthquake';
-    if (properties.place.includes(',')) {
-      hashtags += ` #${properties.place.split(',')[1]?.trim().replaceAll(' ', '')}`;
-    } else {
-      hashtags += ` #${properties.place.replaceAll(' ', '')}`;
-    }
-    hashtags += ' #StaySafe';
-    await client.v1.tweet(`${post} ${hashtags}`);
+    // if (process.env.NODE_ENV === 'development') return;
+    // const client = await twitterapis.getMyClient('bugstransfer');
+    // let hashtags = '#Earthquake';
+    // if (properties.place.includes(',')) {
+    //   hashtags += ` #${properties.place.split(',')[1]?.trim().replaceAll(' ', '')}`;
+    // } else {
+    //   hashtags += ` #${properties.place.replaceAll(' ', '')}`;
+    // }
+    // hashtags += ' #StaySafe';
+    // await client.v1.tweet(`${post} ${hashtags}`);
   } catch (err) {
     catchErrorWithTelegram(err);
   }

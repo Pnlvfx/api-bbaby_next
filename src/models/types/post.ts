@@ -16,7 +16,7 @@ export interface PostProps extends Document {
 }
 
 interface MediaInfoProps {
-  dimension: number[];
+  dimension: [number, number];
   isImage?: boolean;
   isVideo?: boolean;
   image?: string;

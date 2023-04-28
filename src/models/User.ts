@@ -79,7 +79,9 @@ const UserSchema = new Schema<IUser>(
     last_post: {
       type: [Schema.Types.ObjectId],
     },
-    is_bot: Boolean,
+    is_bot: {
+      type: Boolean,
+    },
   },
   {
     timestamps: true,

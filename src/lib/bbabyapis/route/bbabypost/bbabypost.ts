@@ -7,6 +7,10 @@ import { IUser } from '../../../../models/types/user';
 import telegramapis from '../../../telegramapis/telegramapis';
 import { shareToTwitter } from './createPostHooks';
 import config from '../../../../config/config';
+import { Details } from 'express-useragent';
+import { PostProps } from '../../../../models/types/post';
+import userapis from '../../../userapis/userapis';
+import { SortOrder } from 'mongoose';
 
 const bbabypost = {
   newPost: async (user: IUser, title: string, community: string, options?: PostOptions) => {
@@ -67,6 +71,50 @@ const bbabypost = {
         await coraline.sendLog(`New post created from ${user.username}: ${url}`);
       }
       return post;
+    } catch (err) {
+      throw catchError(err);
+    }
+  },
+  getPosts: async (
+    userLang: string,
+    limit: number,
+    skip: number,
+    sort: {
+      [key: string]: SortOrder;
+    },
+    useragent?: Details,
+    token?: string,
+    options?: {
+      community?: string;
+      author?: string;
+    },
+  ) => {
+    try {
+      const _limit = useragent?.isMobile && limit === 15 ? 7 : limit;
+      let posts: PostProps[];
+      if (options?.community) {
+        const filters = { community: coraline.regex.upperLowerCase(options.community) };
+        posts = await Post.find(filters).sort(sort).limit(_limit).skip(Number(skip));
+      } else if (options?.author) {
+        const filters = { author: coraline.regex.upperLowerCase(options.author) };
+        posts = await Post.find(filters).sort(sort).limit(_limit).skip(Number(skip));
+      } else {
+        const communities = await Community.find({ language: userLang || 'en' });
+        const selectedCommunities = Array.from(communities.map((community) => community.name));
+        const filters = { community: selectedCommunities };
+        posts = await Post.find(filters).sort(sort).limit(_limit).skip(Number(skip));
+        if (Number(limit) === 15 && posts.length === 0) {
+          posts = await Post.find({}).sort(sort).limit(_limit).skip(Number(skip));
+        }
+      }
+      if (token) {
+        const user = await userapis.getUserFromToken(token);
+        posts.map((post) => {
+          if (user?.upVotes.find((upvote) => upvote.equals(post._id))) post.liked = true;
+          if (user?.downVotes.find((downvote) => downvote.equals(post._id))) post.liked = false;
+        });
+      }
+      return posts;
     } catch (err) {
       throw catchError(err);
     }

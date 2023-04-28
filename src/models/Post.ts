@@ -32,7 +32,7 @@ const PostSchema = new Schema<PostProps>(
     },
     mediaInfo: {
       dimension: {
-        type: Array<number>,
+        type: [Number, Number],
       },
       isImage: {
         type: Boolean,
