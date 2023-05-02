@@ -10,7 +10,6 @@ import coraline from '../../coraline/coraline';
 import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
 import telegramapis from '../../lib/telegramapis/telegramapis';
-import twitterapis from '../../lib/twitterapis/twitterapis';
 import googleapis from '../../lib/googleapis/googleapis';
 
 const governanceCtrl = {
@@ -186,10 +185,10 @@ const governanceCtrl = {
       }
       if (sharePostToTwitter) {
         try {
-          const twitterText = news.title.substring(0, 300 - url.length - 10) + ' ' + url;
-          const client = await twitterapis.getMyClient('bbabystyle');
-          const twimage = await client.v1.uploadMedia(Buffer.from(newImage.filename));
-          await client.v1.tweet(twitterText, { media_ids: twimage });
+          // const twitterText = news.title.substring(0, 300 - url.length - 10) + ' ' + url;
+          // const client = await twitterapis.getMyClient('bbabystyle');
+          // const twimage = await client.v1.uploadMedia(Buffer.from(newImage.filename));
+          // await client.v1.tweet(twitterText, { media_ids: twimage });
         } catch (err) {
           await news.deleteOne();
           throw catchError(err);

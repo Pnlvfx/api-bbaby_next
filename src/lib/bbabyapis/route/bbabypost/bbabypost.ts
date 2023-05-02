@@ -54,7 +54,7 @@ const bbabypost = {
       post.permalink = `/b/${post.community.toLowerCase()}/comments/${post._id}`;
       const url = `${config.CLIENT_URL}${post.permalink}`;
       if (options?.sharePostToTwitter) {
-        await shareToTwitter(post, url, user, communityInfo, options.isImage, options.isVideo, options.selectedFile);
+        await shareToTwitter(post, url, user, options.isImage, options.isVideo, options.selectedFile);
       }
       if (options?.sharePostToTG) {
         const chat_id = post.community === 'Italy' ? '@anonynewsitaly' : communityInfo.language === 'it' ? '@bbabystyle1' : '@bbaby_style';

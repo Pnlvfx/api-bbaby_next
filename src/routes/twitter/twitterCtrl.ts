@@ -110,10 +110,12 @@ const twitterCtrl = {
       res.status(403).json({ message: error });
     }
   },
-  getHome: async (expressRequest: Request, res: Response) => {
+  getHome: async (twitterRequest: Request, res: Response) => {
     try {
       if (config.NODE_ENV === 'development' && tweets) return res.status(200).json(tweets);
-      const client = await twitterapis.getMyClient('anonynewsitaly');
+      const req = twitterRequest as TwitterRequest;
+      const { user, twitter } = req;
+      const client = await twitterapis.v2.getUserClient(twitter, user);
       const data = await client.v2.homeTimeline({
         expansions: ['author_id', 'attachments.media_keys'],
         'tweet.fields': ['public_metrics', 'entities', 'created_at'],

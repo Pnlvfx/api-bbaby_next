@@ -3,43 +3,24 @@ import { catchError } from '../../../../coraline/cor-route/crlerror';
 import coraline from '../../../../coraline/coraline';
 import twitterapis from '../../../twitterapis/twitterapis';
 import { PostProps } from '../../../../models/types/post';
-import { CommunityProps } from '../../../../models/types/community';
 
-const chooseUser = async (user: IUser, post: PostProps, language: 'it' | 'en') => {
+const chooseUser = async (user: IUser) => {
   try {
-    let client;
-    if (user.role === 0) {
-      //v2
-      const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
-      if (!twitter) throw new Error('You need to authorize the twitter API in the User Settings page.');
-      client = await twitterapis.v2.getUserClient(twitter, user);
-    } else if (post.community === 'Italy') {
-      client = await twitterapis.getMyClient('anonynewsitaly');
-    } else if (language === 'it') {
-      client = await twitterapis.getMyClient('bbabystyle');
-    } else {
-      client = await twitterapis.getMyClient('bugstransfer');
-    }
+    const twitter = user?.tokens?.find((provider) => provider.provider === 'twitter');
+    if (!twitter) throw new Error('You need to authorize the twitter API in the User Settings page.');
+    const client = await twitterapis.v2.getUserClient(twitter, user);
     return client;
   } catch (err) {
     throw catchError(err);
   }
 };
 
-export const shareToTwitter = async (
-  post: PostProps,
-  url: string,
-  user: IUser,
-  communityInfo: CommunityProps,
-  isImage?: boolean,
-  isVideo?: boolean,
-  selectedFile?: string,
-) => {
+export const shareToTwitter = async (post: PostProps, url: string, user: IUser, isImage?: boolean, isVideo?: boolean, selectedFile?: string) => {
   try {
     const govText = `${post.title.substring(0, 279 - url.length)} ${url}`;
     // const govText = post.title.length >= 279 ? govTextUrl : post.title;
     const twitterText = user.role === 0 ? url : govText;
-    const twitterUser = await chooseUser(user, post, communityInfo.language);
+    const twitterUser = await chooseUser(user);
     if (user.role === 1) {
       if (isImage || isVideo) {
         if (!selectedFile) throw new Error('Missing the media parameter!');
