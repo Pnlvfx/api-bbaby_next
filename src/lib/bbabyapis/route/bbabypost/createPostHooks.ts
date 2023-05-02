@@ -34,9 +34,13 @@ export const shareToTwitter = async (post: PostProps, url: string, user: IUser, 
         } else {
           media_id = await twitterUser.v1.uploadMedia(Buffer.from(selectedFile));
         }
-        await twitterUser.v1.tweet(twitterText, { media_ids: media_id });
+        await twitterUser.v2.tweet(twitterText, {
+          media: {
+            media_ids: [media_id],
+          },
+        });
       } else {
-        await twitterUser.v1.tweet(twitterText);
+        await twitterUser.v2.tweet(twitterText);
       }
     } else {
       await twitterUser.v2.tweet(twitterText);
