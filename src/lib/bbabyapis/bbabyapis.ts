@@ -13,67 +13,13 @@ import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { check, useTelegram } from './hooks/hooks';
-import puppeteer from 'puppeteer';
 const bbabyapis = {
-  vivaio: async () => {
-    ///TEST
-
-    ///DOWNLOAD
-    const path = coraline.useStatic('/images/altre-piante');
-    const allUliviImages = `${path}/altre-piante.json`;
-    const imgs = await coraline.readJSON(allUliviImages);
-    let index = 0;
-
-    const download = async () => {
-      try {
-        if (index <= imgs.length - 1) {
-          await coraline.media.getMediaFromUrl(imgs[index], `altre-piante/${index}`, 'images');
-          index += 1;
-          download();
-        } else {
-          console.log('finished');
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    download();
-
-    return;
-
-    ////SCRAPE
-
-    const base_url = 'http://vivaibonomo.it/b33_16_le-nostre-piante+altre-piante.html';
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(base_url);
-    const images = await page.evaluate(async () => {
-      const containers = Array.from(document.querySelectorAll('div.grid3column') as NodeListOf<HTMLDivElement>);
-      const scraped: string[] = [];
-      await Promise.all(
-        containers.map((c) => {
-          const image = c.querySelector('img[title]') as HTMLImageElement;
-          if (!image) return;
-          let clear = image.style.backgroundImage.replace('url(".', '').replace('")', '');
-          const split = clear.split('/_thumbs');
-          clear = split.join('').toLowerCase();
-          scraped.push('http://vivaibonomo.it' + clear);
-        }),
-      );
-      return scraped;
-    });
-    console.log(images);
-    await coraline.saveFile(allUliviImages, images);
-    //
-  },
   initialize: async () => {
     try {
       check();
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       await mongoose.connect(db);
       mongoose.set('strictQuery', true);
-
       if (config.NODE_ENV === 'development') return;
       await useTelegram();
       // useTwitterNotifications(30);
