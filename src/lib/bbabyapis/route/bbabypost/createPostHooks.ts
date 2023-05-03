@@ -27,9 +27,8 @@ export const shareToTwitter = async (post: PostProps, url: string, user: IUser, 
         const isUrl = coraline.media.urlisMedia(selectedFile.split('?')[0]);
         let media_id: string;
         if (isUrl) {
-          const type = isImage ? 'images' : 'videos';
           const public_id = `posts/${post._id.toString()}`;
-          const media = await coraline.media.getMediaFromUrl(selectedFile, public_id, type);
+          const media = await coraline.media.getMediaFromUrl(selectedFile, public_id, isImage ? 'images' : 'videos');
           media_id = await twitterUser.v1.uploadMedia(media.filename);
         } else {
           media_id = await twitterUser.v1.uploadMedia(Buffer.from(selectedFile));

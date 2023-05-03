@@ -51,9 +51,9 @@ const coralineMedia = {
     return new Promise<CoralineMedia>((resolve, reject) => {
       const fetcher = url.parse(media_url).protocol === 'https:' ? https : http;
       fetcher.get(media_url, (res) => {
-        if (res.statusCode === 302) {
+        if (res.statusCode === 302 && res.headers.location) {
           //redirect
-          media_url = res.headers.location as string;
+          media_url = res.headers.location;
           coraline.media.getMediaFromUrl(media_url, public_id, type);
           return;
         }
@@ -79,7 +79,7 @@ const coralineMedia = {
       });
     });
   },
-  getFiletype: (filepath: string) => {
+  getFileType: (filepath: string) => {
     const ext = path.extname(filepath).toLowerCase();
     if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.gif') {
       return 'image';

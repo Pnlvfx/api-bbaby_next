@@ -4,7 +4,6 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 interface ENV {
-  CLIENT_URL: string | undefined;
   SERVER_URL: string | undefined;
   NODE_ENV: string | undefined;
   MONGO_URI: string | undefined;
@@ -32,7 +31,6 @@ interface ENV {
 }
 
 interface Config {
-  CLIENT_URL: string;
   SERVER_URL: string;
   NODE_ENV: 'development' | 'production';
   MONGO_URI: string;
@@ -61,7 +59,6 @@ interface Config {
 
 const getConfig = (): ENV => {
   return {
-    CLIENT_URL: process.env.CLIENT_URL,
     SERVER_URL: process.env.SERVER_URL,
     NODE_ENV: process.env.NODE_ENV,
     MONGO_URI: process.env.MONGO_URI,

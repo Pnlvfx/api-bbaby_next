@@ -6,7 +6,6 @@ import Post from '../../../../models/Post';
 import { IUser } from '../../../../models/types/user';
 import telegramapis from '../../../telegramapis/telegramapis';
 import { shareToTwitter } from './createPostHooks';
-import config from '../../../../config/config';
 import { Details } from 'express-useragent';
 import { PostProps } from '../../../../models/types/post';
 import userapis from '../../../userapis/userapis';
@@ -52,7 +51,7 @@ const bbabypost = {
         post.mediaInfo.dimension.push(...[Number(options.height), Number(options.width)]);
       }
       post.permalink = `/b/${post.community.toLowerCase()}/comments/${post._id}`;
-      const url = `${config.CLIENT_URL}${post.permalink}`;
+      const url = `https://www.bbabystyle.com${post.permalink}`;
       if (options?.sharePostToTwitter) {
         await shareToTwitter(post, url, user, options.isImage, options.isVideo, options.selectedFile);
       }

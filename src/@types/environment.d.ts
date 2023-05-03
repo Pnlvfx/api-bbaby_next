@@ -3,7 +3,6 @@
 namespace NodeJS {
   interface ProcessEnv {
     MONGO_URI: string;
-    CLIENT_URL: string;
     SERVER_URL: string;
     TELEGRAM_TOKEN: string;
     TIKTOK_TELEGRAM_TOKEN: string;

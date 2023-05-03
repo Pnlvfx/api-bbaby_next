@@ -10,19 +10,16 @@ const userCtrl = {
   user: async (req: Request, res: Response) => {
     try {
       const { token } = req.cookies;
-      const { useragent } = req;
-      const mobile = useragent?.isMobile;
       if (!token) {
         return res.status(200).json({
           user: null,
-          device: {
-            mobile,
-          },
         });
       }
       const user = await userapis.getUserFromToken(token);
       if (!user) {
-        userapis.clearToken(res, mobile); // there is a response here!
+        return res.status(200).json({
+          user: null,
+        });
       } else {
         res.status(200).json({
           user: {
@@ -30,9 +27,6 @@ const userCtrl = {
             avatar: user.avatar,
             role: user.role,
             email_verified: user.email_verified,
-          },
-          device: {
-            mobile,
           },
         });
       }

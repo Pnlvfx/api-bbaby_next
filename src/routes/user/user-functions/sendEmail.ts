@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import { IUser } from '../../../models/types/user';
 import { catchError } from '../../../coraline/cor-route/crlerror';
 
-const sendEmail = (to: string, url: string, txt: string, user: IUser) => {
+const sendEmail = (origin: string, url: string, txt: string, user: IUser) => {
   const smtpTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -14,7 +14,7 @@ const sendEmail = (to: string, url: string, txt: string, user: IUser) => {
 
   const mailOptions = {
     from: config.SENDER_EMAIL_ADDRESS,
-    to: to,
+    to: user.email,
     subject: 'Verify your Bbaby email address',
     html: `
         <div style="display: flex; align-items: center; justify-content: center;">
@@ -40,7 +40,7 @@ const sendEmail = (to: string, url: string, txt: string, user: IUser) => {
                     <p>(And don't wait too long. This link will only work for 3 days and you can only use it once.)<p>
                   </div>
                   <div style="font-size: 16px; line-height: 18px; color: #000000; font-family: Helvetica, Arial, sans-serif; text-align: left; min-width: auto !important; padding-bottom: 28px;">
-                    <p>Expired link? No worries! To get a new verification email, visit your <a href=${config.CLIENT_URL}/settings/account target="_blank" style="text-decoration: none; color: #006cbf">Account Settings</a>, then hit "Click to resend".</p>
+                    <p>Expired link? No worries! To get a new verification email, visit your <a href=${origin}/settings/account target="_blank" style="text-decoration: none; color: #006cbf">Account Settings</a>, then hit "Click to resend".</p>
                   </div>
                 </div>
               </div>

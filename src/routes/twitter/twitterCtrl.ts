@@ -4,7 +4,6 @@ import config from '../../config/config';
 import twitterapis from '../../lib/twitterapis/twitterapis';
 import { catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import { MediaObjectV2, TweetV2, TwitterApi, UserV2 } from 'twitter-api-v2';
-const oauthCallback = `${config.CLIENT_URL}/settings`;
 let codeVerifier = '';
 
 interface TweetResponse {
@@ -18,8 +17,12 @@ let italianTweets: TweetResponse | undefined;
 let englishTweets: TweetResponse | undefined;
 
 const twitterCtrl = {
-  generateOAuthUrl: async (expressRequest: Request, res: Response) => {
+  generateOAuthUrl: async (userRequest: Request, res: Response) => {
     try {
+      const req = userRequest as UserRequest;
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
+      const oauthCallback = `${origin}/settings`;
       const client = new TwitterApi({
         clientId: config.TWITTER_CLIENT_ID,
         clientSecret: config.TWITTER_CLIENT_SECRET,
@@ -33,10 +36,13 @@ const twitterCtrl = {
       catchErrorCtrl(err, res);
     }
   },
-  accessToken: async (expressRequest: Request, res: Response) => {
+  accessToken: async (userRequest: Request, res: Response) => {
     try {
-      const req = expressRequest as UserRequest;
+      const req = userRequest as UserRequest;
       const { user } = req;
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
+      const oauthCallback = `${origin}/settings`;
       const client = new TwitterApi({
         clientId: config.TWITTER_CLIENT_ID,
         clientSecret: config.TWITTER_CLIENT_SECRET,

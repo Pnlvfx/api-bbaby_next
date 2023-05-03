@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import type { UserRequest } from '../../@types/express';
-import config from '../../config/config';
 import { createAudio, _createImage } from './gov-functions/createImage';
 import videoshow from 'videoshow';
 import audioconcat from 'audioconcat';
@@ -177,7 +176,7 @@ const governanceCtrl = {
       const newImage = await coraline.media.image.resize(bigImage);
       news.$set({ 'mediaInfo.image': newImage.url, 'mediaInfo.width': 1920, 'mediaInfo.height': 1080 });
       await news.save();
-      const url = `${config.CLIENT_URL}${news.permalink}`;
+      const url = `https://www.bbabystyle.com${permalink}`;
       if (sharePostToTG) {
         const text = `${news.title + ' ' + url}`;
         const chat_id = '@bbabystyle1';

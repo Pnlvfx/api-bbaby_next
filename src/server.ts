@@ -28,7 +28,9 @@ import tiktokRouter from './routes/tiktok/tiktokRouter';
 import validationRouter from './lib/userapis/validationRouter';
 const app = express();
 
-app.use(cors({ origin: config.CLIENT_URL, credentials: true }));
+const origin = config.NODE_ENV === 'production' ? ['https://www.bbabystyle.com'] : ['http://localhost:3000', 'http://192.168.1.22'];
+
+app.use(cors({ origin, credentials: true }));
 app.use(useragent.express());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

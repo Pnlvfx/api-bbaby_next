@@ -47,7 +47,7 @@ const bbabyapis = {
         const email = new Chance().email();
         const password = coraline.generateRandomId(10);
         const _username = coraline.createPermalink(username);
-        const user = await userapis.newUser(email, _username, password);
+        const user = await userapis.newUser('https://www.bbabystyle.com', email, _username, password);
         user.is_bot = true;
         await user.save();
         return user;
@@ -57,7 +57,7 @@ const bbabyapis = {
         const password = coraline.generateRandomId(10);
         const _username = coraline.createPermalink(chance.name() + coraline.year({ min: 1964, max: 2000 }));
         const ipInfo = await userapis.getIP();
-        const user = await userapis.newUser(email, _username, password, ipInfo);
+        const user = await userapis.newUser('https://www.bbabystyle.com', email, _username, password, ipInfo);
         user.is_bot = true;
         await user.save();
         return user;

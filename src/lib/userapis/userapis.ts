@@ -53,7 +53,7 @@ const userapis = {
   createActivationToken: ({ ...payload }) => {
     return jwt.sign(payload, config.ACTIVATION_TOKEN_SECRET, { expiresIn: '3d' });
   },
-  newUser: async (email: string, username: string, password: string, IPinfo?: UserIpInfoProps) => {
+  newUser: async (origin: string, email: string, username: string, password: string, IPinfo?: UserIpInfoProps) => {
     try {
       if (!username || !email || !password) throw new Error('Please fill in all fields!');
       if (!userapis.validateEmail(email)) throw new Error('Not a valid email address!');
@@ -77,7 +77,7 @@ const userapis = {
         user.lon = IPinfo.lon;
       }
       const activation_token = userapis.createActivationToken(user);
-      const url = `${config.CLIENT_URL}/verification/${activation_token}`;
+      const url = `${origin}/verification/${activation_token}`;
       sendEmail(email, url, 'Verify Email Address', user);
       await user.save();
       return user;
@@ -85,35 +85,18 @@ const userapis = {
       throw catchError(err);
     }
   },
-  login: (id: string, res: Response) => {
+  login: (id: string, origin: string, res: Response) => {
     const token = jwt.sign({ id }, config.SECRET);
     const cookieOptions: CookieOptions = {
       httpOnly: true,
       maxAge,
     };
-    if (!config.CLIENT_URL.startsWith('http://192')) {
-      const domain = userapis.getCookieDomain(config.CLIENT_URL);
+    if (!origin.startsWith('http://192')) {
+      const domain = userapis.getCookieDomain(origin);
       cookieOptions.domain = domain;
       cookieOptions.secure = true;
     }
     res.cookie('token', token, cookieOptions).json({ msg: 'Successfully logged in!' });
-  },
-  clearToken: (res: Response, mobile?: boolean) => {
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      maxAge,
-    };
-    if (!config.CLIENT_URL.startsWith('http://192')) {
-      const domain = userapis.getCookieDomain(config.CLIENT_URL);
-      cookieOptions.domain = domain;
-      cookieOptions.secure = true;
-    }
-    res.clearCookie('token', cookieOptions).json({
-      user: null,
-      device: {
-        mobile,
-      },
-    });
   },
 };
 

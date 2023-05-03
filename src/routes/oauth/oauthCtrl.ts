@@ -18,9 +18,11 @@ interface JwtPayload {
 const oauthCtrl = {
   register: async (req: Request, res: Response) => {
     try {
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
       const { email, username, password, ipInfo } = req.body;
       const user = await userapis.newUser(email, username, password, ipInfo);
-      userapis.login(user._id.toString(), res);
+      userapis.login(user.id, origin, res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
@@ -41,26 +43,30 @@ const oauthCtrl = {
   },
   login: async (req: Request, res: Response) => {
     try {
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
       const { username, password } = req.body;
       const user = await User.findOne({ username: coraline.regex.upperLowerCase(username) });
       if (!user) return res.status(422).json({ msg: 'Invalid username!' });
       const passOk = bcrypt.compareSync(password, user.password);
       if (!passOk) return res.status(422).json({ msg: 'Invalid username or password' });
-      userapis.login(user._id.toString(), res);
+      userapis.login(user.id, origin, res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
   },
   logout: async (req: Request, res: Response) => {
     try {
-      if (req?.headers?.origin?.startsWith('http://192')) {
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
+      if (origin.startsWith('http://192')) {
         res
           .clearCookie('token', {
             httpOnly: true,
           })
           .send();
       } else {
-        const domain = userapis.getCookieDomain(config.CLIENT_URL);
+        const domain = userapis.getCookieDomain(origin);
         res
           .clearCookie('token', {
             httpOnly: true,
@@ -75,6 +81,8 @@ const oauthCtrl = {
   },
   googleLogin: async (req: Request, res: Response) => {
     try {
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
       const { tokenId, ipInfo } = req.body;
       const { GOOGLE_SECRET } = config;
       const url = `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${tokenId}`;
@@ -102,6 +110,7 @@ const oauthCtrl = {
           email,
           password: passwordHash,
           avatar: avatar.secure_url,
+          email_verified: true,
           country,
           countryCode,
           city,
@@ -111,14 +120,15 @@ const oauthCtrl = {
         });
         await user.save();
       }
-      userapis.login(user._id.toString(), res);
+      userapis.login(user.id, origin, res);
     } catch (err) {
       catchErrorCtrl(err, res);
     }
   },
   saveEUCookie: async (req: Request, res: Response) => {
     try {
-      if (!req.headers.origin) return res.status(400).json({ msg: 'API enabled only for valid client!' });
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
       const { eu_cookie } = req.cookies;
       if (eu_cookie) return res.status(200).json(null);
       const maxAge = 63072000000 / 2; // 1 year
@@ -128,7 +138,7 @@ const oauthCtrl = {
         sameSite: true,
       };
       if (!req?.headers?.origin?.startsWith('http://192.168')) {
-        cookieOptions.domain = userapis.getCookieDomain(config.CLIENT_URL);
+        cookieOptions.domain = userapis.getCookieDomain(origin);
         cookieOptions.secure = true;
       }
       const { status } = req.body;
@@ -149,11 +159,13 @@ const oauthCtrl = {
   sendVerificationEmail: async (userRequest: Request, res: Response) => {
     try {
       const req = userRequest as UserRequest;
+      const { origin } = req.headers;
+      if (!origin) return res.status(400).json({ msg: 'Cannot access this endpoint without a valid origin!' });
       const { user } = req;
       if (user.email_verified) return res.status(200).json({ msg: 'This email is already verified, try to refresh the page!' });
       const activation_token = userapis.createActivationToken(user);
-      const url = `${config.CLIENT_URL}/verification/${activation_token}`;
-      sendEMail(user.email, url, 'Verify Email Address', user);
+      const url = `${origin}/verification/${activation_token}`;
+      sendEMail(origin, url, 'Verify Email Address', user);
       res.status(200).json({
         msg: `Bbabystyle sent a confimation email to: ${user.email}. Click the verify link in the email to secure your Bbabystyle account!`,
       });
