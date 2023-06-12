@@ -3,13 +3,13 @@ import path from 'path';
 import { coraline_path, coralinemkDir, projectName } from './utils/coralineFunctions';
 import regex from './cor-route/regex';
 import coralineDate from './cor-route/cor-date';
-const fsPromises = fs.promises;
 import crypto from 'crypto';
 import coralineMedia from './cor-route/media/cor-media';
 import coralineColors from './cor-route/cor-colors';
 import telegramapis from '../lib/telegramapis/telegramapis';
 import { catchError, catchErrorCtrl } from './cor-route/crlerror';
 import os from 'os';
+const fsPromises = fs.promises;
 
 const coraline = {
   stringify: (data: unknown) => {

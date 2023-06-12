@@ -6,7 +6,7 @@ import telegramapis from '../telegramapis/telegramapis';
 import { helpMessage, startMessage, successMessageArr, wrongMessage } from './messages';
 const telegram = telegramapis(process.env.TIKTOK_TELEGRAM_TOKEN);
 
-const handleError = async (chatID: number, devError: string) => {
+export const handleError = async (chatID: number, devError: string) => {
   try {
     await telegram.sendMessage(chatID, wrongMessage);
     await coraline.sendLog(devError);

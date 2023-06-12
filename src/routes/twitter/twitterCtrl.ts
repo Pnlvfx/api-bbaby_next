@@ -76,9 +76,9 @@ const twitterCtrl = {
       catchErrorCtrl(err, res);
     }
   },
-  twitterLogout: async (expressRequest: Request, res: Response) => {
+  twitterLogout: async (userRequest: Request, res: Response) => {
     try {
-      const req = expressRequest as UserRequest;
+      const req = userRequest as UserRequest;
       const { user } = req;
       user.tokens = user.tokens.filter((t) => t.provider !== 'twitter');
       user.externalAccounts = user.externalAccounts.filter((t) => t.provider !== 'twitter');
@@ -139,11 +139,12 @@ const twitterCtrl = {
       catchErrorCtrl(err, res);
     }
   },
-  getUserTweets: async (expressRequest: Request, res: Response) => {
+  getUserTweets: async (twitterRequest: Request, res: Response) => {
     try {
-      const req = expressRequest as TwitterRequest;
+      const req = twitterRequest as TwitterRequest;
+      const { user, twitter } = req;
+      const client = await twitterapis.v2.getUserClient(twitter, user);
       const { id } = req.params;
-      const client = new TwitterApi(config.TWITTER_BEARER_TOKEN);
       const data = await client.v2.userTimeline(id, {
         expansions: ['author_id', 'attachments.media_keys'],
         'tweet.fields': ['public_metrics', 'entities', 'created_at'],

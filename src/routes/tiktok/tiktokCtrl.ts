@@ -13,7 +13,7 @@ const tiktokCtrl = {
       const output = `${infoPath}/${id}.json`;
       let tiktok: TiktokProps;
       try {
-        tiktok = (await coraline.readJSON(output)) as TiktokProps;
+        tiktok = await coraline.readJSON(output);
         if (!tiktok.video) {
           tiktok = await tiktokapis.directDownload(url.toString(), output);
         }

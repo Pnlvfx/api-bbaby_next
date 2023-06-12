@@ -34,7 +34,7 @@ const userapis = {
         method: 'get',
       });
       const userIpInfo = await res.json();
-      if (!res.ok) throw new Error(userIpInfo?.msg);
+      if (!res.ok) throw new Error('Error when trying to get ip info!');
       return userIpInfo as UserIpInfoProps;
     } catch (err) {
       throw catchError(err);

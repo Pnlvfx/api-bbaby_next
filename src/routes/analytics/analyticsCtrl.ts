@@ -21,6 +21,7 @@ const analyticsCtrl = {
       const user = token ? await userapis.getUserFromToken(token) : null;
       if (user?.role === 1) return res.sendStatus(200);
       if (!req.useragent) return res.sendStatus(200);
+      if (!req.headers.origin) return res.sendStatus(200);
       if (req.useragent.isBot) return res.sendStatus(200);
       if (req.useragent.source.match('Ahrefs')) return res.sendStatus(200);
       if (req.useragent.source.match('Chrome-Lighthouse')) return res.sendStatus(200);
