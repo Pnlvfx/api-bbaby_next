@@ -10,6 +10,19 @@ import { catchError, catchErrorCtrl } from '../../coraline/cor-route/crlerror';
 import pexelsapi from '../../lib/pexelsapi/pexelsapi';
 import telegramapis from '../../lib/telegramapis/telegramapis';
 import googleapis from '../../lib/googleapis/googleapis';
+import sharp from 'sharp';
+
+const resize = async (image: { filename: string; url: string }) => {
+  try {
+    const arr = image.filename.split('.');
+    const newFile = `${arr[0]}_1920x1080.${arr[1]}`;
+    const newUrl = image.url + '?w=1920&h=1080';
+    await sharp(image.filename).resize(1920, 1080).toFile(newFile);
+    return { filename: newFile, url: newUrl };
+  } catch (err) {
+    throw catchError(err);
+  }
+};
 
 const governanceCtrl = {
   createImage: async (expressRequest: Request, res: Response) => {
@@ -173,7 +186,7 @@ const governanceCtrl = {
       const public_id = `news/${news._id}`;
       coraline.use('images/news');
       const bigImage = await coraline.media.getMediaFromUrl(mediaInfo.image, public_id, 'images');
-      const newImage = await coraline.media.image.resize(bigImage);
+      const newImage = await resize(bigImage);
       news.$set({ 'mediaInfo.image': newImage.url, 'mediaInfo.width': 1920, 'mediaInfo.height': 1080 });
       await news.save();
       const url = `https://www.bbabystyle.com${permalink}`;
