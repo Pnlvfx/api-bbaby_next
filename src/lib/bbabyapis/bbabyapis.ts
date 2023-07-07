@@ -12,16 +12,13 @@ import Post from '../../models/Post';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
 import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
-import { check, useTelegram } from './hooks/hooks';
+import { check } from './hooks/hooks';
 const bbabyapis = {
   initialize: async () => {
     try {
       check();
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       await mongoose.connect(db);
-      mongoose.set('strictQuery', true);
-      if (config.NODE_ENV === 'development') return;
-      await useTelegram();
       // useTwitterNotifications(30);
       useEarthquakeAI(5);
     } catch (err) {

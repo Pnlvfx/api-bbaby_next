@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-interface TiktokInfoProps {
+export interface TiktokInfo {
   success: boolean;
   author: {
     name: string;
@@ -24,7 +21,7 @@ interface TiktokInfoProps {
     url?: string;
   };
 }
-interface TiktokProps {
+export interface Tiktok {
   id: string;
   video: CoralineMedia;
   text?: string;

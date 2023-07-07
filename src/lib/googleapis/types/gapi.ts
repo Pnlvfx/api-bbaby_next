@@ -1,23 +1,21 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-interface SpeechToTextResponse {
+export interface SpeechToTextResponse {
   results?: Results[];
   error?: GoogleError;
 }
 
-interface TextToSpeechResponse {
+export interface TextToSpeechResponse {
   audioContent: string;
   error?: GoogleError;
 }
 
-interface GoogleTranslateResponse {
+export interface GoogleTranslateResponse {
   translations: {
     translatedText: string;
   }[];
   error?: GoogleError;
 }
 
-interface GoogleDetectLanguageResponse {
+export interface GoogleDetectLanguageResponse {
   languages: {
     languageCode: string;
     confidence: number;

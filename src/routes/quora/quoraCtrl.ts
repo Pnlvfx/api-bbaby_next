@@ -8,7 +8,7 @@ const quoraCtrl = {
       const { limit, skip } = req.query;
       const _limit = Number(limit);
       const _skip = Number(skip);
-      const quoras = await Quora.find({}).sort({ ups: -1 }).limit(_limit).skip(_skip);
+      const quoras = await Quora.find({}).sort({ ups: -1 }).limit(_limit).skip(_skip).lean();
       res.status(200).json(quoras);
     } catch (err) {
       catchErrorCtrl(err, res);

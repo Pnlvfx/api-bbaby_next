@@ -21,7 +21,6 @@ import coraline from './coraline/coraline';
 import analyticsRouter from './routes/analytics/analyticsRouter';
 import imageRouter from './bbaby_static/images/imageRouter';
 import bbabyapis from './lib/bbabyapis/bbabyapis';
-import telegramRouter from './routes/telegram/telegramRouter';
 import generalRouter from './routes/general/generalRouter';
 import sitemapRouter from './routes/sitemap/sitemapRouter';
 import tiktokRouter from './routes/tiktok/tiktokRouter';
@@ -50,8 +49,6 @@ app.use('/', validationRouter);
 
 app.use('/', generalRouter);
 
-app.use('/', telegramRouter);
-
 app.use('/static', express.static(coraline.useStatic()));
 
 app.use('/sitemaps', sitemapRouter);
@@ -76,14 +73,12 @@ app.use('/categories', categoryRouter);
 
 app.use('/news', newsRouter);
 
-app.use(auth);
+app.use('/twitter', auth, twitterRouter);
 
-app.use('/twitter', twitterRouter);
+app.use('/reddit', auth, redditRouter);
 
-app.use('/reddit', redditRouter);
+app.use('/governance', auth, governanceRouter);
 
-app.use('/governance', governanceRouter);
-
-app.use('/tiktok', tiktokRouter);
+app.use('/tiktok', auth, tiktokRouter);
 
 app.listen(4000);

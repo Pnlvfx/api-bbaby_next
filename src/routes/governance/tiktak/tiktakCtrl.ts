@@ -9,6 +9,25 @@ import { apiconfig } from '../../../config/APIconfig';
 import googleapis from '../../../lib/googleapis/googleapis';
 
 const tiktakCtrl = {
+  getTiktaks: async (userRequest: Request, res: Response) => {
+    try {
+      const tiktaks = await Tiktak.find({}).sort({ createdAt: -1 }).limit(4);
+      res.status(200).json(tiktaks);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
+  getTiktak: async (userRequest: Request, res: Response) => {
+    try {
+      const req = userRequest as UserRequest;
+      const { permalink } = req.params;
+      const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
+      if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
+      res.status(200).json(tiktak);
+    } catch (err) {
+      catchErrorCtrl(err, res);
+    }
+  },
   newTiktak: async (userRequest: Request, res: Response) => {
     try {
       const req = userRequest as UserRequest;
@@ -33,25 +52,6 @@ const tiktakCtrl = {
       });
       await tiktak.save();
       res.status(201).json(tiktak);
-    } catch (err) {
-      catchErrorCtrl(err, res);
-    }
-  },
-  getTiktaks: async (userRequest: Request, res: Response) => {
-    try {
-      const tiktaks = await Tiktak.find({}).sort({ createdAt: -1 }).limit(4);
-      res.status(200).json(tiktaks);
-    } catch (err) {
-      catchErrorCtrl(err, res);
-    }
-  },
-  getTiktak: async (userRequest: Request, res: Response) => {
-    try {
-      const req = userRequest as UserRequest;
-      const { permalink } = req.params;
-      const tiktak = await Tiktak.findOne({ permalink: `/governance/tiktak/${permalink}` });
-      if (!tiktak) return res.status(400).json({ msg: 'There is no a tiktak with this id!' });
-      res.status(200).json(tiktak);
     } catch (err) {
       catchErrorCtrl(err, res);
     }

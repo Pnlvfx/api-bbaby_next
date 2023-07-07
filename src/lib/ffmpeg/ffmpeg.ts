@@ -3,6 +3,7 @@ import coraline from '../../coraline/coraline';
 import path from 'path';
 import { catchError } from '../../coraline/cor-route/crlerror';
 import fs from 'fs';
+import { FFmpegImage } from './types';
 
 const ffmpeg = {
   videoToAudio: (video: string, output?: string) => {

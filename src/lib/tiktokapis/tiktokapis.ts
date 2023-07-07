@@ -2,7 +2,7 @@ import { catchError } from '../../coraline/cor-route/crlerror';
 import coraline from '../../coraline/coraline';
 import ffmpeg from '../ffmpeg/ffmpeg';
 import speechtotext from '../googleapis/route/speechtotext';
-import { getInfo } from './hooks/ttInfo';
+import { getInfo } from './hooks/tt-info';
 
 const tiktokapis = {
   getVideoID: (url: string) => {

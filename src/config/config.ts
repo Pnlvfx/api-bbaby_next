@@ -9,7 +9,6 @@ interface ENV {
   MONGO_URI: string | undefined;
   SECRET: string | undefined;
   TELEGRAM_TOKEN: string | undefined;
-  TIKTOK_TELEGRAM_TOKEN: string | undefined;
   CLOUD_NAME: string | undefined;
   CLOUD_API_KEY: string | undefined;
   CLOUD_API_SECRET: string | undefined;
@@ -36,7 +35,6 @@ interface Config {
   MONGO_URI: string;
   SECRET: string;
   TELEGRAM_TOKEN: string;
-  TIKTOK_TELEGRAM_TOKEN: string;
   CLOUD_NAME: string;
   CLOUD_API_KEY: string;
   CLOUD_API_SECRET: string;
@@ -64,7 +62,6 @@ const getConfig = (): ENV => {
     MONGO_URI: process.env.MONGO_URI,
     SECRET: process.env.SECRET,
     TELEGRAM_TOKEN: process.env.TELEGRAM_TOKEN,
-    TIKTOK_TELEGRAM_TOKEN: process.env.TIKTOK_TELEGRAM_TOKEN,
     CLOUD_NAME: process.env.CLOUD_NAME,
     CLOUD_API_KEY: process.env.CLOUD_API_KEY,
     CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
