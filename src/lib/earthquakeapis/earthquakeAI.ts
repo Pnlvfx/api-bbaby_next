@@ -1,7 +1,7 @@
 import { catchError, catchErrorWithTelegram } from '../../coraline/cor-route/crlerror';
-import Community from '../../models/Community';
-import Earthquake from '../../models/Earthquake';
-import User from '../../models/User';
+import Community from '../../models/community';
+import Earthquake from '../../models/earthquake';
+import User from '../../models/user';
 import bbabyapis from '../bbabyapis/bbabyapis';
 import bbabycommunity from '../bbabyapis/route/bbabycommunity/bbabycommunity';
 import bbabypost from '../bbabyapis/route/bbabypost/bbabypost';

@@ -9,7 +9,6 @@ import { IUser } from '../../models/types/user';
 import Post from '../../models/post';
 import bbabycommunity from './route/bbabycommunity/bbabycommunity';
 import { answer } from './hooks/answer';
-import { useEarthquakeAI } from '../earthquakeapis/earthquakeAI';
 import { sendLog } from '../telegram';
 import coraline from 'coraline';
 const bbabyapis = {
@@ -19,7 +18,7 @@ const bbabyapis = {
       const db = config.NODE_ENV === 'production' ? config.MONGO_URI : 'mongodb://localhost:27017/bbabystyle';
       await mongoose.connect(db);
       // useTwitterNotifications(30);
-      useEarthquakeAI(5);
+      // useEarthquakeAI(5);
     } catch (err) {
       sendLog('bbabyapis.initialize' + ' ' + err);
     }

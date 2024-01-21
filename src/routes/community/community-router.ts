@@ -8,20 +8,18 @@ communityRouter.get('/', communityCtrl.getCommunities);
 
 communityRouter.get('/:name', communityCtrl.getCommunity);
 
-communityRouter.use(auth);
+communityRouter.post('/', auth, communityCtrl.createCommunity);
 
-communityRouter.post('/', communityCtrl.createCommunity);
+communityRouter.post('/:name/change_avatar', auth, communityCtrl.changeAvatar);
 
-communityRouter.post('/:name/change_avatar', communityCtrl.changeAvatar);
+communityRouter.post('/edit/description', auth, communityCtrl.updateDescription);
 
-communityRouter.post('/edit/description', communityCtrl.updateDescription);
+communityRouter.post('/subscribe', auth, communityCtrl.subscribe);
 
-communityRouter.post('/subscribe', communityCtrl.subscribe);
+communityRouter.get('/user/pref', auth, communityCtrl.getUserPreferredCommunities);
 
-communityRouter.get('/user/pref', communityCtrl.getUserPreferredCommunities);
+communityRouter.post('/:name/category', auth, communityCtrl.chooseCategory);
 
-communityRouter.post('/:name/category', communityCtrl.chooseCategory);
-
-communityRouter.post('/search', communityCtrl.searchCommunity);
+communityRouter.post('/search', auth, communityCtrl.searchCommunity);
 
 export default communityRouter;

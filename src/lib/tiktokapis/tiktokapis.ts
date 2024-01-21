@@ -1,38 +1,8 @@
-import { catchError } from '../../coraline/cor-route/crlerror';
-import coraline from '../../coraline/coraline';
+import coraline from 'coraline';
 import ffmpeg from '../ffmpeg/ffmpeg';
 import speechtotext from '../googleapis/route/speechtotext';
-import { getInfo } from './hooks/tt-info';
-import { Tiktok } from './types/tttypes';
 
 const tiktokapis = {
-  getVideoID: (url: string) => {
-    const split = url.split('/');
-    return split[split.length - 1];
-  },
-  getInfo,
-  directDownload: async (url: string, output: string) => {
-    try {
-      try {
-        const response = await coraline.readJSON(output);
-        return response as Tiktok;
-      } catch (err) {
-        const info = await getInfo(url);
-        if (!info.video.url.no_wm) throw new Error('Missing video for this url!');
-        const id = tiktokapis.getVideoID(url);
-        const publicID = `tiktok/${id}`;
-        const video = await coraline.media.getMediaFromUrl(info.video.url.no_wm, publicID, 'videos');
-        const response = {
-          id,
-          video,
-        };
-        await coraline.saveFile(output, response);
-        return response as Tiktok;
-      }
-    } catch (err) {
-      throw catchError(err);
-    }
-  },
   extractText: async (video: string, id: string) => {
     try {
       const path = coraline.use('tiktok');

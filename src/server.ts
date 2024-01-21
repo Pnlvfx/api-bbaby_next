@@ -82,3 +82,5 @@ app.use('/governance', auth, governanceRouter);
 app.use('/tiktok', auth, tiktokRouter);
 
 app.listen(4000);
+
+console.log('Server started')
