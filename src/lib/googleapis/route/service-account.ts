@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import coraline from '../../../coraline/coraline';
 import { GoogleCredentials } from '../types/credentials';
+import coraline from 'coraline';
 
 type TokenType = 'translate' | 'text_to_speech' | 'youtube' | 'speech_to_text';
 

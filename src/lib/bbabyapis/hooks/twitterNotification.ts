@@ -1,5 +1,5 @@
 import { MediaObjectV2, TweetV2, UserV2 } from 'twitter-api-v2';
-import { apiconfig } from '../../../config/APIconfig';
+import { apiconfig } from '../../../config/api-config';
 import { catchError, catchErrorWithTelegram } from '../../../coraline/cor-route/crlerror';
 import telegramapis from '../../telegramapis/telegramapis';
 import twitterapis from '../../twitterapis/twitterapis';

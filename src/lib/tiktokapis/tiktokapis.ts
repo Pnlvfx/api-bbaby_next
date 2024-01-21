@@ -3,6 +3,7 @@ import coraline from '../../coraline/coraline';
 import ffmpeg from '../ffmpeg/ffmpeg';
 import speechtotext from '../googleapis/route/speechtotext';
 import { getInfo } from './hooks/tt-info';
+import { Tiktok } from './types/tttypes';
 
 const tiktokapis = {
   getVideoID: (url: string) => {
@@ -14,7 +15,7 @@ const tiktokapis = {
     try {
       try {
         const response = await coraline.readJSON(output);
-        return response as TiktokProps;
+        return response as Tiktok;
       } catch (err) {
         const info = await getInfo(url);
         if (!info.video.url.no_wm) throw new Error('Missing video for this url!');
@@ -26,7 +27,7 @@ const tiktokapis = {
           video,
         };
         await coraline.saveFile(output, response);
-        return response as TiktokProps;
+        return response as Tiktok;
       }
     } catch (err) {
       throw catchError(err);
@@ -45,7 +46,7 @@ const tiktokapis = {
   },
   deleteTiktok: async (filename: string) => {
     try {
-      const tiktok = (await coraline.readJSON(filename)) as TiktokProps;
+      const tiktok = (await coraline.readJSON(filename)) as Tiktok;
       await coraline.deleteFile(tiktok.video.filename);
       await coraline.deleteFile(filename);
     } catch (err) {

@@ -38,13 +38,9 @@ const gapiyoutube = {
       throw new Error('Youtube API says you are unauthorized');
     }
     const isJson = response.headers.get('content-type')?.includes('application/json');
-    const data = isJson ? await response.json() : null;
-    if (!response.ok) {
-      const error = data.error.message;
-      throw new Error(error);
-    } else {
-      console.log(data);
-    }
+    const data = isJson ? await response.json() : undefined;
+    if (!response.ok) throw new Error(data.error.message);
+    console.log(data);
   },
 };
 

@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
+import { Feature } from '../lib/earthquakeapis/types/eq';
 
-const EarthquakeSchema = new Schema<Earthquake>(
+const EarthquakeSchema = new Schema<Feature>(
   {
     type: String,
     properties: {},

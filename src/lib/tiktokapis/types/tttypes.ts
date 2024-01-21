@@ -26,11 +26,11 @@ export interface Tiktok {
   video: CoralineMedia;
   text?: string;
   translated?: string;
-  textArray?: TextArrayProps[];
+  textArray?: TextArray[];
 }
 
-type TextArrayProps = {
+export interface TextArray {
   text: string;
   start: number;
   end: number;
-};
+}

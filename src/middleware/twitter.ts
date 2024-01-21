@@ -1,6 +1,6 @@
 import type { Response, NextFunction, Request } from 'express';
 import type { TwitterRequest } from '../@types/express';
-import { catchErrorCtrl } from '../coraline/cor-route/crlerror';
+import { catchErrorCtrl } from '../lib/telegram';
 
 const twitterAuth = async (expressRequest: Request, res: Response, next: NextFunction) => {
   try {

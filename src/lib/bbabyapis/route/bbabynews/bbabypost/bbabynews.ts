@@ -1,8 +1,8 @@
 import { ExternalNews } from '../../../../../@types/external-news';
-import { apiconfig } from '../../../../../config/APIconfig';
+import { apiconfig } from '../../../../../config/api-config';
 import { catchError } from '../../../../../coraline/cor-route/crlerror';
 import coraline from '../../../../../coraline/coraline';
-import BBC from '../../../../../models/BBC';
+import BBC from '../../../../../models/bbc';
 import googleapis from '../../../../googleapis/googleapis';
 import telegramapis from '../../../../telegramapis/telegramapis';
 const telegram = telegramapis(process.env.TELEGRAM_TOKEN);

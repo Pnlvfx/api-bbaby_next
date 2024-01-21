@@ -1,7 +1,5 @@
 import dotenv from 'dotenv';
-import path from 'path';
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
 
 interface ENV {
   SERVER_URL: string | undefined;
@@ -28,8 +26,7 @@ interface ENV {
   OPENAI_API_KEY_2: string | undefined;
   IP_LOOKUP_API_KEY: string | undefined;
 }
-
-interface Config {
+export interface Config {
   SERVER_URL: string;
   NODE_ENV: 'development' | 'production';
   MONGO_URI: string;
@@ -91,8 +88,8 @@ const getSanitzedConfig = (config: ENV): Config => {
   }
   return config as Config;
 };
-const config = getConfig();
+const _config = getConfig();
 
-const sanitizedConfig = getSanitzedConfig(config);
+const config = getSanitzedConfig(_config);
 
-export default sanitizedConfig;
+export default config;

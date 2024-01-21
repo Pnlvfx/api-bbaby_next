@@ -1,14 +1,13 @@
-import coraline from '../../../coraline/coraline';
 import { GoogleCredentials } from '../types/credentials';
 import config from '../../../config/config';
+import coraline from 'coraline';
 
 const gapiOAuth = {
   newOAuthUrl: (origin: string) => {
     const base_url = 'https://accounts.google.com/o/oauth2/v2/auth';
     const prompt = 'consent';
     const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
-    const googleAuth = `${base_url}?scope=${SCOPES}&prompt=${prompt}&response_type=code&client_id=${process.env.YOUTUBE_CLIENT_ID}&redirect_uri=${origin}&state=bbabystyle`;
-    return googleAuth;
+    return `${base_url}?scope=${SCOPES}&prompt=${prompt}&response_type=code&client_id=${process.env.YOUTUBE_CLIENT_ID}&redirect_uri=${origin}&state=bbabystyle`;
   },
   getAccessToken: async (grant_type: 'authorization_code' | 'refresh_token', code: string, redirect_uri: string, refresh_token?: string) => {
     const { YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET } = config;
@@ -45,13 +44,13 @@ const gapiOAuth = {
     if (credentials.expires_in) {
       credentials.expires = Date.now() / 1000 + credentials.expires_in;
     }
-    await coraline.saveFile(file, credentials);
+    await coraline.saveFile(file, JSON.stringify(credentials));
     //delete after 1 hour
     coraline.runAtSpecificTime(
       1,
       0,
       async () => {
-        await coraline.deleteFile(file);
+        await coraline.rm(file);
       },
       false,
     );
@@ -61,14 +60,9 @@ const gapiOAuth = {
   checkTokenValidity: async () => {
     const tokenPath = coraline.use('token');
     const file = `${tokenPath}/youtube_token.json`;
-    let credentials: GoogleCredentials;
-    try {
-      credentials = await coraline.readJSON(file);
-      const now = Date.now() / 1000;
-      if (credentials.expires && now > credentials?.expires) throw new Error('Your access token is expired, you need to get a new one!');
-    } catch (err) {
-      throw new Error('Your access token is expired, you need to get a new one!');
-    }
+    const credentials = await coraline.readJSON<GoogleCredentials>(file);
+    const now = Date.now() / 1000;
+    if (credentials.expires && now > credentials?.expires) throw new Error('Your access token is expired, you need to get a new one!');
     return credentials;
   },
 };
